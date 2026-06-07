@@ -1,4 +1,4 @@
-# AutoCheck – Website für ein KFZ-Sachverständigenbüro
+# Benzel KFZ – Website für ein KFZ-Sachverständigenbüro
 
 Moderne, voll responsive Website für ein KFZ-Unternehmen, das Fahrzeuge nach Schäden
 kontrolliert und Gutachten erstellt (Unfallschaden, Fahrzeugbewertung, Gebrauchtwagen-Check,
@@ -38,9 +38,9 @@ Suchen & ersetzen Sie die folgenden Platzhalter (z. B. per Editor-Suche):
 
 | Platzhalter | Bedeutung |
 |---|---|
-| `AutoCheck` | Firmenname / Markenname |
+| `Benzel KFZ` | Firmenname / Markenname |
 | `030 123 45 67` und `+49301234567` | Telefonnummer (Anzeige bzw. `tel:`-Links) |
-| `info@autocheck-gutachten.de` | E-Mail-Adresse |
+| `info@benzel-kfz.de` | E-Mail-Adresse |
 | `Musterstraße 12, 12345 Musterstadt` | Anschrift |
 | `15+ / 8.000+ / 4,9` (in `index.html`) | echte Kennzahlen |
 | Texte in `impressum.html` / `datenschutz.html` | **rechtlich verpflichtend** ausfüllen |

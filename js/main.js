@@ -1,5 +1,5 @@
 /* =========================================================
-   AutoCheck – KFZ-Gutachten · main.js
+   Benzel KFZ – KFZ-Gutachten · main.js
    ========================================================= */
 (function () {
   "use strict";
@@ -194,7 +194,7 @@
         `Nachricht:\n${message}\n`;
 
       const mailto =
-        "mailto:info@autocheck-gutachten.de" +
+        "mailto:info@benzel-kfz.de" +
         "?subject=" + encodeURIComponent(subject) +
         "&body=" + encodeURIComponent(body);
 
