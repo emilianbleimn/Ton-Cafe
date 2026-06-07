@@ -18,7 +18,9 @@ hosten (GitHub Pages, Netlify, Vercel, jeder Webspace) und leicht anzupassen.
 ├── robots.txt          # Suchmaschinen-Hinweise
 ├── sitemap.xml         # Sitemap für Suchmaschinen
 ├── css/
-│   └── style.css       # komplettes Design-System & Responsive-Layout
+│   ├── style.css       # komplettes Design-System & Responsive-Layout
+│   └── fonts.css       # lokale @font-face-Definitionen (DSGVO-freundlich)
+├── fonts/              # lokal gehostete Schriften (Inter & Poppins, woff2)
 ├── js/
 │   └── main.js         # Navigation, Scroll-Animationen, Zähler, FAQ, Formular
 └── .github/workflows/
@@ -55,10 +57,10 @@ Suchen & ersetzen Sie die folgenden Platzhalter (z. B. per Editor-Suche):
 > ⚠️ **Wichtig:** Impressum und Datenschutzerklärung enthalten Platzhalter und ersetzen
 > keine Rechtsberatung. Bitte vor Veröffentlichung mit echten Daten füllen und ggf. prüfen lassen.
 
-### 🔒 Hinweis Datenschutz (Google Fonts)
-Die Schriften werden aktuell von Google Fonts geladen. In Deutschland ist es datenschutz­freundlicher,
-die Schriften **lokal einzubinden** (selbst hosten) oder auf eine System-Schriftart umzustellen.
-Die CSS-Variablen enthalten bereits System-Fallbacks (`--font-body`, `--font-head`).
+### 🔒 Datenschutz: Schriften lokal gehostet
+Die Schriften (Inter &amp; Poppins) werden **lokal aus dem Ordner `fonts/`** geladen (siehe `css/fonts.css`) –
+es findet **kein externer Aufruf an Google Fonts** statt. Das ist in Deutschland datenschutzfreundlich.
+Ausgeliefert wird nur das Latin-Subset (inkl. Umlaute ä/ö/ü/ß).
 
 ### Eigene Fotos einbinden (optional)
 Die Seite nutzt bewusst SVG-Illustrationen, damit sie überall zuverlässig aussieht.
