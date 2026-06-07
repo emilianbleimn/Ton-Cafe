@@ -21,6 +21,46 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700;800&display=swap" rel="stylesheet" />
 
   <link rel="stylesheet" href="css/style.css" />
+
+  <link rel="canonical" href="https://benzel-kfz.de/" />
+  <meta property="og:url" content="https://benzel-kfz.de/" />
+  <meta name="robots" content="index, follow" />
+  <meta name="author" content="Benzel KFZ" />
+
+  <!-- Strukturierte Daten für lokale SEO – Adresse, Telefon & Domain bitte anpassen -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "AutomotiveBusiness",
+    "name": "Benzel KFZ",
+    "description": "Unabhängiges Kfz-Sachverständigenbüro für Unfallschadengutachten, Fahrzeugbewertung, Gebrauchtwagen-Check und Oldtimer-Gutachten.",
+    "url": "https://benzel-kfz.de/",
+    "telephone": "+49-30-1234567",
+    "email": "info@benzel-kfz.de",
+    "priceRange": "€€",
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": "Musterstraße 12",
+      "postalCode": "12345",
+      "addressLocality": "Musterstadt",
+      "addressCountry": "DE"
+    },
+    "areaServed": "DE",
+    "openingHoursSpecification": [{
+      "@type": "OpeningHoursSpecification",
+      "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+      "opens": "08:00",
+      "closes": "18:00"
+    }],
+    "makesOffer": [
+      { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Unfallschadengutachten" } },
+      { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Fahrzeugbewertung / Wertgutachten" } },
+      { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Gebrauchtwagen-Check" } },
+      { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Oldtimer-Gutachten" } },
+      { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Kostenvoranschlag" } }
+    ]
+  }
+  </script>
 </head>
 <body>
   <a class="skip-link" href="#main">Zum Inhalt springen</a>
@@ -61,6 +101,7 @@
       <nav class="nav" id="nav" aria-label="Hauptnavigation">
         <a href="#leistungen" class="nav__link">Leistungen</a>
         <a href="#ablauf" class="nav__link">Ablauf</a>
+        <a href="#soforthilfe" class="nav__link">Soforthilfe</a>
         <a href="#warum" class="nav__link">Warum wir</a>
         <a href="#ueber-uns" class="nav__link">Über uns</a>
         <a href="#bewertungen" class="nav__link">Bewertungen</a>
@@ -284,6 +325,57 @@
             <p>Wir unterstützen Sie bei der Schadenregulierung mit der Versicherung – bis alles geklärt ist.</p>
           </li>
         </ol>
+      </div>
+    </section>
+
+    <!-- ===== Soforthilfe nach Unfall ===== -->
+    <section class="section" id="soforthilfe">
+      <div class="container">
+        <div class="section__head reveal">
+          <span class="eyebrow">Im Schadensfall</span>
+          <h2 class="section__title">Soforthilfe nach einem Unfall</h2>
+          <p class="section__sub">Die wichtigsten Schritte direkt nach einem Unfall – damit Ihnen kein Recht verloren geht.</p>
+        </div>
+
+        <div class="cards">
+          <article class="card reveal">
+            <span class="card__icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span>
+            <h3 class="card__title">1. Unfallstelle sichern</h3>
+            <p>Warnblinker einschalten, Warndreieck aufstellen und – falls nötig – Erste Hilfe leisten.</p>
+          </article>
+          <article class="card reveal">
+            <span class="card__icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg></span>
+            <h3 class="card__title">2. Polizei &amp; Notruf</h3>
+            <p>Bei Verletzten oder größeren Schäden den Notruf 112 wählen und die Polizei den Unfall aufnehmen lassen.</p>
+          </article>
+          <article class="card reveal">
+            <span class="card__icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg></span>
+            <h3 class="card__title">3. Beweise sichern</h3>
+            <p>Fotografieren Sie Fahrzeuge, Schäden, Kennzeichen und die gesamte Unfallstelle aus mehreren Winkeln.</p>
+          </article>
+          <article class="card reveal">
+            <span class="card__icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
+            <h3 class="card__title">4. Daten austauschen</h3>
+            <p>Name, Anschrift, Kennzeichen und Versicherungsdaten aller Beteiligten und Zeugen notieren.</p>
+          </article>
+          <article class="card reveal">
+            <span class="card__icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg></span>
+            <h3 class="card__title">5. Nichts voreilig zugeben</h3>
+            <p>Unterschreiben Sie keine Schuldanerkenntnis und machen Sie keine Angaben zur Schuldfrage.</p>
+          </article>
+          <article class="card reveal">
+            <span class="card__icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg></span>
+            <h3 class="card__title">6. Gutachter einschalten</h3>
+            <p>Rufen Sie uns für ein unabhängiges Gutachten – bei unverschuldetem Unfall zahlt meist die gegnerische Versicherung.</p>
+          </article>
+        </div>
+
+        <div class="soforthilfe__cta reveal">
+          <a href="tel:+49301234567" class="btn btn--primary btn--lg">
+            <svg viewBox="0 0 24 24" class="ico" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+            Jetzt 24h-Unfallhilfe anrufen
+          </a>
+        </div>
       </div>
     </section>
 
