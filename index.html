@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AutoCheck · KFZ-Gutachten & Schadenanalyse | Kfz-Sachverständigenbüro</title>
+  <meta name="description" content="Unabhängiges KFZ-Sachverständigenbüro: Unfallschadengutachten, Fahrzeugbewertung, Gebrauchtwagen-Check & Oldtimer-Gutachten. Schnell, neutral & deutschlandweit vor Ort." />
+  <meta name="theme-color" content="#0a1a30" />
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="AutoCheck · KFZ-Gutachten & Schadenanalyse" />
+  <meta property="og:description" content="Unabhängige KFZ-Gutachten nach Unfall & Schaden. Schnell, neutral und deutschlandweit vor Ort." />
+  <meta property="og:type" content="website" />
+  <meta property="og:locale" content="de_DE" />
+
+  <!-- Favicon (inline SVG) -->
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230a1a30'/%3E%3Cpath d='M7 19h18M9 19l1.6-4.2A2 2 0 0 1 12.5 13.5h7a2 2 0 0 1 1.9 1.3L23 19' fill='none' stroke='%23ff6b35' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3Ccircle cx='11' cy='21' r='1.8' fill='%23fff'/%3E%3Ccircle cx='21' cy='21' r='1.8' fill='%23fff'/%3E%3C/svg%3E" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700;800&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <a class="skip-link" href="#main">Zum Inhalt springen</a>
+
+  <!-- ===== Topbar ===== -->
+  <div class="topbar">
+    <div class="container topbar__inner">
+      <div class="topbar__left">
+        <a href="tel:+49301234567" class="topbar__item">
+          <svg viewBox="0 0 24 24" class="ico" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+          030 123 45 67
+        </a>
+        <a href="mailto:info@autocheck-gutachten.de" class="topbar__item topbar__item--hide-sm">
+          <svg viewBox="0 0 24 24" class="ico" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+          info@autocheck-gutachten.de
+        </a>
+      </div>
+      <div class="topbar__right">
+        <span class="topbar__badge">
+          <svg viewBox="0 0 24 24" class="ico" aria-hidden="true"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/></svg>
+          24h&nbsp;Unfallhilfe
+        </span>
+        <span class="topbar__item topbar__item--hide-sm">Mo–Fr 8–18 Uhr</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Header ===== -->
+  <header class="header" id="header">
+    <div class="container header__inner">
+      <a href="#start" class="brand" aria-label="AutoCheck Startseite">
+        <span class="brand__mark" aria-hidden="true">
+          <svg viewBox="0 0 32 32"><path d="M7 19h18M9 19l1.6-4.2A2 2 0 0 1 12.5 13.5h7a2 2 0 0 1 1.9 1.3L23 19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="11" cy="21" r="1.9" fill="currentColor"/><circle cx="21" cy="21" r="1.9" fill="currentColor"/></svg>
+        </span>
+        <span class="brand__text">Auto<span>Check</span></span>
+      </a>
+
+      <nav class="nav" id="nav" aria-label="Hauptnavigation">
+        <a href="#leistungen" class="nav__link">Leistungen</a>
+        <a href="#ablauf" class="nav__link">Ablauf</a>
+        <a href="#warum" class="nav__link">Warum wir</a>
+        <a href="#ueber-uns" class="nav__link">Über uns</a>
+        <a href="#bewertungen" class="nav__link">Bewertungen</a>
+        <a href="#faq" class="nav__link">FAQ</a>
+        <a href="#kontakt" class="btn btn--primary nav__cta">Termin anfragen</a>
+      </nav>
+
+      <button class="nav-toggle" id="navToggle" aria-label="Menü öffnen" aria-expanded="false" aria-controls="nav">
+        <svg class="nav-toggle__open" viewBox="0 0 24 24" aria-hidden="true"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg>
+        <svg class="nav-toggle__close" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <main id="main">
+    <!-- ===== Hero ===== -->
+    <section class="hero" id="start">
+      <div class="hero__glow" aria-hidden="true"></div>
+      <div class="container hero__inner">
+        <div class="hero__content reveal">
+          <span class="eyebrow eyebrow--light">Unabhängiges KFZ-Sachverständigenbüro</span>
+          <h1 class="hero__title">Schadenkontrolle &amp; KFZ-Gutachten – <span>schnell, neutral, gerichtsfest.</span></h1>
+          <p class="hero__lead">
+            Wir prüfen Ihr Fahrzeug nach Unfall oder Schaden, dokumentieren jeden Mangel und erstellen
+            ein belastbares Gutachten – damit Sie gegenüber Versicherungen Ihr volles Recht bekommen.
+          </p>
+          <div class="hero__actions">
+            <a href="#kontakt" class="btn btn--primary btn--lg">
+              Kostenlose Ersteinschätzung
+              <svg viewBox="0 0 24 24" class="ico" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+            </a>
+            <a href="tel:+49301234567" class="btn btn--ghost btn--lg">
+              <svg viewBox="0 0 24 24" class="ico" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+              030 123 45 67
+            </a>
+          </div>
+          <ul class="hero__usps">
+            <li><svg viewBox="0 0 24 24" class="ico" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg> TÜV-/DEKRA-zertifiziert</li>
+            <li><svg viewBox="0 0 24 24" class="ico" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg> Termin in 24 h</li>
+            <li><svg viewBox="0 0 24 24" class="ico" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg> Deutschlandweit vor Ort</li>
+          </ul>
+        </div>
+
+        <div class="hero__visual reveal">
+          <!-- Illustration: Fahrzeug unter Prüfung -->
+          <svg class="hero__illustration" viewBox="0 0 460 380" role="img" aria-label="Illustration eines Fahrzeugs, das auf Schäden geprüft wird">
+            <defs>
+              <linearGradient id="panel" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0" stop-color="#13315f"/>
+                <stop offset="1" stop-color="#0c2046"/>
+              </linearGradient>
+              <linearGradient id="carBody" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="#3b82f6"/>
+                <stop offset="1" stop-color="#2563eb"/>
+              </linearGradient>
+              <linearGradient id="lens" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0" stop-color="#ffffff" stop-opacity=".35"/>
+                <stop offset="1" stop-color="#ffffff" stop-opacity=".05"/>
+              </linearGradient>
+            </defs>
+
+            <!-- Panel -->
+            <rect x="20" y="28" width="420" height="324" rx="28" fill="url(#panel)"/>
+            <g opacity=".5" stroke="#23436f" stroke-width="1.5">
+              <line x1="20" y1="120" x2="440" y2="120"/>
+              <line x1="20" y1="220" x2="440" y2="220"/>
+            </g>
+            <g fill="#244571" opacity=".55">
+              <circle cx="60" cy="70" r="3"/><circle cx="92" cy="70" r="3"/><circle cx="124" cy="70" r="3"/>
+              <circle cx="400" cy="312" r="3"/><circle cx="368" cy="312" r="3"/>
+            </g>
+
+            <!-- Road -->
+            <rect x="56" y="262" width="348" height="10" rx="5" fill="#1c3a63"/>
+
+            <!-- Car -->
+            <g transform="translate(78,150)">
+              <!-- shadow -->
+              <ellipse cx="152" cy="120" rx="150" ry="14" fill="#08152c" opacity=".55"/>
+              <!-- wheels -->
+              <circle cx="86" cy="112" r="30" fill="#0b1c39"/>
+              <circle cx="86" cy="112" r="14" fill="#9fb6d6"/>
+              <circle cx="226" cy="112" r="30" fill="#0b1c39"/>
+              <circle cx="226" cy="112" r="14" fill="#9fb6d6"/>
+              <!-- body -->
+              <path d="M8 92 Q6 70 30 66 L86 56 Q108 26 150 24 L196 24 Q236 26 256 56 L292 66 Q314 70 314 92 L314 102 Q314 112 304 112 L286 112 A30 30 0 0 0 166 112 L146 112 A30 30 0 0 0 26 112 L18 112 Q8 112 8 102 Z" fill="url(#carBody)"/>
+              <!-- windows -->
+              <path d="M104 60 Q120 36 150 34 L172 34 L172 60 Z" fill="#cfe2ff" opacity=".9"/>
+              <path d="M182 34 L196 34 Q226 36 240 60 L182 60 Z" fill="#cfe2ff" opacity=".9"/>
+              <!-- door line + handle -->
+              <line x1="177" y1="64" x2="177" y2="100" stroke="#1d4ed8" stroke-width="3" stroke-linecap="round"/>
+              <rect x="150" y="74" width="18" height="5" rx="2.5" fill="#1d4ed8"/>
+              <!-- headlight -->
+              <circle cx="304" cy="80" r="6" fill="#ffe39a"/>
+            </g>
+
+            <!-- Magnifier -->
+            <g transform="translate(258,196)">
+              <line x1="46" y1="46" x2="92" y2="92" stroke="#ff6b35" stroke-width="14" stroke-linecap="round"/>
+              <circle cx="34" cy="34" r="40" fill="url(#lens)" stroke="#ff6b35" stroke-width="9"/>
+            </g>
+
+            <!-- Check badge -->
+            <g transform="translate(72,64)">
+              <circle cx="22" cy="22" r="24" fill="#22c55e"/>
+              <path d="M12 23l7 7 12-14" fill="none" stroke="#ffffff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+            </g>
+
+            <!-- Floating chip -->
+            <g transform="translate(286,86)">
+              <rect width="132" height="44" rx="12" fill="#ffffff"/>
+              <circle cx="24" cy="22" r="11" fill="#e6f7ee"/>
+              <path d="M19 22l4 4 7-8" fill="none" stroke="#22c55e" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+              <text x="44" y="19" font-family="Inter, sans-serif" font-size="12" font-weight="700" fill="#0f172a">Schaden erfasst</text>
+              <text x="44" y="34" font-family="Inter, sans-serif" font-size="11" fill="#64748b">12 Positionen</text>
+            </g>
+          </svg>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Stats band ===== -->
+    <section class="stats" aria-label="Kennzahlen">
+      <div class="container stats__grid">
+        <div class="stat reveal">
+          <div class="stat__num"><span data-count="15">0</span>+</div>
+          <div class="stat__label">Jahre Erfahrung</div>
+        </div>
+        <div class="stat reveal">
+          <div class="stat__num"><span data-count="8000">0</span>+</div>
+          <div class="stat__label">erstellte Gutachten</div>
+        </div>
+        <div class="stat reveal">
+          <div class="stat__num"><span data-count="24">0</span>h</div>
+          <div class="stat__label">Reaktionszeit</div>
+        </div>
+        <div class="stat reveal">
+          <div class="stat__num"><span data-count="49" data-decimals="1">0</span>/5</div>
+          <div class="stat__label">Kundenbewertung</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Leistungen ===== -->
+    <section class="section" id="leistungen">
+      <div class="container">
+        <div class="section__head reveal">
+          <span class="eyebrow">Unsere Leistungen</span>
+          <h2 class="section__title">Gutachten für jeden Schadenfall</h2>
+          <p class="section__sub">Von der Unfallabwicklung bis zum Kaufcheck – wir liefern objektive, nachvollziehbare Ergebnisse.</p>
+        </div>
+
+        <div class="cards">
+          <article class="card reveal">
+            <span class="card__icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.5 2.8C1.4 11.3 1 12.1 1 13v3c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/></svg></span>
+            <h3 class="card__title">Unfallschadengutachten</h3>
+            <p>Vollständige Schadenermittlung nach einem Unfall – inkl. Reparaturkosten, Wertminderung und Wiederbeschaffungswert.</p>
+          </article>
+
+          <article class="card reveal">
+            <span class="card__icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10h12"/><path d="M4 14h9"/><path d="M19 6a7.7 7.7 0 0 0-5.2-2A7.9 7.9 0 0 0 6 12c0 4.4 3.5 8 7.8 8 2 0 3.8-.8 5.2-2"/></svg></span>
+            <h3 class="card__title">Fahrzeugbewertung &amp; Wertgutachten</h3>
+            <p>Neutrale Ermittlung des aktuellen Markt- und Wiederbeschaffungswerts – für Kauf, Verkauf, Leasingrückgabe oder Versicherung.</p>
+          </article>
+
+          <article class="card reveal">
+            <span class="card__icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg></span>
+            <h3 class="card__title">Gebrauchtwagen-Check</h3>
+            <p>Gründliche Untersuchung vor dem Kauf: technischer Zustand, versteckte Mängel und Unfallspuren – Sicherheit vor der Entscheidung.</p>
+          </article>
+
+          <article class="card reveal">
+            <span class="card__icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg></span>
+            <h3 class="card__title">Oldtimer-Gutachten</h3>
+            <p>Zustands- und Wertgutachten für Klassiker, inklusive Bewertung nach §23 StVZO für das H-Kennzeichen.</p>
+          </article>
+
+          <article class="card reveal">
+            <span class="card__icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></span>
+            <h3 class="card__title">Kostenvoranschlag</h3>
+            <p>Transparente Reparaturkostenschätzung bei kleineren Schäden – ideal als Grundlage für Werkstatt und Versicherung.</p>
+          </article>
+
+          <article class="card reveal">
+            <span class="card__icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg></span>
+            <h3 class="card__title">Beweissicherung &amp; Dokumentation</h3>
+            <p>Lückenlose Foto- und Schadendokumentation – gerichtsfest aufbereitet für Versicherung, Anwalt und Gericht.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Ablauf ===== -->
+    <section class="section section--alt" id="ablauf">
+      <div class="container">
+        <div class="section__head reveal">
+          <span class="eyebrow">So einfach geht's</span>
+          <h2 class="section__title">Ihr Weg zum Gutachten</h2>
+          <p class="section__sub">In vier klaren Schritten – wir kümmern uns um den Rest.</p>
+        </div>
+
+        <ol class="steps">
+          <li class="step reveal">
+            <div class="step__num">1</div>
+            <h3 class="step__title">Kontakt aufnehmen</h3>
+            <p>Rufen Sie an oder senden Sie eine Online-Anfrage. Einen Termin gibt es meist innerhalb von 24 Stunden.</p>
+          </li>
+          <li class="step reveal">
+            <div class="step__num">2</div>
+            <h3 class="step__title">Begutachtung vor Ort</h3>
+            <p>Wir kommen zu Ihnen oder Sie zu uns. Das Fahrzeug wird vollständig geprüft und fotografiert.</p>
+          </li>
+          <li class="step reveal">
+            <div class="step__num">3</div>
+            <h3 class="step__title">Gutachten erhalten</h3>
+            <p>Sie bekommen ein detailliertes, gerichtsfestes Gutachten – in der Regel innerhalb von 2–3 Werktagen.</p>
+          </li>
+          <li class="step reveal">
+            <div class="step__num">4</div>
+            <h3 class="step__title">Abwicklung &amp; Beratung</h3>
+            <p>Wir unterstützen Sie bei der Schadenregulierung mit der Versicherung – bis alles geklärt ist.</p>
+          </li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- ===== Warum wir ===== -->
+    <section class="section" id="warum">
+      <div class="container">
+        <div class="section__head reveal">
+          <span class="eyebrow">Ihre Vorteile</span>
+          <h2 class="section__title">Warum AutoCheck?</h2>
+          <p class="section__sub">Unabhängig, schnell und immer in Ihrem Interesse.</p>
+        </div>
+
+        <div class="features">
+          <div class="feature reveal">
+            <span class="feature__icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg></span>
+            <div>
+              <h3 class="feature__title">100 % unabhängig</h3>
+              <p>Wir arbeiten neutral und ausschließlich in Ihrem Interesse – nicht im Auftrag der Versicherung.</p>
+            </div>
+          </div>
+          <div class="feature reveal">
+            <span class="feature__icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/></svg></span>
+            <div>
+              <h3 class="feature__title">Schnelle Termine</h3>
+              <p>Begutachtung in der Regel innerhalb von 24 Stunden – nach einem Unfall zählt jeder Tag.</p>
+            </div>
+          </div>
+          <div class="feature reveal">
+            <span class="feature__icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="6"/><path d="M15.48 12.89 17 22l-5-3-5 3 1.52-9.11"/></svg></span>
+            <div>
+              <h3 class="feature__title">Zertifizierte Sachverständige</h3>
+              <p>Geprüfte und anerkannte Kfz-Sachverständige mit langjähriger Erfahrung in der Schadenanalyse.</p>
+            </div>
+          </div>
+          <div class="feature reveal">
+            <span class="feature__icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 10c0 4.99-5.54 10.19-7.4 11.8a1 1 0 0 1-1.2 0C9.54 20.19 4 14.99 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></svg></span>
+            <div>
+              <h3 class="feature__title">Deutschlandweit vor Ort</h3>
+              <p>Mobiler Service: Wir kommen zu Ihnen – nach Hause, in die Werkstatt oder an den Unfallort.</p>
+            </div>
+          </div>
+          <div class="feature reveal">
+            <span class="feature__icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/></svg></span>
+            <div>
+              <h3 class="feature__title">Gerichtsfeste Gutachten</h3>
+              <p>Nachvollziehbar, vollständig und anerkannt – damit Sie Ihre Ansprüche sicher durchsetzen.</p>
+            </div>
+          </div>
+          <div class="feature reveal">
+            <span class="feature__icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
+            <div>
+              <h3 class="feature__title">Hilfe bei der Regulierung</h3>
+              <p>Bei unverschuldetem Unfall trägt die gegnerische Versicherung in der Regel die Gutachterkosten.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Über uns ===== -->
+    <section class="section section--alt" id="ueber-uns">
+      <div class="container about">
+        <div class="about__media reveal">
+          <div class="about__card">
+            <svg viewBox="0 0 24 24" class="about__big-icon" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg>
+            <p class="about__quote">„Ein gutes Gutachten schafft Klarheit – objektiv, vollständig und auf Ihrer Seite.“</p>
+            <p class="about__author">— Ihr AutoCheck-Team</p>
+          </div>
+        </div>
+        <div class="about__content reveal">
+          <span class="eyebrow">Über uns</span>
+          <h2 class="section__title">Ihr Partner für faire Schadenabwicklung</h2>
+          <p>
+            AutoCheck ist Ihr unabhängiges Kfz-Sachverständigenbüro. Seit über 15 Jahren prüfen wir
+            Fahrzeuge nach Unfällen und Schäden, dokumentieren jeden Mangel und erstellen Gutachten,
+            auf die sich Versicherungen, Anwälte und Gerichte verlassen.
+          </p>
+          <p>
+            Unser Anspruch: maximale Objektivität, schnelle Bearbeitung und eine verständliche Beratung,
+            die Ihnen in jeder Situation den Rücken stärkt.
+          </p>
+          <ul class="checklist">
+            <li><svg viewBox="0 0 24 24" class="ico" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg> Zertifizierte &amp; vereidigte Sachverständige</li>
+            <li><svg viewBox="0 0 24 24" class="ico" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg> Modernste Mess- und Prüftechnik</li>
+            <li><svg viewBox="0 0 24 24" class="ico" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg> Transparente Kosten ohne Überraschungen</li>
+            <li><svg viewBox="0 0 24 24" class="ico" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg> Persönliche Betreuung von A bis Z</li>
+          </ul>
+          <a href="#kontakt" class="btn btn--primary">Jetzt beraten lassen
+            <svg viewBox="0 0 24 24" class="ico" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Bewertungen ===== -->
+    <section class="section" id="bewertungen">
+      <div class="container">
+        <div class="section__head reveal">
+          <span class="eyebrow">Das sagen Kunden</span>
+          <h2 class="section__title">Vertrauen, das sich auszahlt</h2>
+          <p class="section__sub">Über 8.000 zufriedene Kundinnen und Kunden – hier ein kleiner Auszug.</p>
+        </div>
+
+        <div class="reviews">
+          <figure class="review reviewcard reveal">
+            <div class="review__stars" aria-label="5 von 5 Sternen">★★★★★</div>
+            <blockquote>Nach meinem Unfall wurde ich super schnell und kompetent betreut. Das Gutachten war am nächsten Tag fertig – die Versicherung hat alles ohne Diskussion gezahlt.</blockquote>
+            <figcaption><strong>Markus T.</strong><span>Unfallschadengutachten</span></figcaption>
+          </figure>
+          <figure class="review reviewcard reveal">
+            <div class="review__stars" aria-label="5 von 5 Sternen">★★★★★</div>
+            <blockquote>Vor dem Gebrauchtwagenkauf den Check machen lassen – die beste Entscheidung. Versteckte Vorschäden wurden sofort entdeckt. Absolut empfehlenswert!</blockquote>
+            <figcaption><strong>Sandra K.</strong><span>Gebrauchtwagen-Check</span></figcaption>
+          </figure>
+          <figure class="review reviewcard reveal">
+            <div class="review__stars" aria-label="5 von 5 Sternen">★★★★★</div>
+            <blockquote>Sehr professionell, freundlich und transparent. Mein Oldtimer-Gutachten fürs H-Kennzeichen war top aufbereitet. Gerne wieder.</blockquote>
+            <figcaption><strong>Jürgen M.</strong><span>Oldtimer-Gutachten</span></figcaption>
+          </figure>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== FAQ ===== -->
+    <section class="section section--alt" id="faq">
+      <div class="container container--narrow">
+        <div class="section__head reveal">
+          <span class="eyebrow">Häufige Fragen</span>
+          <h2 class="section__title">Antworten auf einen Blick</h2>
+        </div>
+
+        <div class="faq">
+          <details class="faq__item reveal">
+            <summary>Wer zahlt das Gutachten nach einem unverschuldeten Unfall?
+              <svg viewBox="0 0 24 24" class="faq__chevron" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+            </summary>
+            <div class="faq__body"><p>Bei einem unverschuldeten Unfall trägt in der Regel die gegnerische Haftpflichtversicherung die Kosten für das Gutachten. Sie haben grundsätzlich das Recht, einen unabhängigen Sachverständigen Ihrer Wahl zu beauftragen.</p></div>
+          </details>
+          <details class="faq__item reveal">
+            <summary>Wie schnell erhalte ich mein Gutachten?
+              <svg viewBox="0 0 24 24" class="faq__chevron" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+            </summary>
+            <div class="faq__body"><p>Nach der Begutachtung erstellen wir Ihr Gutachten in der Regel innerhalb von 2–3 Werktagen. In dringenden Fällen ist auch eine Express-Bearbeitung möglich.</p></div>
+          </details>
+          <details class="faq__item reveal">
+            <summary>Kommen Sie auch zu mir vor Ort?
+              <svg viewBox="0 0 24 24" class="faq__chevron" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+            </summary>
+            <div class="faq__body"><p>Ja. Unser mobiler Service kommt deutschlandweit zu Ihnen – nach Hause, in die Werkstatt oder direkt an den Unfallort. So sparen Sie Zeit und Aufwand.</p></div>
+          </details>
+          <details class="faq__item reveal">
+            <summary>Was kostet ein Gutachten?
+              <svg viewBox="0 0 24 24" class="faq__chevron" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+            </summary>
+            <div class="faq__body"><p>Die Kosten richten sich nach Art und Höhe des Schadens. Die Ersteinschätzung ist bei uns immer kostenlos und unverbindlich – sprechen Sie uns einfach an.</p></div>
+          </details>
+          <details class="faq__item reveal">
+            <summary>Brauche ich bei einem Bagatellschaden ein Gutachten?
+              <svg viewBox="0 0 24 24" class="faq__chevron" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+            </summary>
+            <div class="faq__body"><p>Bei sehr kleinen Schäden (Bagatellschaden, meist unter ca. 750 €) reicht häufig ein Kostenvoranschlag. Wir beraten Sie gern, welche Variante in Ihrem Fall sinnvoll ist.</p></div>
+          </details>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== CTA band ===== -->
+    <section class="cta-band">
+      <div class="container cta-band__inner reveal">
+        <div>
+          <h2>Schaden am Fahrzeug? Wir prüfen ihn – neutral &amp; schnell.</h2>
+          <p>Kostenlose Ersteinschätzung. Termin meist innerhalb von 24 Stunden.</p>
+        </div>
+        <div class="cta-band__actions">
+          <a href="#kontakt" class="btn btn--primary btn--lg">Termin anfragen</a>
+          <a href="tel:+49301234567" class="btn btn--light btn--lg">
+            <svg viewBox="0 0 24 24" class="ico" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+            Anrufen
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Kontakt ===== -->
+    <section class="section" id="kontakt">
+      <div class="container">
+        <div class="section__head reveal">
+          <span class="eyebrow">Kontakt</span>
+          <h2 class="section__title">Jetzt Termin anfragen</h2>
+          <p class="section__sub">Füllen Sie das Formular aus oder rufen Sie an – wir melden uns schnellstmöglich zurück.</p>
+        </div>
+
+        <div class="contact">
+          <div class="contact__info reveal">
+            <a class="contact__item" href="tel:+49301234567">
+              <span class="contact__ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg></span>
+              <span><strong>Telefon</strong>030 123 45 67</span>
+            </a>
+            <a class="contact__item" href="mailto:info@autocheck-gutachten.de">
+              <span class="contact__ico"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg></span>
+              <span><strong>E-Mail</strong>info@autocheck-gutachten.de</span>
+            </a>
+            <div class="contact__item">
+              <span class="contact__ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 10c0 4.99-5.54 10.19-7.4 11.8a1 1 0 0 1-1.2 0C9.54 20.19 4 14.99 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></svg></span>
+              <span><strong>Adresse</strong>Musterstraße 12, 12345 Musterstadt</span>
+            </div>
+            <div class="contact__item">
+              <span class="contact__ico"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span>
+              <span><strong>Öffnungszeiten</strong>Mo–Fr 8:00–18:00 Uhr · 24h Unfallhilfe</span>
+            </div>
+          </div>
+
+          <form class="contact__form reveal" id="contactForm" novalidate>
+            <div class="field">
+              <label for="name">Name *</label>
+              <input type="text" id="name" name="name" autocomplete="name" required placeholder="Max Mustermann" />
+            </div>
+            <div class="field-row">
+              <div class="field">
+                <label for="email">E-Mail *</label>
+                <input type="email" id="email" name="email" autocomplete="email" required placeholder="max@beispiel.de" />
+              </div>
+              <div class="field">
+                <label for="phone">Telefon</label>
+                <input type="tel" id="phone" name="phone" autocomplete="tel" placeholder="0170 1234567" />
+              </div>
+            </div>
+            <div class="field">
+              <label for="service">Gewünschte Leistung</label>
+              <select id="service" name="service">
+                <option value="Unfallschadengutachten">Unfallschadengutachten</option>
+                <option value="Fahrzeugbewertung / Wertgutachten">Fahrzeugbewertung / Wertgutachten</option>
+                <option value="Gebrauchtwagen-Check">Gebrauchtwagen-Check</option>
+                <option value="Oldtimer-Gutachten">Oldtimer-Gutachten</option>
+                <option value="Kostenvoranschlag">Kostenvoranschlag</option>
+                <option value="Sonstiges">Sonstiges / Beratung</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="message">Nachricht *</label>
+              <textarea id="message" name="message" rows="4" required placeholder="Beschreiben Sie kurz Ihr Anliegen (z. B. Fahrzeug, Schaden, Wunschtermin)…"></textarea>
+            </div>
+            <label class="checkbox">
+              <input type="checkbox" id="privacy" name="privacy" required />
+              <span>Ich habe die <a href="datenschutz.html">Datenschutzerklärung</a> gelesen und stimme der Verarbeitung meiner Daten zu. *</span>
+            </label>
+            <button type="submit" class="btn btn--primary btn--lg btn--block">
+              Anfrage senden
+              <svg viewBox="0 0 24 24" class="ico" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+            </button>
+            <p class="form__note" id="formNote" role="status" aria-live="polite"></p>
+          </form>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ===== Footer ===== -->
+  <footer class="footer">
+    <div class="container footer__grid">
+      <div class="footer__col">
+        <a href="#start" class="brand brand--footer">
+          <span class="brand__mark" aria-hidden="true">
+            <svg viewBox="0 0 32 32"><path d="M7 19h18M9 19l1.6-4.2A2 2 0 0 1 12.5 13.5h7a2 2 0 0 1 1.9 1.3L23 19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="11" cy="21" r="1.9" fill="currentColor"/><circle cx="21" cy="21" r="1.9" fill="currentColor"/></svg>
+          </span>
+          <span class="brand__text">Auto<span>Check</span></span>
+        </a>
+        <p class="footer__about">Ihr unabhängiges Kfz-Sachverständigenbüro für Unfallschäden, Fahrzeugbewertung und Gutachten – schnell, neutral und deutschlandweit.</p>
+      </div>
+      <div class="footer__col">
+        <h4>Leistungen</h4>
+        <ul>
+          <li><a href="#leistungen">Unfallschadengutachten</a></li>
+          <li><a href="#leistungen">Fahrzeugbewertung</a></li>
+          <li><a href="#leistungen">Gebrauchtwagen-Check</a></li>
+          <li><a href="#leistungen">Oldtimer-Gutachten</a></li>
+        </ul>
+      </div>
+      <div class="footer__col">
+        <h4>Unternehmen</h4>
+        <ul>
+          <li><a href="#ueber-uns">Über uns</a></li>
+          <li><a href="#ablauf">Ablauf</a></li>
+          <li><a href="#bewertungen">Bewertungen</a></li>
+          <li><a href="#kontakt">Kontakt</a></li>
+        </ul>
+      </div>
+      <div class="footer__col">
+        <h4>Kontakt</h4>
+        <ul>
+          <li><a href="tel:+49301234567">030 123 45 67</a></li>
+          <li><a href="mailto:info@autocheck-gutachten.de">info@autocheck-gutachten.de</a></li>
+          <li>Musterstraße 12<br />12345 Musterstadt</li>
+        </ul>
+      </div>
+    </div>
+    <div class="container footer__bottom">
+      <p>© <span id="year">2026</span> AutoCheck Kfz-Gutachten. Alle Rechte vorbehalten.</p>
+      <nav class="footer__legal" aria-label="Rechtliches">
+        <a href="impressum.html">Impressum</a>
+        <a href="datenschutz.html">Datenschutz</a>
+      </nav>
+    </div>
+  </footer>
+
+  <button class="to-top" id="toTop" aria-label="Nach oben scrollen">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m18 15-6-6-6 6"/></svg>
+  </button>
+
+  <script src="js/main.js"></script>
+</body>
+</html>
