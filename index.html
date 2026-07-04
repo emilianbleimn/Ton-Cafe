@@ -468,6 +468,7 @@
       display: grid; grid-template-columns: 1fr 1.5fr;
       gap: clamp(3rem,7vw,7rem); align-items: start;
       position: relative; z-index: 1;
+      direction: ltr;
     }
     .loc-info h4 { font-size: .95rem; color: var(--bronze); margin: 2rem 0 .5rem; }
     .loc-info p, .loc-info address { font-size: .86rem; color: var(--cream-mid); line-height: 1.85; }
@@ -1007,17 +1008,10 @@
       <h4>Öffnungszeiten</h4>
       <table class="hours" aria-label="Öffnungszeiten">
         <tbody>
-          <tr><td>Dienstag – Freitag</td><td>10:00 – 20:00 Uhr</td></tr>
-          <tr><td>Samstag</td>           <td>10:00 – 18:00 Uhr</td></tr>
-          <tr><td>Sonntag</td>           <td>12:00 – 17:00 Uhr</td></tr>
-          <tr><td>Montag</td>            <td>Geschlossen</td></tr>
+          <tr><td>Mittwoch & Donnerstag</td><td>10:00 – 14:00 Uhr</td></tr>
+          <tr><td>Die restlichen Tage</td> <td>Auf Anfrage</td></tr>
         </tbody>
       </table>
-
-      <div class="res-note">
-        <strong>Nur mit Reservierung.</strong>
-        Drop-ins sind leider nicht möglich. <a href="#booking">Jetzt online anfragen</a> oder telefonisch melden.
-      </div>
     </div>
 
     <div class="rv rv-d1">
@@ -1062,7 +1056,7 @@
 
       <div class="pay-note" role="note">
         <span class="pay-icon" aria-hidden="true">◆</span>
-        <p><strong>Zahlung erfolgt bar vor Ort.</strong> Es ist keine Vorabzahlung erforderlich. Bitte bringe den Betrag passend zum Workshop-Tag mit.</p>
+        <p><strong>Zahlung erfolgt bar vor Ort.</strong>
       </div>
     </div>
 
