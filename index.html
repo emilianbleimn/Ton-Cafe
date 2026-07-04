@@ -229,14 +229,18 @@
     ───────────────────────────────────────────── */
     #hero {
       min-height: 100svh;
-      background: #ede5d6;
+      background: #ede8dd;
       display: flex; align-items: center; justify-content: center;
+      overflow: hidden;
     }
     #hero img {
-      width: clamp(320px, 72vmin, 900px);
-      height: auto;
       display: block;
-      mix-blend-mode: multiply;
+      width: clamp(320px, 68vmin, 860px);
+      height: clamp(320px, 68vmin, 860px);
+      object-fit: cover;
+      object-position: center;
+      -webkit-mask-image: radial-gradient(ellipse 72% 72% at center, black 45%, transparent 78%);
+      mask-image: radial-gradient(ellipse 72% 72% at center, black 45%, transparent 78%);
       animation: logoFloat 7s cubic-bezier(0.37, 0, 0.63, 1) infinite;
       will-change: transform;
     }
