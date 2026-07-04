@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Tonflüstern – Raum für kreative Momente | Keramik-Workshops & Atelier</title>
-  <meta name="description" content="Tonflüstern verbindet authentische Keramik-Workshops mit einem kreativen Atelier. Töpfern für Anfänger und Fortgeschrittene. Jetzt Platz sichern.">
+  <title>Tonflüstern – Keramik bemalen | Keramikcafé</title>
+  <meta name="description" content="Tonflüstern — Keramik bemalen in entspannter Café-Atmosphäre. Wähle einen Rohling und gestalte ihn nach deiner Handschrift. Jetzt anfragen.">
 
   <!-- Open Graph -->
   <!-- OG-URL ANPASSEN -->
@@ -336,6 +336,10 @@
     .ws-grid {
       display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
       gap: 1.5px;
+    }
+    .ws-grid--single {
+      grid-template-columns: minmax(280px, 480px);
+      justify-content: center;
     }
 
     /* 3-D tilt card */
@@ -716,7 +720,7 @@
   </a>
   <ul class="nav-links">
     <li><a href="#about">Konzept</a></li>
-    <li><a href="#workshops">Workshops</a></li>
+    <li><a href="#workshops">Kurs</a></li>
     <li><a href="#cafe">Café</a></li>
     <li><a href="#gallery">Galerie</a></li>
     <li><a href="#location">Standort</a></li>
@@ -731,11 +735,11 @@
 <!-- Mobile menu -->
 <div class="mob-menu" id="mob-menu" role="dialog" aria-label="Mobile Navigation">
   <a href="#about"      onclick="closeMob()">Konzept</a>
-  <a href="#workshops"  onclick="closeMob()">Workshops</a>
+  <a href="#workshops"  onclick="closeMob()">Kurs</a>
   <a href="#cafe"       onclick="closeMob()">Café</a>
   <a href="#gallery"    onclick="closeMob()">Galerie</a>
   <a href="#location"   onclick="closeMob()">Standort</a>
-  <a href="#booking"    onclick="closeMob()">Workshop buchen</a>
+  <a href="#booking"    onclick="closeMob()">Kurs anfragen</a>
   <a href="#contact"    onclick="closeMob()">Kontakt</a>
 </div>
 
@@ -780,15 +784,14 @@
         „Hier entstehen nicht nur Tassen — hier entstehen Momente."
       </blockquote>
       <p class="rv rv-d2">
-        Ob du noch nie Ton in der Hand hattest oder bereits erste Erfahrungen mitbringst —
-        unsere Workshops sind für alle Levels offen.
+        Wähle einen Rohling und gib ihm deine ganz persönliche Handschrift —
+        kreativ, entspannt, ohne Vorkenntnisse.
         Kleine Gruppen, persönliche Betreuung, kein Stress.
       </p>
       <div class="badges rv rv-d3">
-        <span class="badge">Anfänger willkommen</span>
-        <span class="badge">Fortgeschrittene</span>
-        <span class="badge">Private Gruppen</span>
+        <span class="badge">Alle Levels willkommen</span>
         <span class="badge">Kleine Gruppen</span>
+        <span class="badge">Kreativ &amp; Entspannt</span>
       </div>
       <div class="feat-grid rv rv-d3">
         <div class="feat">
@@ -819,33 +822,17 @@
 <section id="workshops" aria-labelledby="ws-h">
   <div class="ws-hdr rv">
     <div>
-      <span class="sec-num">03 — Workshops</span>
+      <span class="sec-num">03 — Kurs</span>
       <span class="gold-rule"></span>
-      <h2 id="ws-h" class="dlg">Dein nächster<br><em>Kurs</em></h2>
+      <h2 id="ws-h" class="dlg">Unser<br><em>Angebot</em></h2>
     </div>
     <p class="ws-hdr-note">
       Alle Materialien sind inklusive. Mitbringen musst du nur Neugier und Kleidung, die schmutzig werden darf.
     </p>
   </div>
 
-  <div class="ws-grid">
-
-    <!-- KARTE 1: Preise/Zeiten anpassen -->
-    <article class="wc rv" data-ws="anf" aria-label="Anfänger Workshop">
-      <!-- BILD ANPASSEN -->
-      <img class="wc-img"
-        src="https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=700&q=75"
-        alt="Anfänger formt Tonbecher an der Töpferscheibe" loading="lazy">
-      <div class="wc-body">
-        <p class="wc-tag">Beliebt · Anfänger</p>
-        <h3>Anfänger Workshop</h3>
-        <p>Dein erster Kontakt mit der Töpferscheibe. Lerne Grundtechniken, forme dein erstes Gefäß — mit Anleitung und ohne Vorkenntnisse.</p>
-      </div>
-    </article>
-
-    <!-- KARTE 2 -->
-    <article class="wc rv rv-d1" data-ws="bem" aria-label="Keramik bemalen">
-      <!-- BILD ANPASSEN -->
+  <div class="ws-grid ws-grid--single">
+    <article class="wc rv" data-ws="bem" aria-label="Keramik bemalen">
       <img class="wc-img"
         src="https://images.unsplash.com/photo-1611516491426-03025e6043c8?w=700&q=75"
         alt="Bemalung von Keramik-Rohlingen mit farbigen Glasuren" loading="lazy">
@@ -853,35 +840,9 @@
         <p class="wc-tag">Kreativ · Entspannt</p>
         <h3>Keramik bemalen</h3>
         <p>Wähle einen Rohling und gib ihm deine Handschrift. Ideal für kreative Nachmittage — alleine, zu zweit oder in der Gruppe.</p>
+        <a class="btn-fill" href="#booking" style="display:inline-block;margin-top:1.2rem;">Jetzt anfragen</a>
       </div>
     </article>
-
-    <!-- KARTE 3 -->
-    <article class="wc rv rv-d2" data-ws="auf" aria-label="Aufbaukurs Töpfern">
-      <!-- BILD ANPASSEN -->
-      <img class="wc-img"
-        src="https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?w=700&q=75"
-        alt="Fortgeschrittene Töpfertechnik an der Drehscheibe" loading="lazy">
-      <div class="wc-body">
-        <p class="wc-tag">Fortgeschritten · 4 Termine</p>
-        <h3>Aufbaukurs</h3>
-        <p>Vier intensive Abende für alle, die mehr wollen. Vertiefe Drehtechnik, Glasuren und Ofenarbeit — dein Weg zum eigenen Stil.</p>
-      </div>
-    </article>
-
-    <!-- KARTE 4: Private Gruppen -->
-    <article class="wc wc--accent rv rv-d3" data-ws="grp" aria-label="Private Events und Gruppen">
-      <!-- BILD ANPASSEN -->
-      <img class="wc-img"
-        src="https://images.unsplash.com/photo-1606760227091-3dd870d97f1d?w=700&q=75"
-        alt="Gruppe beim gemeinsamen Töpfern – privates Event" loading="lazy">
-      <div class="wc-body">
-        <p class="wc-tag">Privat · Auf Anfrage</p>
-        <h3>Private Events &amp; Gruppen</h3>
-        <p>Geburtstag, Teambuilding, JGA, Firmenfeier — das Studio gehört exklusiv euch. Individuelles Programm, Catering auf Wunsch.</p>
-      </div>
-    </article>
-
   </div>
 </section>
 
@@ -994,8 +955,8 @@
       </table>
 
       <div class="res-note">
-        <strong>Workshops nur mit Reservierung.</strong>
-        Drop-ins sind leider nicht möglich. <a href="#booking">Jetzt online buchen</a> oder telefonisch anfragen.
+        <strong>Nur mit Reservierung.</strong>
+        Drop-ins sind leider nicht möglich. <a href="#booking">Jetzt online anfragen</a> oder telefonisch melden.
       </div>
     </div>
 
@@ -1036,8 +997,8 @@
     <div class="bk-info rv">
       <span class="sec-num">07 — Buchung</span>
       <span class="gold-rule"></span>
-      <h2 id="bk-h" class="dmd">Workshop<br><em>anfragen</em></h2>
-      <p>Wähle deinen Wunsch-Workshop, gib deine Kontaktdaten ein — wir melden uns innerhalb von 24 Stunden mit einem Terminvorschlag.</p>
+      <h2 id="bk-h" class="dmd">Keramik bemalen<br><em>anfragen</em></h2>
+      <p>Gib deine Kontaktdaten ein — wir melden uns innerhalb von 24 Stunden mit einem Terminvorschlag.</p>
 
       <div class="pay-note" role="note">
         <span class="pay-icon" aria-hidden="true">◆</span>
@@ -1057,7 +1018,7 @@
         action="https://formspree.io/f/DEINE_ID"
         method="POST" novalidate>
 
-        <input type="hidden" name="_subject" value="Neue Workshop-Anfrage – Tonflüstern">
+        <input type="hidden" name="_subject" value="Neue Anfrage – Keramik bemalen – Tonflüstern">
         <input type="hidden" name="_language" value="de">
 
         <div class="fr">
@@ -1071,16 +1032,7 @@
           </div>
         </div>
 
-        <div class="fg">
-          <label for="bk-ws">Workshop *</label>
-          <select id="bk-ws" name="workshop" required>
-            <option value="">— Workshop auswählen —</option>
-            <option value="Anfänger Workshop">Anfänger Workshop</option>
-            <option value="Keramik bemalen">Keramik bemalen</option>
-            <option value="Aufbaukurs / Fortgeschritten">Aufbaukurs / Fortgeschritten</option>
-            <option value="Private Events / Gruppen">Private Events / Gruppen</option>
-          </select>
-        </div>
+        <input type="hidden" name="workshop" value="Keramik bemalen">
 
         <div class="fr">
           <div class="fg">
