@@ -694,6 +694,7 @@
 <nav id="nav" role="navigation" aria-label="Hauptnavigation">
   <ul class="nav-links">
     <li><a href="#about">Konzept</a></li>
+    <li><a href="#ueber-mich">Über mich</a></li>
     <li><a href="#workshops">Kurs</a></li>
     <li><a href="#cafe">Café</a></li>
     <li><a href="#gallery">Galerie</a></li>
@@ -708,7 +709,8 @@
 
 <!-- Mobile menu -->
 <div class="mob-menu" id="mob-menu" role="dialog" aria-label="Mobile Navigation">
-  <a href="#about"      onclick="closeMob()">Konzept</a>
+  <a href="#about"       onclick="closeMob()">Konzept</a>
+  <a href="#ueber-mich" onclick="closeMob()">Über mich</a>
   <a href="#workshops"  onclick="closeMob()">Kurs</a>
   <a href="#cafe"       onclick="closeMob()">Café</a>
   <a href="#gallery"    onclick="closeMob()">Galerie</a>
@@ -791,12 +793,53 @@
 </section>
 
 <!-- ══════════════════════════════════════════
-     03 — WORKSHOPS
+     03 — ÜBER MICH
+══════════════════════════════════════════ -->
+<section id="ueber-mich" aria-labelledby="um-h">
+  <div class="about-grid">
+
+    <div class="about-sticky">
+      <div class="rv">
+        <span class="sec-num">03 — Über mich</span>
+        <span class="gold-rule"></span>
+      </div>
+      <div class="about-img-wrap rv rv-d1">
+        <!-- BILD ANPASSEN: Eigenes Foto einfügen -->
+        <img
+          src="https://images.unsplash.com/photo-1607462109225-6b64ae2dd3cb?w=800&q=80"
+          alt="Inhaberin von Tonflüstern beim Keramik bemalen"
+          loading="lazy" width="800" height="600">
+      </div>
+    </div>
+
+    <div class="about-right">
+      <div class="rv">
+        <span class="eyebrow">Die Person dahinter</span>
+        <h2 id="um-h" class="dlg" style="margin:1rem 0;">Hallo, ich bin<br><em>Tonflüstern</em></h2>
+      </div>
+      <p class="rv rv-d1">
+        Hier kannst du deinen eigenen Text einfügen — wer du bist, wie die Idee zu Tonflüstern entstanden ist und was dich antreibt. Deine Geschichte macht den Unterschied.
+      </p>
+      <p class="rv rv-d2">
+        Was dich begeistert, warum du Keramik liebst, was dir bei deinen Gästen wichtig ist — all das gehört hier hin. Je persönlicher, desto besser.
+      </p>
+      <div class="badges rv rv-d3">
+        <span class="badge">Leidenschaft für Keramik</span>
+        <span class="badge">Kreatives Handwerk</span>
+        <span class="badge">Gastgeberin mit Herz</span>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     04 — WORKSHOPS
 ══════════════════════════════════════════ -->
 <section id="workshops" aria-labelledby="ws-h">
   <div class="ws-hdr rv">
     <div>
-      <span class="sec-num">03 — Kurs</span>
+      <span class="sec-num">04 — Kurs</span>
       <span class="gold-rule"></span>
       <h2 id="ws-h" class="dlg">Unser<br><em>Angebot</em></h2>
     </div>
