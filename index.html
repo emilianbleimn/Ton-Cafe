@@ -1314,6 +1314,12 @@ window.scrollTo(0, 0);
 ──────────────────────────────────────────── */
 window.addEventListener('load', () => {
   window.scrollTo(0, 0);
+  requestAnimationFrame(() => {
+    document.querySelectorAll('.rv').forEach(el => {
+      const r = el.getBoundingClientRect();
+      if (r.top < window.innerHeight) el.classList.add('on');
+    });
+  });
 });
 
 /* ────────────────────────────────────────────
