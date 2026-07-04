@@ -80,23 +80,6 @@
     }
 
     /* ─────────────────────────────────────────────
-       PAGE LOADER
-    ───────────────────────────────────────────── */
-    #loader {
-      position: fixed; inset: 0; z-index: 10000;
-      background: var(--bg-0);
-      display: flex; align-items: center; justify-content: center;
-      transition: opacity .9s ease, visibility .9s ease;
-    }
-    #loader.out { opacity: 0; visibility: hidden; }
-    .loader-word {
-      font-family: var(--fs);
-      font-size: clamp(2.6rem, 5.5vw, 4.2rem);
-      color: var(--logo-green);
-      letter-spacing: .06em;
-      animation: lpulse 1.4s ease-in-out infinite;
-    }
-    @keyframes lpulse { 0%,100%{opacity:.2} 50%{opacity:1} }
 
     /* ─────────────────────────────────────────────
        SCROLL REVEAL
@@ -690,12 +673,6 @@
 </head>
 <body>
 
-<!-- ══════════════════════════════════════════
-     PAGE LOADER
-══════════════════════════════════════════ -->
-<div id="loader" role="status" aria-label="Seite lädt">
-  <span class="loader-word">Tonflüstern</span>
-</div>
 
 <!-- ══════════════════════════════════════════
      COOKIE BANNER
@@ -1261,10 +1238,7 @@ window.scrollTo(0, 0);
    LOADER
 ──────────────────────────────────────────── */
 window.addEventListener('load', () => {
-  window.scrollTo(0, 0);          /* second guarantee after all resources load */
-  setTimeout(() => {
-    document.getElementById('loader').classList.add('out');
-  }, 500);
+  window.scrollTo(0, 0);
 });
 
 /* ────────────────────────────────────────────
