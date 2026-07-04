@@ -1,0 +1,1507 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tonflüstern – Keramik bemalen | Keramikcafé</title>
+  <meta name="description" content="Tonflüstern — Keramik bemalen in entspannter Café-Atmosphäre. Wähle einen Rohling und gestalte ihn nach deiner Handschrift. Jetzt anfragen.">
+
+  <!-- Open Graph -->
+  <!-- OG-URL ANPASSEN -->
+  <meta property="og:url" content="https://tonfluestern.de">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Tonflüstern – Raum für kreative Momente">
+  <meta property="og:description" content="Töpfern. Entspannen. Genießen. Erlebe Keramik-Workshops in einem einzigartigen kreativen Atelier.">
+  <!-- OG-BILD ANPASSEN: Ersetze URL durch eigenes Vorschaubild (1200×630 px) -->
+  <meta property="og:image" content="https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?w=1200&q=80">
+  <meta name="twitter:card" content="summary_large_image">
+
+  <!-- Google Fonts preconnect -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,300;1,9..144,400;1,9..144,500;1,9..144,600&family=Lato:ital,wght@0,300;0,400;0,700;1,300;1,400&family=Pinyon+Script&display=swap" rel="stylesheet">
+
+  <style>
+    /* ─────────────────────────────────────────────
+       DESIGN TOKENS
+    ───────────────────────────────────────────── */
+    :root {
+      --bg-0:        #f4ece0;   /* warmes Leinen – Haupthintergrund         */
+      --bg-1:        #ebe2d2;   /* heller Sand – alternierende Sektionen    */
+      --bg-2:        #e1d5c2;   /* Sand – Karten, Inputs                    */
+      --bg-3:        #d4c5af;   /* warmes Taupe – Akzente, Hover            */
+      --terra:       #a84c2a;   /* Terrakotta                               */
+      --terra-dim:   #7a3418;
+      --bronze:      #7a5230;   /* Dunkelbronze / Braun – Akzentfarbe       */
+      --bronze-dim:  #5a3c22;
+      --cream:       #291b0f;   /* Haupttext – warmes Dunkelbraun           */
+      --cream-mid:   #5e4535;   /* Sekundärtext – mittleres Braun           */
+      --cream-faint: #a8917a;   /* Dezenter Text, Trennlinien               */
+      --on-col:      #f4ece0;   /* Textfarbe auf farbigen Buttons           */
+      --fd: 'Fraunces', Georgia, serif;
+      --fs: 'Pinyon Script', cursive;
+      --fb: 'Lato', system-ui, sans-serif;
+      --lgreen: rgba(196,222,166,0.32);
+      --logo-green: #263d1e;   /* dark forest green — logo text */
+      --logo-sand:  #c9a770;   /* warm golden circle fill */
+      --pad: clamp(5rem, 10vw, 9rem);
+    }
+
+    /* ─────────────────────────────────────────────
+       RESET
+    ───────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; font-size: 16px; }
+    body {
+      font-family: var(--fb);
+      background-color: var(--bg-0);
+      color: var(--cream);
+      overflow-x: hidden;
+      line-height: 1.75;
+      letter-spacing: 0.01em;
+    }
+    img { display: block; max-width: 100%; height: auto; }
+    a   { color: inherit; text-decoration: none; }
+    button { cursor: pointer; border: none; background: none; font-family: inherit; }
+    address { font-style: normal; }
+
+    /* ─────────────────────────────────────────────
+       FILM GRAIN
+    ───────────────────────────────────────────── */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      pointer-events: none;
+      opacity: 0.035;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='256' height='256'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      background-size: 160px 160px;
+    }
+
+    /* ─────────────────────────────────────────────
+
+    /* ─────────────────────────────────────────────
+       SCROLL REVEAL
+    ───────────────────────────────────────────── */
+    .rv {
+      opacity: 0;
+      transform: translateY(36px);
+      transition: opacity .9s cubic-bezier(.16,1,.3,1), transform .9s cubic-bezier(.16,1,.3,1);
+    }
+    .rv.on { opacity: 1; transform: none; }
+    .rv-d1 { transition-delay: .1s; }
+    .rv-d2 { transition-delay: .2s; }
+    .rv-d3 { transition-delay: .32s; }
+    .rv-d4 { transition-delay: .44s; }
+
+    /* ─────────────────────────────────────────────
+       TYPOGRAPHY
+    ───────────────────────────────────────────── */
+    .eyebrow {
+      font-family: var(--fb);
+      font-size: .68rem;
+      font-weight: 500;
+      letter-spacing: .26em;
+      text-transform: uppercase;
+      color: var(--bronze);
+    }
+    .sec-num {
+      font-family: var(--fd);
+      font-size: .72rem;
+      letter-spacing: .18em;
+      color: var(--cream-faint);
+    }
+    h1,h2,h3,h4 { font-family: var(--fd); font-weight: 400; line-height: 1.08; }
+    .dxl  { font-size: clamp(3.2rem,8.5vw,7.5rem); line-height: .97; }
+    .dlg  { font-size: clamp(2.4rem,5.5vw,5rem);   line-height: 1.03; }
+    .dmd  { font-size: clamp(1.9rem,3.8vw,3.4rem); }
+    .dsm  { font-size: clamp(1.4rem,2.4vw,2rem); }
+    .gold-rule { display: block; width: 52px; height: 1px; background: var(--bronze); opacity: .55; margin: 1.4rem 0; }
+
+    /* ─────────────────────────────────────────────
+       GLOBAL BUTTONS
+    ───────────────────────────────────────────── */
+    .btn-fill {
+      display: inline-block;
+      padding: .88rem 2rem;
+      background: var(--terra);
+      color: var(--on-col);
+      font-family: var(--fb);
+      font-size: .7rem;
+      font-weight: 500;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+      transition: background .3s, transform .3s;
+    }
+    .btn-fill:hover { background: #9d4830; transform: translateY(-2px); }
+    .btn-ghost {
+      display: inline-block;
+      padding: .88rem 2rem;
+      border: 1px solid rgba(122,82,48,.4);
+      color: var(--bronze);
+      font-family: var(--fb);
+      font-size: .7rem;
+      font-weight: 500;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+      transition: border-color .3s, color .3s;
+    }
+    .btn-ghost:hover { border-color: var(--bronze); color: var(--cream); }
+
+    /* ─────────────────────────────────────────────
+       NAVIGATION
+    ───────────────────────────────────────────── */
+    #nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 900;
+      padding: 1.6rem clamp(1.5rem,5vw,5rem);
+      display: flex; align-items: center; justify-content: space-between;
+      transition: background .4s, padding .4s, border-color .4s;
+      border-bottom: 1px solid transparent;
+    }
+    #nav.sc {
+      background: rgba(244,236,224,.96);
+      backdrop-filter: blur(14px);
+      padding: 1rem clamp(1.5rem,5vw,5rem);
+      border-color: rgba(122,82,48,.2);
+    }
+    .nav-logo { display: flex; align-items: center; gap: .55rem; }
+    .logo-mark { width: 1.9rem; height: 1.9rem; flex-shrink: 0; }
+    .nav-emblem {
+      display: block; width: 42px; height: 42px; flex-shrink: 0;
+      background: url(grafik.png) no-repeat;
+      background-size: 320%;
+      background-position: 50% 4%;
+    }
+    .logo-text { font-family: var(--fs); font-size: 1.9rem; color: var(--logo-green); line-height: 1; letter-spacing: -.03em; }
+    .nav-links { display: flex; gap: 2.5rem; list-style: none; }
+    .nav-links a {
+      font-size: .7rem; letter-spacing: .16em; text-transform: uppercase;
+      color: var(--cream-mid); transition: color .3s;
+    }
+    .nav-links a:hover { color: var(--cream); }
+    .nav-book {
+      font-size: .68rem; letter-spacing: .16em; text-transform: uppercase;
+      padding: .6rem 1.5rem;
+      border: 1px solid var(--bronze); color: var(--bronze);
+      transition: background .3s, color .3s;
+    }
+    .nav-book:hover { background: var(--bronze); color: var(--bg-0); }
+
+    /* Mobile hamburger */
+    .ham { display: none; flex-direction: column; gap: 5px; }
+    .ham span { display: block; width: 22px; height: 1px; background: var(--cream); transition: .3s; }
+    .ham.open span:nth-child(1) { transform: translateY(6px) rotate(45deg); }
+    .ham.open span:nth-child(2) { opacity: 0; }
+    .ham.open span:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
+
+    .mob-menu {
+      display: none; position: fixed; inset: 0; z-index: 800;
+      background: rgba(244,236,224,.98);
+      flex-direction: column; align-items: center; justify-content: center;
+      gap: 2.5rem;
+    }
+    .mob-menu.open { display: flex; }
+    .mob-menu a {
+      font-family: var(--fd); font-size: clamp(2rem,6vw,3rem); font-style: italic;
+      color: var(--cream); transition: color .3s;
+    }
+    .mob-menu a:hover { color: var(--bronze); }
+
+    @media (max-width: 800px) {
+      .nav-links, .nav-book { display: none; }
+      .ham { display: flex; }
+    }
+
+    /* ─────────────────────────────────────────────
+       HERO
+    ───────────────────────────────────────────── */
+    #hero {
+      min-height: 100svh;
+      background: #ede8dd;
+      display: flex; align-items: center; justify-content: center;
+      overflow: hidden;
+    }
+    #hero img {
+      display: block;
+      width: clamp(320px, 68vmin, 860px);
+      height: clamp(320px, 68vmin, 860px);
+      object-fit: cover;
+      object-position: center;
+      -webkit-mask-image: radial-gradient(ellipse 72% 72% at center, black 45%, transparent 78%);
+      mask-image: radial-gradient(ellipse 72% 72% at center, black 45%, transparent 78%);
+      animation: logoFloat 7s cubic-bezier(0.37, 0, 0.63, 1) infinite;
+      will-change: transform;
+    }
+    @keyframes logoFloat {
+      0%, 100% { transform: translateY(0px); }
+      50%       { transform: translateY(-14px); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      #hero img { animation: none; }
+    }
+
+    /* ─────────────────────────────────────────────
+       ABOUT
+    ───────────────────────────────────────────── */
+    #about {
+      padding: var(--pad) clamp(1.5rem,5vw,5rem);
+      position: relative;
+    }
+    #about::before {
+      content: ''; position: absolute; left: 0; top: 30%; width: 40%; height: 60%;
+      background: radial-gradient(ellipse at left, rgba(168,76,42,.05) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .about-grid {
+      display: grid; grid-template-columns: 1fr 1.45fr;
+      gap: clamp(3rem,7vw,8rem); align-items: start;
+      position: relative; z-index: 1;
+    }
+    .about-sticky { position: sticky; top: 7rem; }
+    .about-img-wrap { position: relative; margin-top: 2rem; }
+    .about-img-wrap img {
+      width: 100%; height: 460px; object-fit: cover;
+      filter: brightness(.88) contrast(1.04) saturate(.9);
+    }
+    .about-img-wrap::before {
+      content: ''; position: absolute; top: -14px; right: -14px;
+      width: 65%; height: 55%;
+      border: 1px solid rgba(122,82,48,.18);
+      pointer-events: none;
+    }
+    .about-right { padding-top: 3.5rem; }
+    .about-right p {
+      color: var(--cream-mid); font-size: .93rem; line-height: 1.9; max-width: 500px;
+    }
+    blockquote {
+      font-family: var(--fd); font-size: clamp(1.3rem,2.6vw,2rem);
+      font-style: italic; color: var(--cream); line-height: 1.5;
+      padding-left: 1.8rem; border-left: 2px solid var(--bronze);
+      margin: 3rem 0;
+    }
+    .feat-grid {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 1.8rem; margin-top: 3rem;
+    }
+    .feat {
+      padding: 1.4rem 0;
+      border-top: 1px solid rgba(122,82,48,.12);
+    }
+    .feat h4 { font-family: var(--fd); font-size: 1.1rem; margin-bottom: .4rem; }
+    .feat p  { font-size: .82rem; color: var(--cream-mid); line-height: 1.7; }
+    .badges  { display: flex; gap: .7rem; flex-wrap: wrap; margin-top: 2rem; }
+    .badge {
+      font-size: .62rem; letter-spacing: .16em; text-transform: uppercase;
+      padding: .38rem .9rem;
+      border: 1px solid rgba(122,82,48,.25); color: var(--cream-mid);
+    }
+
+    @media (max-width: 760px) {
+      .about-grid  { grid-template-columns: 1fr; }
+      .about-sticky { position: static; }
+      .feat-grid   { grid-template-columns: 1fr; }
+    }
+
+    /* ─────────────────────────────────────────────
+       WORKSHOPS
+    ───────────────────────────────────────────── */
+    #workshops {
+      padding: var(--pad) clamp(1.5rem,5vw,5rem);
+      background: var(--bg-1); position: relative;
+    }
+    #workshops::after {
+      content: ''; position: absolute; right: 0; top: 20%;
+      width: 40%; height: 60%;
+      background: radial-gradient(ellipse at right, rgba(122,82,48,.04) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .ws-hdr {
+      display: flex; justify-content: space-between;
+      align-items: flex-end; margin-bottom: 4rem;
+      flex-wrap: wrap; gap: 2rem;
+    }
+    .ws-hdr-note { max-width: 320px; font-size: .84rem; color: var(--cream-mid); line-height: 1.8; align-self: flex-end; }
+    .ws-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+      gap: 1.5px;
+    }
+    .ws-grid--single {
+      grid-template-columns: minmax(280px, 480px);
+      justify-content: center;
+    }
+
+    /* 3-D tilt card */
+    .wc {
+      background: var(--bg-2); overflow: hidden;
+      position: relative; transform-style: preserve-3d;
+      transition: box-shadow .4s;
+    }
+    .wc::before {
+      content: ''; position: absolute; inset: 0; z-index: 1;
+      background: radial-gradient(ellipse at var(--mx,50%) var(--my,50%), rgba(122,82,48,.1) 0%, transparent 55%);
+      opacity: 0; transition: opacity .3s; pointer-events: none;
+    }
+    .wc:hover::before  { opacity: 1; }
+    .wc:hover { box-shadow: 0 24px 48px rgba(41,27,15,.18); }
+    .wc-img {
+      width: 100%; height: 210px; object-fit: cover;
+      filter: brightness(.82) saturate(.8);
+      transition: filter .5s, transform .6s cubic-bezier(.16,1,.3,1);
+    }
+    .wc:hover .wc-img { filter: brightness(.95) saturate(.92); transform: scale(1.03); }
+    .wc-body { padding: 1.7rem; }
+    .wc-tag { font-size: .6rem; letter-spacing: .2em; text-transform: uppercase; color: var(--terra); margin-bottom: .7rem; }
+    .wc-body h3 { font-size: 1.5rem; margin-bottom: .7rem; }
+    .wc-body p  { font-size: .82rem; color: var(--cream-mid); line-height: 1.7; margin-bottom: 1.5rem; }
+    .wc-foot {
+      display: flex; justify-content: space-between; align-items: center;
+      padding-top: 1.1rem; border-top: 1px solid rgba(122,82,48,.1);
+    }
+    .wc-price { font-family: var(--fd); font-size: 1.5rem; color: var(--bronze); }
+    .wc-dur   { font-size: .7rem; color: var(--cream-mid); }
+    .wc-btn {
+      display: block; width: 100%; margin-top: 1.1rem;
+      padding: .72rem; text-align: center;
+      border: 1px solid rgba(168,76,42,.38); color: var(--terra);
+      font-size: .66rem; letter-spacing: .18em; text-transform: uppercase;
+      font-family: var(--fb); transition: background .3s, color .3s, border-color .3s;
+    }
+    .wc-btn:hover { background: var(--terra); color: var(--on-col); border-color: var(--terra); }
+    .wc--accent {
+      background: linear-gradient(140deg,#d8cbb8 0%,#c8b49c 100%);
+      border: 1px solid rgba(122,82,48,.25);
+    }
+
+    /* ─────────────────────────────────────────────
+       CAFÉ
+    ───────────────────────────────────────────── */
+    #cafe {
+      position: relative; overflow: hidden;
+      padding: var(--pad) clamp(1.5rem,5vw,5rem);
+      display: grid; grid-template-columns: 1.15fr 1fr;
+      gap: clamp(3rem,7vw,8rem); align-items: center;
+    }
+    .cafe-imgs { position: relative; height: 520px; z-index: 1; }
+    .cafe-img-a {
+      position: absolute; top: 0; left: 0; width: 73%; height: 73%;
+      object-fit: cover; filter: brightness(.9) saturate(.9);
+    }
+    .cafe-img-b {
+      position: absolute; bottom: 0; right: 0; width: 52%; height: 58%;
+      object-fit: cover; filter: brightness(.88) saturate(.88);
+      border: 4px solid var(--bg-0);
+    }
+    .cafe-imgs::after {
+      content: ''; position: absolute; top: 15%; left: 25%; width: 45%; height: 45%;
+      background: radial-gradient(ellipse, rgba(122,82,48,.1) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .cafe-content { position: relative; z-index: 1; }
+    .cafe-content h2 { margin: 1rem 0; }
+    .cafe-content > p { color: var(--cream-mid); font-size: .9rem; line-height: 1.9; max-width: 400px; margin-top: 1rem; }
+    .cafe-list { list-style: none; margin-top: 2.2rem; }
+    .cafe-list li {
+      display: flex; align-items: center; gap: 1rem;
+      padding: .75rem 0; border-bottom: 1px solid rgba(41,27,15,.04);
+      font-size: .88rem; color: var(--cream-mid);
+    }
+    .cafe-list li::before {
+      content: ''; display: block; width: 5px; height: 5px;
+      background: var(--bronze); border-radius: 50%; flex-shrink: 0;
+    }
+    .cafe-note { margin-top: 1.6rem; font-size: .75rem; color: var(--cream-faint); letter-spacing: .04em; }
+
+    @media (max-width: 860px) {
+      #cafe { grid-template-columns: 1fr; }
+      .cafe-imgs { height: 340px; }
+    }
+
+    /* ─────────────────────────────────────────────
+       GALLERY
+    ───────────────────────────────────────────── */
+    #gallery { padding: var(--pad) clamp(1.5rem,5vw,5rem); background: var(--bg-1); }
+    .gal-hdr  { margin-bottom: 3rem; }
+    .gal-grid {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 3px;
+    }
+    .gi { overflow: hidden; position: relative; }
+    .gi:nth-child(1) { grid-column: span 5; grid-row: span 2; }
+    .gi:nth-child(2) { grid-column: span 4; }
+    .gi:nth-child(3) { grid-column: span 3; }
+    .gi:nth-child(4) { grid-column: span 4; }
+    .gi:nth-child(5) { grid-column: span 3; }
+    .gi:nth-child(6) { grid-column: span 4; grid-row: span 2; }
+    .gi:nth-child(7) { grid-column: span 4; }
+    .gi:nth-child(8) { grid-column: span 4; }
+
+    .gi img {
+      width: 100%; height: 260px; object-fit: cover;
+      filter: brightness(.76) saturate(.72) contrast(1.04);
+      transition: transform .8s cubic-bezier(.16,1,.3,1), filter .5s;
+    }
+    .gi:nth-child(1) img, .gi:nth-child(6) img { height: 100%; min-height: 390px; }
+    .gi:hover img { transform: scale(1.05); filter: brightness(.92) saturate(.88) contrast(1.04); }
+    .gi::after {
+      content: attr(data-lbl);
+      position: absolute; bottom: 0; left: 0; right: 0;
+      padding: 1.5rem 1rem .7rem;
+      background: linear-gradient(to top, rgba(41,27,15,.7), transparent);
+      font-size: .6rem; letter-spacing: .16em; text-transform: uppercase;
+      color: var(--cream-mid); opacity: 0; transition: opacity .3s;
+    }
+    .gi:hover::after { opacity: 1; }
+
+    @media (max-width: 760px) {
+      .gal-grid { grid-template-columns: 1fr 1fr; gap: 2px; }
+      .gi { grid-column: span 1 !important; grid-row: span 1 !important; }
+      .gi img, .gi:nth-child(1) img, .gi:nth-child(6) img { height: 190px; min-height: unset; }
+    }
+
+    /* ─────────────────────────────────────────────
+       LOCATION
+    ───────────────────────────────────────────── */
+    #location { padding: var(--pad) clamp(1.5rem,5vw,5rem); position: relative; overflow: hidden; }
+    .loc-grid {
+      display: grid; grid-template-columns: 1fr 1.5fr;
+      gap: clamp(3rem,7vw,7rem); align-items: start;
+      position: relative; z-index: 1;
+      direction: ltr;
+    }
+    .loc-info h4 { font-size: .95rem; color: var(--bronze); margin: 2rem 0 .5rem; }
+    .loc-info p, .loc-info address { font-size: .86rem; color: var(--cream-mid); line-height: 1.85; }
+    .hours { width: 100%; border-collapse: collapse; margin-top: .5rem; }
+    .hours tr { border-bottom: 1px solid rgba(41,27,15,.04); }
+    .hours td { padding: .45rem 0; font-size: .82rem; color: var(--cream-mid); }
+    .hours td:last-child { text-align: right; color: var(--cream); }
+    .res-note {
+      margin-top: 2rem; padding: 1.1rem 1.4rem;
+      border-left: 2px solid var(--terra);
+      background: rgba(168,76,42,.06);
+      font-size: .81rem; color: var(--cream-mid); line-height: 1.65;
+    }
+    .res-note a { color: var(--terra); }
+
+    /* Maps wrapper */
+    .map-wrap { position: relative; height: 420px; background: var(--bg-2); }
+    .map-overlay {
+      position: absolute; inset: 0; z-index: 10;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 1.2rem;
+      text-align: center; padding: 2rem;
+    }
+    .map-overlay p { font-size: .84rem; color: var(--cream-mid); max-width: 360px; line-height: 1.65; }
+    .map-overlay.hide { display: none; }
+    #gmap { width: 100%; height: 100%; border: none; display: none;
+      filter: grayscale(70%) sepia(18%) contrast(.88) brightness(.98); }
+    #gmap.show { display: block; }
+
+    @media (max-width: 760px) {
+      .loc-grid { grid-template-columns: 1fr; }
+      .map-wrap  { height: 320px; }
+    }
+
+    /* ─────────────────────────────────────────────
+       BOOKING
+    ───────────────────────────────────────────── */
+    #booking {
+      padding: var(--pad) clamp(1.5rem,5vw,5rem);
+      background: var(--bg-1); position: relative;
+    }
+    #booking::before {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(ellipse at 75% 50%, rgba(168,76,42,.04) 0%, transparent 60%);
+      pointer-events: none;
+    }
+    .bk-grid {
+      display: grid; grid-template-columns: 1fr 1.55fr;
+      gap: clamp(3rem,7vw,8rem); align-items: start;
+    }
+    .bk-info p { font-size: .88rem; color: var(--cream-mid); line-height: 1.85; margin-top: 1rem; }
+    .pay-note {
+      display: flex; align-items: flex-start; gap: 1rem;
+      padding: 1.2rem 1.3rem;
+      background: rgba(122,82,48,.06); border: 1px solid rgba(122,82,48,.14);
+      margin-top: 2rem;
+    }
+    .pay-icon { font-size: 1rem; flex-shrink: 0; margin-top: .15rem; color: var(--bronze); }
+    .pay-note p { font-size: .81rem; color: var(--cream-mid); margin: 0; }
+    .pay-note strong { color: var(--cream); }
+
+    /* Form */
+    .fg { margin-bottom: 1.4rem; }
+    label {
+      display: block; font-size: .66rem; letter-spacing: .2em; text-transform: uppercase;
+      color: var(--cream-mid); margin-bottom: .48rem;
+    }
+    input, select, textarea {
+      width: 100%; background: var(--bg-2);
+      border: 1px solid rgba(41,27,15,.07);
+      color: var(--cream); padding: .82rem 1rem;
+      font-family: var(--fb); font-size: .9rem;
+      outline: none; border-radius: 0; appearance: none;
+      transition: border-color .3s;
+    }
+    input:focus, select:focus, textarea:focus { border-color: rgba(122,82,48,.45); }
+    textarea { resize: vertical; min-height: 100px; }
+    select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='7' fill='none'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%235e4535' stroke-width='1.4'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: right 1rem center; cursor: pointer;
+    }
+    select option { background: var(--bg-2); }
+    .fr { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .sub-btn {
+      width: 100%; padding: .95rem; margin-top: .4rem;
+      background: var(--terra); color: var(--on-col);
+      font-family: var(--fb); font-size: .7rem; font-weight: 500;
+      letter-spacing: .22em; text-transform: uppercase;
+      transition: background .3s;
+    }
+    .sub-btn:hover { background: #9d4830; }
+    .sub-btn:disabled { opacity: .45; cursor: not-allowed; }
+    .form-legal { font-size: .7rem; color: var(--cream-faint); line-height: 1.6; margin-bottom: 1rem; }
+    .form-legal a { color: var(--bronze); }
+
+    /* Confirmation */
+    .conf { display: none; text-align: center; padding: 3.5rem 2rem; }
+    .conf.show { display: block; }
+    .conf-check {
+      width: 58px; height: 58px; border-radius: 50%;
+      border: 1px solid var(--bronze);
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 1.5rem; font-size: 1.3rem; color: var(--bronze);
+    }
+    .conf h3 { font-family: var(--fd); font-size: 2rem; color: var(--bronze); margin-bottom: .8rem; }
+    .conf p  { font-size: .88rem; color: var(--cream-mid); line-height: 1.7; }
+
+    @media (max-width: 760px) {
+      .bk-grid { grid-template-columns: 1fr; }
+      .fr { grid-template-columns: 1fr; }
+    }
+
+    /* ─────────────────────────────────────────────
+       CONTACT
+    ───────────────────────────────────────────── */
+    #contact { padding: var(--pad) clamp(1.5rem,5vw,5rem); position: relative; overflow: hidden; }
+    .ct-grid {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: clamp(3rem,7vw,8rem);
+      position: relative; z-index: 1;
+    }
+    .ct-detail {
+      display: flex; flex-direction: column; gap: .3rem;
+      padding: 1.1rem 0; border-bottom: 1px solid rgba(41,27,15,.05);
+    }
+    .ct-lbl { font-size: .6rem; letter-spacing: .22em; text-transform: uppercase; color: var(--bronze); }
+    .ct-detail a, .ct-detail span { font-size: .9rem; color: var(--cream-mid); transition: color .3s; }
+    .ct-detail a:hover { color: var(--cream); }
+    .soc-wrap { display: flex; gap: .8rem; margin-top: 2rem; flex-wrap: wrap; }
+    .soc-link {
+      padding: .55rem 1.2rem; border: 1px solid rgba(122,82,48,.2);
+      font-size: .62rem; letter-spacing: .15em; text-transform: uppercase;
+      color: var(--cream-mid); transition: border-color .3s, color .3s;
+    }
+    .soc-link:hover { border-color: var(--bronze); color: var(--bronze); }
+
+    @media (max-width: 760px) { .ct-grid { grid-template-columns: 1fr; } }
+
+    /* ─────────────────────────────────────────────
+       FOOTER
+    ───────────────────────────────────────────── */
+    footer {
+      background: var(--bg-0);
+      border-top: 1px solid rgba(122,82,48,.09);
+      padding: 2.8rem clamp(1.5rem,5vw,5rem);
+    }
+    .ft-inner {
+      display: flex; justify-content: space-between;
+      align-items: center; flex-wrap: wrap; gap: 1.5rem;
+    }
+    .ft-logo { display: flex; align-items: center; gap: .45rem; font-family: var(--fs); font-size: 1.5rem; color: var(--logo-green); text-decoration: none; }
+    .ft-logo .logo-mark { width: 1.6rem; height: 1.6rem; }
+    .ft-links { display: flex; gap: 2rem; list-style: none; }
+    .ft-links a { font-size: .7rem; letter-spacing: .1em; text-transform: uppercase; color: var(--cream-faint); transition: color .3s; }
+    .ft-links a:hover { color: var(--cream-mid); }
+    .ft-copy { font-size: .7rem; color: var(--cream-faint); }
+
+    /* ─────────────────────────────────────────────
+       LEGAL MODALS
+    ───────────────────────────────────────────── */
+    .lm {
+      display: none; position: fixed; inset: 0; z-index: 9500;
+      background: rgba(41,27,15,.7); backdrop-filter: blur(6px);
+      overflow-y: auto; padding: 2rem;
+    }
+    .lm.open { display: flex; align-items: flex-start; justify-content: center; }
+    .lm-inner {
+      background: var(--bg-2); max-width: 700px; width: 100%;
+      padding: 3rem; margin: auto; position: relative;
+      border: 1px solid rgba(122,82,48,.1);
+    }
+    .lm-close {
+      position: absolute; top: 1.2rem; right: 1.5rem;
+      font-size: 1.8rem; color: var(--cream-mid); cursor: pointer; line-height: 1;
+    }
+    .lm-inner > h2 { font-size: 2.2rem; margin-bottom: 2rem; }
+    .lm-inner h3 { font-family: var(--fd); font-size: 1.1rem; color: var(--bronze); margin: 1.8rem 0 .5rem; }
+    .lm-inner p, .lm-inner li { font-size: .84rem; color: var(--cream-mid); line-height: 1.8; margin-bottom: .4rem; }
+    .lm-inner ul { padding-left: 1.4rem; margin-bottom: .8rem; }
+    .ph {
+      display: inline-block; padding: .15rem .5rem;
+      background: rgba(122,82,48,.1); border: 1px dashed rgba(122,82,48,.3);
+      color: var(--bronze); font-size: .8rem;
+    }
+
+    /* ─────────────────────────────────────────────
+       COOKIE BANNER
+    ───────────────────────────────────────────── */
+    #cookie {
+      position: fixed; bottom: 1.8rem; left: 1.8rem; right: 1.8rem;
+      max-width: 500px; z-index: 9400;
+      background: var(--bg-3);
+      border: 1px solid rgba(122,82,48,.15);
+      padding: 1.4rem; display: flex; flex-direction: column; gap: .9rem;
+    }
+    #cookie.hide { display: none; }
+    .ck-text { font-size: .77rem; color: var(--cream-mid); line-height: 1.6; }
+    .ck-text a { color: var(--bronze); text-decoration: underline; }
+    .ck-btns { display: flex; gap: .8rem; }
+    .ck-btn {
+      padding: .52rem 1.15rem; font-size: .65rem;
+      letter-spacing: .13em; text-transform: uppercase; font-family: var(--fb);
+    }
+    .ck-yes { background: var(--terra); color: var(--on-col); transition: background .3s; }
+    .ck-yes:hover { background: #9d4830; }
+    .ck-no { border: 1px solid rgba(41,27,15,.25); color: var(--cream-mid); transition: border-color .3s, color .3s; }
+    .ck-no:hover { border-color: rgba(41,27,15,.5); color: var(--cream); }
+  </style>
+</head>
+<body>
+
+
+<!-- ══════════════════════════════════════════
+     COOKIE BANNER
+══════════════════════════════════════════ -->
+<div id="cookie" role="dialog" aria-label="Cookie-Hinweis">
+  <p class="ck-text">
+    Diese Website nutzt Google Maps zur Standortdarstellung. Erst bei Zustimmung werden Daten an Google LLC (USA) übermittelt.
+    Mehr dazu in der <a href="#" onclick="openModal('dse');return false;">Datenschutzerklärung</a>.
+  </p>
+  <div class="ck-btns">
+    <button class="ck-btn ck-yes" onclick="acceptCookies()">Akzeptieren</button>
+    <button class="ck-btn ck-no"  onclick="declineCookies()">Ablehnen</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     NAV
+══════════════════════════════════════════ -->
+<nav id="nav" role="navigation" aria-label="Hauptnavigation">
+  <a href="#hero" class="nav-emblem" aria-label="Zurück zur Startseite"></a>
+  <ul class="nav-links">
+    <li><a href="#about">Konzept</a></li>
+    <li><a href="#ueber-mich">Über mich</a></li>
+    <li><a href="#workshops">Kurs</a></li>
+    <li><a href="#cafe">Café</a></li>
+    <li><a href="#gallery">Galerie</a></li>
+    <li><a href="#location">Standort</a></li>
+    <li><a href="#contact">Kontakt</a></li>
+  </ul>
+  <a class="nav-book" href="#booking">Buchen</a>
+  <button class="ham" id="ham" aria-label="Menü öffnen" aria-expanded="false">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<!-- Mobile menu -->
+<div class="mob-menu" id="mob-menu" role="dialog" aria-label="Mobile Navigation">
+  <a href="#about"       onclick="closeMob()">Konzept</a>
+  <a href="#ueber-mich" onclick="closeMob()">Über mich</a>
+  <a href="#workshops"  onclick="closeMob()">Kurs</a>
+  <a href="#cafe"       onclick="closeMob()">Café</a>
+  <a href="#gallery"    onclick="closeMob()">Galerie</a>
+  <a href="#location"   onclick="closeMob()">Standort</a>
+  <a href="#booking"    onclick="closeMob()">Kurs anfragen</a>
+  <a href="#contact"    onclick="closeMob()">Kontakt</a>
+</div>
+
+<!-- ══════════════════════════════════════════
+     01 — HERO
+══════════════════════════════════════════ -->
+<section id="hero" aria-label="Hero – Tonflüstern">
+  <img src="grafik.png" alt="Tonflüstern Logo">
+</section>
+
+<!-- ══════════════════════════════════════════
+     02 — ÜBER DAS KONZEPT
+══════════════════════════════════════════ -->
+<section id="about" aria-labelledby="about-h">
+  <div class="about-grid">
+
+    <div class="about-sticky">
+      <div class="rv">
+        <span class="sec-num">02 — Konzept</span>
+        <span class="gold-rule"></span>
+      </div>
+      <div class="about-img-wrap rv rv-d1">
+        <!-- BILD ANPASSEN: Eigenes Studio-Foto einfügen -->
+        <img
+          src="https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?w=800&q=80"
+          alt="Töpferin an der Drehscheibe im Tonflüstern Atelier"
+          loading="lazy" width="800" height="600">
+      </div>
+    </div>
+
+    <div class="about-right">
+      <div class="rv">
+        <span class="eyebrow">Über das Konzept</span>
+        <h2 id="about-h" class="dlg" style="margin:1rem 0;">Wo Ton und Kaffee<br><em>aufeinandertreffen</em></h2>
+      </div>
+      <p class="rv rv-d1">
+        <strong style="color:var(--cream)">Tonflüstern</strong> ist kein klassisches Töpferkurs-Studio.
+        Es ist ein Ort der Entschleunigung — ein Raum, in dem du mit den Händen arbeitest und für einige Stunden die Zeit vergisst.
+        Atelier und Café in einem, ohne Kompromisse bei beidem.
+      </p>
+      <blockquote class="rv rv-d2">
+        „Hier entstehen nicht nur Tassen — hier entstehen Momente."
+      </blockquote>
+      <p class="rv rv-d2">
+        Wähle einen Rohling und gib ihm deine ganz persönliche Handschrift —
+        kreativ, entspannt, ohne Vorkenntnisse.
+        Kleine Gruppen, persönliche Betreuung, kein Stress.
+      </p>
+      <div class="badges rv rv-d3">
+        <span class="badge">Alle Levels willkommen</span>
+        <span class="badge">Kleine Gruppen</span>
+        <span class="badge">Kreativ &amp; Entspannt</span>
+      </div>
+      <div class="feat-grid rv rv-d3">
+        <div class="feat">
+          <h4>Handwerk</h4>
+          <p>Echte Keramik-Rohlinge, hochwertige Glasurfarben — keine Massenware, kein Kitsch.</p>
+        </div>
+        <div class="feat">
+          <h4>Atmosphäre</h4>
+          <p>Warmes Licht, Musik, Kaffeeduft — ein Raum, der zum Entspannen einlädt.</p>
+        </div>
+        <div class="feat">
+          <h4>Kreativität</h4>
+          <p>Ob alleine, zu zweit oder mit Freunden — jeder gestaltet sein eigenes Unikat.</p>
+        </div>
+        <div class="feat">
+          <h4>Dein Werk</h4>
+          <p>Was du formst, wird gebrannt — und geht mit dir nach Hause.</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     03 — ÜBER MICH
+══════════════════════════════════════════ -->
+<section id="ueber-mich" aria-labelledby="um-h">
+  <div class="about-grid">
+
+    <div class="about-sticky">
+      <div class="rv">
+        <span class="sec-num">03 — Über mich</span>
+        <span class="gold-rule"></span>
+      </div>
+      <div class="about-img-wrap rv rv-d1">
+        <!-- BILD ANPASSEN: Eigenes Foto einfügen -->
+        <img
+          src="https://images.unsplash.com/photo-1607462109225-6b64ae2dd3cb?w=800&q=80"
+          alt="Inhaberin von Tonflüstern beim Keramik bemalen"
+          loading="lazy" width="800" height="600">
+      </div>
+    </div>
+
+    <div class="about-right">
+      <div class="rv">
+        <span class="eyebrow">Die Person dahinter</span>
+        <h2 id="um-h" class="dlg" style="margin:1rem 0;">Hallo, ich bin<br><em>Tonflüstern</em></h2>
+      </div>
+      <p class="rv rv-d1">
+        Hier kannst du deinen eigenen Text einfügen — wer du bist, wie die Idee zu Tonflüstern entstanden ist und was dich antreibt. Deine Geschichte macht den Unterschied.
+      </p>
+      <p class="rv rv-d2">
+        Was dich begeistert, warum du Keramik liebst, was dir bei deinen Gästen wichtig ist — all das gehört hier hin. Je persönlicher, desto besser.
+      </p>
+      <div class="badges rv rv-d3">
+        <span class="badge">Leidenschaft für Keramik</span>
+        <span class="badge">Kreatives Handwerk</span>
+        <span class="badge">Gastgeberin mit Herz</span>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     04 — WORKSHOPS
+══════════════════════════════════════════ -->
+<section id="workshops" aria-labelledby="ws-h">
+  <div class="ws-hdr rv">
+    <div>
+      <span class="sec-num">04 — Kurs</span>
+      <span class="gold-rule"></span>
+      <h2 id="ws-h" class="dlg">Mein<br><em>Angebot</em></h2>
+    </div>
+    <p class="ws-hdr-note">
+      Alle Materialien sind inklusive. Mitbringen musst du nur Neugier und Kleidung, die schmutzig werden darf.
+    </p>
+  </div>
+
+  <div class="ws-grid">
+    <article class="wc rv" data-ws="bem" aria-label="Keramik bemalen">
+      <img class="wc-img"
+        src="https://images.unsplash.com/photo-1611516491426-03025e6043c8?w=700&q=75"
+        alt="Bemalung von Keramik-Rohlingen mit farbigen Glasuren" loading="lazy">
+      <div class="wc-body">
+        <p class="wc-tag">Kreativ · Entspannt · Für alle</p>
+        <h3>Keramik bemalen</h3>
+        <p>Wähle einen Rohling — eine Tasse, eine Schale oder eine Vase — und gestalte ihn ganz nach deiner Vorstellung. Mit Farbe, Mustern und deiner eigenen Handschrift wird aus einem einfachen Stück etwas Einzigartiges.</p>
+
+        <ul style="list-style:none;padding:0;margin:1.2rem 0;display:flex;flex-direction:column;gap:.55rem;">
+          <li style="font-size:.82rem;color:var(--cream-mid);">✦ &nbsp;Alle Materialien &amp; Farben inklusive</li>
+          <li style="font-size:.82rem;color:var(--cream-mid);">✦ &nbsp;Kein Vorwissen nötig — für Anfänger &amp; Kreative</li>
+          <li style="font-size:.82rem;color:var(--cream-mid);">✦ &nbsp;Ideal für Einzelpersonen, Paare &amp; kleine Gruppen</li>
+          <li style="font-size:.82rem;color:var(--cream-mid);">✦ &nbsp;Dein bemaltes Stück wird gebrannt &amp; geht mit dir nach Hause</li>
+          <li style="font-size:.82rem;color:var(--cream-mid);">✦ &nbsp;Kaffee &amp; Getränke aus unserem Café verfügbar</li>
+        </ul>
+
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;padding-top:1rem;border-top:1px solid rgba(122,82,48,.12);margin-top:.5rem;">
+          <span style="font-family:var(--fd);font-size:1.1rem;color:var(--bronze);">Preis: auf Anfrage</span>
+          <a class="btn-fill" href="#booking">Jetzt anfragen</a>
+        </div>
+      </div>
+    </article>
+
+    <article class="wc rv rv-d1" data-ws="bem2" aria-label="Keramik bemalen 2">
+      <img class="wc-img"
+        src="https://images.unsplash.com/photo-1611516491426-03025e6043c8?w=700&q=75"
+        alt="Töpfern oder Modellieren" loading="lazy">
+      <div class="wc-body">
+        <p class="wc-tag">Kreativ · Entspannt · Für alle</p>
+        <h3>Töpfern oder Modellieren</h3>
+        <p>Töpfere oder modelliere — eine Tasse, eine Schale oder eine Vase — und gestalte ihn ganz nach deiner Vorstellung. später nach dem Brennen kannst Du es mit Farbe, Mustern und deiner eigenen Handschrift bemalen.</p>
+
+        <ul style="list-style:none;padding:0;margin:1.2rem 0;display:flex;flex-direction:column;gap:.55rem;">
+          <li style="font-size:.82rem;color:var(--cream-mid);">✦ &nbsp;Alle Materialien &amp; Farben inklusive</li>
+          <li style="font-size:.82rem;color:var(--cream-mid);">✦ &nbsp;Kein Vorwissen nötig — für Anfänger &amp; Kreative</li>
+          <li style="font-size:.82rem;color:var(--cream-mid);">✦ &nbsp;Ideal für Einzelpersonen, Paare &amp; kleine Gruppen</li>
+          <li style="font-size:.82rem;color:var(--cream-mid);">✦ &nbsp;Dein bemaltes Stück wird gebrannt &amp; geht mit dir nach Hause</li>
+          <li style="font-size:.82rem;color:var(--cream-mid);">✦ &nbsp;Kaffee &amp; Getränke aus unserem Café verfügbar</li>
+        </ul>
+
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;padding-top:1rem;border-top:1px solid rgba(122,82,48,.12);margin-top:.5rem;">
+          <span style="font-family:var(--fd);font-size:1.1rem;color:var(--bronze);">Preis: auf Anfrage</span>
+          <a class="btn-fill" href="#booking">Jetzt anfragen</a>
+        </div>
+      </div>
+    </article>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     04 — CAFÉ
+══════════════════════════════════════════ -->
+<section id="cafe" aria-labelledby="cafe-h">
+
+  <div class="cafe-imgs rv">
+    <!-- BILDER ANPASSEN -->
+    <img class="cafe-img-a"
+      src="https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=800&q=75"
+      alt="Kaffee und handgemachte Keramik-Tasse im Tonflüstern" loading="lazy">
+    <img class="cafe-img-b"
+      src="https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=600&q=75"
+      alt="Espresso in einer handgefertigten Keramiktasse" loading="lazy">
+  </div>
+
+  <div class="cafe-content">
+    <div class="rv">
+      <span class="sec-num">04 — Café</span>
+      <span class="gold-rule"></span>
+      <span class="eyebrow">Creative Café Zone</span>
+      <h2 id="cafe-h" class="dlg">Ton in der Hand,<br>Kaffee <em>daneben</em></h2>
+    </div>
+    <p class="rv rv-d1">
+      Tonflüstern ist kein Restaurant — es ist die entspannte Ergänzung zum Kreativsein.
+      Während du töpferst, kannst du dir Kaffee, Tee oder kleine Snacks holen.
+      Alles frisch, alles mit Bedacht ausgewählt.
+    </p>
+    <ul class="cafe-list rv rv-d2" aria-label="Café-Angebot">
+      <li>Specialty Coffee — Espresso, Flat White, Filter</li>
+      <li>Tees &amp; Kräuterinfusionen</li>
+      <li>Hausgemachte Kuchen &amp; Gebäck</li>
+      <li>Herzhafte Kleinigkeiten &amp; Snacks</li>
+      <li>Wasser &amp; Kaltgetränke</li>
+    </ul>
+    <p class="cafe-note rv rv-d3">Das Café ist ausschließlich für Workshop-Teilnehmende geöffnet.</p>
+  </div>
+
+</section>
+
+<!-- ══════════════════════════════════════════
+     05 — GALERIE
+══════════════════════════════════════════ -->
+<section id="gallery" aria-labelledby="gal-h">
+  <div class="gal-hdr rv">
+    <span class="sec-num">05 — Galerie</span>
+    <span class="gold-rule"></span>
+    <h2 id="gal-h" class="dlg">Das Studio<br>in <em>Bildern</em></h2>
+  </div>
+
+  <!-- ALLE GALERIE-BILDER ANPASSEN: Eigene Studio-Fotos einfügen -->
+  <div class="gal-grid" role="list" aria-label="Studio-Galerie">
+    <div class="gi rv" data-lbl="Die Scheibe" role="listitem">
+      <img src="https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=900&q=75"
+        alt="Töpferscheibe mit frischem Ton" loading="lazy"></div>
+    <div class="gi rv rv-d1" data-lbl="Rohlinge" role="listitem">
+      <img src="https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?w=700&q=75"
+        alt="Frische Ton-Rohlinge auf dem Regal" loading="lazy"></div>
+    <div class="gi rv rv-d2" data-lbl="Detail" role="listitem">
+      <img src="https://images.unsplash.com/photo-1584464491033-06628f3a6b7b?w=600&q=75"
+        alt="Detailansicht handgemachter Keramik" loading="lazy"></div>
+    <div class="gi rv rv-d1" data-lbl="Workshop" role="listitem">
+      <img src="https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=700&q=75"
+        alt="Workshop-Teilnehmerinnen beim gemeinsamen Töpfern" loading="lazy"></div>
+    <div class="gi rv rv-d2" data-lbl="Glasuren" role="listitem">
+      <img src="https://images.unsplash.com/photo-1611516491426-03025e6043c8?w=600&q=75"
+        alt="Farbige Keramik-Glasuren in kleinen Gefäßen" loading="lazy"></div>
+    <div class="gi rv rv-d3" data-lbl="Café Zone" role="listitem">
+      <img src="https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=900&q=75"
+        alt="Gemütlicher Atelier-Bereich im Tonflüstern" loading="lazy"></div>
+    <div class="gi rv rv-d1" data-lbl="Fertige Werke" role="listitem">
+      <img src="https://images.unsplash.com/photo-1606760227091-3dd870d97f1d?w=700&q=75"
+        alt="Fertige Keramik-Arbeiten der Workshop-Teilnehmer" loading="lazy"></div>
+    <div class="gi rv rv-d2" data-lbl="Atelier" role="listitem">
+      <img src="https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=600&q=75"
+        alt="Warme Abend-Atmosphäre im Tonflüstern Atelier" loading="lazy"></div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     06 — STANDORT
+══════════════════════════════════════════ -->
+<section id="location" aria-labelledby="loc-h">
+  <div class="loc-grid">
+
+    <div class="loc-info rv">
+      <span class="sec-num">06 — Standort</span>
+      <span class="gold-rule"></span>
+      <h2 id="loc-h" class="dmd">Finde uns<br><em>in deiner Nähe</em></h2>
+
+      <h4>Adresse</h4>
+      <!-- ADRESSE ANPASSEN -->
+      <address>
+        Tonflüstern<br>
+        Hauptstraße 43<br>
+        64711 Erbach<br>
+        Deutschland
+      </address>
+
+      <h4>Öffnungszeiten</h4>
+      <table class="hours" aria-label="Öffnungszeiten">
+        <tbody>
+          <tr><td>Mittwoch</td><td>10:00 – 14:00 Uhr</td></tr>
+          <tr><td>Donnerstag</td><td>14:00 – 18:00 Uhr</td></tr>
+          <tr><td>Die restlichen Tage</td> <td>Auf Anfrage</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="rv rv-d1">
+      <!-- Google Maps mit DSGVO-Consent -->
+      <div class="map-wrap">
+        <div class="map-overlay" id="map-overlay">
+          <p>Für die Kartenansicht wird Google Maps (Google LLC, USA) verwendet. Erst nach deiner Zustimmung werden Daten übermittelt.</p>
+          <button class="btn-fill" onclick="loadMap()">Karte laden</button>
+        </div>
+        <!--
+          GOOGLE MAPS URL ANPASSEN:
+          1. Öffne Google Maps und navigiere zu deinem Standort
+          2. Klicke auf "Teilen" → "Karte einbetten"
+          3. Kopiere die komplette src-URL aus dem iframe-Code
+          4. Ersetze den data-src-Wert unten durch deine URL
+        -->
+        <iframe id="gmap"
+          src="about:blank"
+          data-src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2579.0!2d8.9957!3d49.6578!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x47bd6b4b5b5b5b5b%3A0x0!2sHauptstra%C3%9Fe+43%2C+64711+Erbach!5e0!3m2!1sde!2sde!4v1"
+          allowfullscreen loading="lazy"
+          referrerpolicy="no-referrer-when-downgrade"
+          title="Standort Tonflüstern auf Google Maps"
+          aria-label="Interaktive Karte – Standort Tonflüstern">
+        </iframe>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     07 — BUCHUNG
+══════════════════════════════════════════ -->
+<section id="booking" aria-labelledby="bk-h">
+  <div class="bk-grid">
+
+    <div class="bk-info rv">
+      <span class="sec-num">07 — Buchung</span>
+      <span class="gold-rule"></span>
+      <h2 id="bk-h" class="dmd">Keramik bemalen<br><em>anfragen</em></h2>
+      <p>Gib deine Kontaktdaten ein — wir melden uns innerhalb von 24 Stunden mit einem Terminvorschlag.</p>
+
+      <div class="pay-note" role="note">
+        <span class="pay-icon" aria-hidden="true">◆</span>
+        <p><strong>Zahlung erfolgt bar vor Ort.</strong>
+      </div>
+    </div>
+
+    <div class="rv rv-d1">
+      <!--
+        FORMSPREE EINRICHTEN:
+        1. Registriere dich kostenlos auf https://formspree.io
+        2. Erstelle ein neues Formular → du erhältst eine ID (z.B. "xyzabcde")
+        3. Ersetze "DEINE_ID" in der action-URL durch deine echte Formspree-ID
+        → Solange "DEINE_ID" enthalten ist, läuft der Demo-Modus (kein echter Versand)
+      -->
+      <form id="bk-form"
+        action="https://formspree.io/f/DEINE_ID"
+        method="POST" novalidate>
+
+        <input type="hidden" name="_subject" value="Neue Anfrage – Keramik bemalen – Tonflüstern">
+        <input type="hidden" name="_language" value="de">
+
+        <div class="fr">
+          <div class="fg">
+            <label for="bk-name">Name *</label>
+            <input type="text" id="bk-name" name="name" required placeholder="Dein Name" autocomplete="name">
+          </div>
+          <div class="fg">
+            <label for="bk-email">E-Mail *</label>
+            <input type="email" id="bk-email" name="email" required placeholder="deine@email.de" autocomplete="email">
+          </div>
+        </div>
+
+        <input type="hidden" name="workshop" value="Keramik bemalen">
+
+        <div class="fr">
+          <div class="fg">
+            <label for="bk-pers">Personenanzahl *</label>
+            <select id="bk-pers" name="personen" required>
+              <option value="">— Anzahl —</option>
+              <option value="1 Person">1 Person</option>
+              <option value="2 Personen">2 Personen</option>
+              <option value="3 Personen">3 Personen</option>
+              <option value="4 Personen">4 Personen</option>
+              <option value="5+ Personen">5+ Personen</option>
+            </select>
+          </div>
+          <div class="fg">
+            <label for="bk-date">Wunschtermin</label>
+            <input type="date" id="bk-date" name="wunschtermin" autocomplete="off">
+          </div>
+        </div>
+
+        <div class="fg">
+          <label for="bk-msg">Nachricht / Fragen</label>
+          <textarea id="bk-msg" name="nachricht" placeholder="Hast du besondere Wünsche oder Fragen?"></textarea>
+        </div>
+
+        <p class="form-legal">
+          Mit dem Absenden stimmst du der Verarbeitung deiner Daten zur Bearbeitung deiner Anfrage zu.
+          Details in der <a href="#" onclick="openModal('dse');return false;">Datenschutzerklärung</a>.
+        </p>
+
+        <button type="submit" class="sub-btn" id="bk-sub">Anfrage senden</button>
+      </form>
+
+      <div class="conf" id="bk-conf" role="alert">
+        <div class="conf-check" aria-hidden="true">✓</div>
+        <h3>Danke!</h3>
+        <p>Deine Anfrage ist bei uns eingegangen.<br>Wir melden uns innerhalb von 24 Stunden. Wir freuen uns auf dich!</p>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     08 — KONTAKT
+══════════════════════════════════════════ -->
+<section id="contact" aria-labelledby="ct-h">
+  <div class="ct-grid">
+
+    <div class="rv">
+      <span class="sec-num">08 — Kontakt</span>
+      <span class="gold-rule"></span>
+      <h2 id="ct-h" class="dmd">Fragen?<br><em>Wir sind da.</em></h2>
+
+      <!-- KONTAKTDATEN ANPASSEN -->
+      <div class="ct-detail">
+        <span class="ct-lbl">E-Mail</span>
+        <a href="mailto:hallo@tonfluestern.de">hallo@tonfluestern.de</a>
+      </div>
+      <div class="ct-detail">
+        <span class="ct-lbl">Telefon</span>
+        <!-- TELEFONNUMMER ANPASSEN -->
+        <a href="tel:+4912345678900">+49 123 456 789 00</a>
+      </div>
+      <div class="ct-detail">
+        <span class="ct-lbl">Adresse</span>
+        <!-- ADRESSE ANPASSEN -->
+        <span>Hauptstraße 43, 64711 Erbach, Deutschland</span>
+      </div>
+
+      <!-- SOCIAL-LINKS ANPASSEN: href durch echte Profil-URLs ersetzen -->
+      <div class="soc-wrap">
+        <a class="soc-link" href="https://www.instagram.com/DEIN_INSTAGRAM_HANDLE"
+           target="_blank" rel="noopener noreferrer" aria-label="Tonflüstern auf Instagram">Instagram</a>
+      </div>
+    </div>
+
+    <div class="rv rv-d1">
+      <!-- FORMSPREE: Gleiche ID wie Buchungsformular oder separate anlegen -->
+      <form id="ct-form"
+        action="https://formspree.io/f/DEINE_ID"
+        method="POST" novalidate>
+
+        <input type="hidden" name="_subject" value="Kontaktanfrage – Tonflüstern">
+
+        <div class="fg">
+          <label for="ct-name">Name *</label>
+          <input type="text" id="ct-name" name="name" required placeholder="Dein Name" autocomplete="name">
+        </div>
+        <div class="fg">
+          <label for="ct-email">E-Mail *</label>
+          <input type="email" id="ct-email" name="email" required placeholder="deine@email.de" autocomplete="email">
+        </div>
+        <div class="fg">
+          <label for="ct-msg">Nachricht *</label>
+          <textarea id="ct-msg" name="nachricht" required placeholder="Wie können wir dir helfen?" style="min-height:130px;"></textarea>
+        </div>
+        <button type="submit" class="sub-btn" id="ct-sub">Nachricht senden</button>
+      </form>
+
+      <div class="conf" id="ct-conf" role="alert">
+        <div class="conf-check" aria-hidden="true">✓</div>
+        <h3>Gesendet!</h3>
+        <p>Deine Nachricht ist angekommen.<br>Wir antworten so schnell wie möglich.</p>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     FOOTER
+══════════════════════════════════════════ -->
+<footer>
+  <div class="ft-inner">
+    <ul class="ft-links">
+      <li><a href="#" onclick="openModal('imp');return false;">Impressum</a></li>
+      <li><a href="#" onclick="openModal('dse');return false;">Datenschutz</a></li>
+    </ul>
+    <!-- JAHR ANPASSEN -->
+    <p class="ft-copy">© 2025 Tonflüstern. Alle Rechte vorbehalten.</p>
+  </div>
+</footer>
+
+<!-- ══════════════════════════════════════════
+     IMPRESSUM MODAL
+══════════════════════════════════════════ -->
+<div class="lm" id="lm-imp" role="dialog" aria-modal="true" aria-label="Impressum">
+  <div class="lm-inner">
+    <button class="lm-close" onclick="closeModal('imp')" aria-label="Schließen">&times;</button>
+    <h2>Impressum</h2>
+
+    <!--
+      ⚠️ PFLICHTINHALT NACH § 5 TMG – VOM INHABER AUSZUFÜLLEN
+      Alle Platzhalter (orange markiert) durch korrekte Angaben ersetzen.
+      Diese Angaben sind in Deutschland gesetzlich vorgeschrieben.
+    -->
+
+    <h3>Angaben gemäß § 5 TMG</h3>
+    <p>
+      <span class="ph">VORNAME NACHNAME / FIRMENNAME</span><br>
+      <span class="ph">STRAßE HAUSNUMMER</span><br>
+      <span class="ph">PLZ ORT</span>
+    </p>
+
+    <h3>Kontakt</h3>
+    <p>
+      Telefon: <span class="ph">+49 XXX XXXXXXXX</span><br>
+      E-Mail: <span class="ph">hallo@tonfluestern.de</span>
+    </p>
+
+    <h3>Umsatzsteuer-ID (falls vorhanden)</h3>
+    <p>Umsatzsteuer-Identifikationsnummer gemäß § 27a UStG:<br>
+      <span class="ph">DE XXXXXXXXX</span></p>
+
+    <h3>Verantwortlich für den Inhalt (§ 55 Abs. 2 RStV)</h3>
+    <p><span class="ph">VORNAME NACHNAME, STRAßE HAUSNUMMER, PLZ ORT</span></p>
+
+    <h3>Haftungsausschluss</h3>
+    <p>Als Diensteanbieter sind wir gemäß § 7 Abs. 1 TMG für eigene Inhalte auf diesen Seiten nach den allgemeinen Gesetzen verantwortlich. Nach §§ 8 bis 10 TMG sind wir als Diensteanbieter jedoch nicht verpflichtet, übermittelte oder gespeicherte fremde Informationen zu überwachen oder nach Umständen zu forschen, die auf eine rechtswidrige Tätigkeit hinweisen.</p>
+
+    <h3>Haftung für Links</h3>
+    <p>Unser Angebot enthält Links zu externen Websites Dritter, auf deren Inhalte wir keinen Einfluss haben. Deshalb können wir für diese fremden Inhalte auch keine Gewähr übernehmen. Für die Inhalte der verlinkten Seiten ist stets der jeweilige Anbieter oder Betreiber der Seiten verantwortlich.</p>
+
+    <h3>Urheberrecht</h3>
+    <p>Die durch die Seitenbetreiber erstellten Inhalte und Werke auf diesen Seiten unterliegen dem deutschen Urheberrecht. Die Vervielfältigung, Bearbeitung, Verbreitung und jede Art der Verwertung außerhalb der Grenzen des Urheberrechtes bedürfen der schriftlichen Zustimmung des jeweiligen Autors bzw. Erstellers.</p>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     DATENSCHUTZ MODAL
+══════════════════════════════════════════ -->
+<div class="lm" id="lm-dse" role="dialog" aria-modal="true" aria-label="Datenschutzerklärung">
+  <div class="lm-inner">
+    <button class="lm-close" onclick="closeModal('dse')" aria-label="Schließen">&times;</button>
+    <h2>Datenschutzerklärung</h2>
+
+    <!--
+      ⚠️ ENTWURF – VOM INHABER ZU PRÜFEN UND ANZUPASSEN
+      Dieser Text ist ein vereinfachter Entwurf. Lasse ihn von einem Rechtsanwalt
+      oder Datenschutzbeauftragten prüfen, bevor die Seite live geht.
+    -->
+
+    <h3>1. Verantwortlicher</h3>
+    <p>
+      <span class="ph">VORNAME NACHNAME / FIRMENNAME</span><br>
+      <span class="ph">STRAßE HAUSNUMMER, PLZ ORT</span><br>
+      E-Mail: <span class="ph">hallo@tonfluestern.de</span>
+    </p>
+
+    <h3>2. Datenerfassung – Kontakt- und Buchungsformulare</h3>
+    <p>Wenn Sie unsere Formulare verwenden, werden Ihre Daten (Name, E-Mail, Nachricht) über den Dienst <strong>Formspree</strong> (Formspree, Inc., USA) übermittelt. Die Übertragung erfolgt verschlüsselt (TLS). Rechtsgrundlage: Art. 6 Abs. 1 lit. b DSGVO (Vertragsanbahnung).</p>
+    <p>Formspree-Datenschutz: <span class="ph">https://formspree.io/legal/privacy-policy</span></p>
+
+    <h3>3. Google Maps</h3>
+    <p>Diese Website nutzt Google Maps (Google LLC, 1600 Amphitheatre Parkway, Mountain View, CA 94043, USA) zur Darstellung von Standortkarten. Google Maps wird <strong>erst nach Ihrer ausdrücklichen Einwilligung</strong> geladen. Ohne Zustimmung werden keine Daten an Google übermittelt. Rechtsgrundlage: Art. 6 Abs. 1 lit. a DSGVO. Ihre Einwilligung können Sie jederzeit widerrufen (Browser-Cookies löschen).</p>
+
+    <h3>4. Cookies</h3>
+    <p>Diese Website setzt ausschließlich einen technisch notwendigen Cookie zur Speicherung Ihrer Cookie-Einwilligung (localStorage). Bei Zustimmung werden Google Maps Cookies gesetzt.</p>
+
+    <h3>5. Hosting</h3>
+    <p>Diese Website wird gehostet bei: <span class="ph">ANBIETER, ADRESSE</span>. Mit dem Betrieb der Website werden technische Zugriffsdaten (IP-Adresse, Zeitstempel, aufgerufene Seiten) im Rahmen des Serverbetriebs protokolliert. Rechtsgrundlage: Art. 6 Abs. 1 lit. f DSGVO.</p>
+
+    <h3>6. Ihre Rechte</h3>
+    <p>Sie haben das Recht auf Auskunft (Art. 15 DSGVO), Berichtigung (Art. 16), Löschung (Art. 17), Einschränkung der Verarbeitung (Art. 18), Datenübertragbarkeit (Art. 20) sowie Widerspruch (Art. 21). Anfragen an: <span class="ph">hallo@tonfluestern.de</span></p>
+    <p>Sie haben außerdem das Recht, sich bei einer Datenschutzaufsichtsbehörde zu beschweren.</p>
+
+    <p style="margin-top:2rem;padding-top:1rem;border-top:1px solid rgba(41,27,15,.06);font-size:.74rem;color:var(--cream-faint);">
+      Stand: <span class="ph">Monat Jahr</span> — Dieser Text ist ein Entwurf und ersetzt keine Rechtsberatung.
+    </p>
+  </div>
+</div>
+
+
+<script>
+/* ────────────────────────────────────────────
+   SCROLL RESTORATION — always start at top
+──────────────────────────────────────────── */
+if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+if (window.location.hash) history.replaceState(null, '', window.location.pathname);
+window.scrollTo(0, 0);
+
+/* ────────────────────────────────────────────
+   LOADER
+──────────────────────────────────────────── */
+window.addEventListener('load', () => {
+  window.scrollTo(0, 0);
+  requestAnimationFrame(() => {
+    document.querySelectorAll('.rv').forEach(el => {
+      const r = el.getBoundingClientRect();
+      if (r.top < window.innerHeight) el.classList.add('on');
+    });
+  });
+});
+
+/* ────────────────────────────────────────────
+   NAV SCROLL
+──────────────────────────────────────────── */
+const nav = document.getElementById('nav');
+window.addEventListener('scroll', () => {
+  nav.classList.toggle('sc', scrollY > 60);
+}, { passive: true });
+
+/* ────────────────────────────────────────────
+   MOBILE MENU
+──────────────────────────────────────────── */
+const ham = document.getElementById('ham');
+const mob = document.getElementById('mob-menu');
+ham.addEventListener('click', () => {
+  const open = mob.classList.toggle('open');
+  ham.classList.toggle('open', open);
+  ham.setAttribute('aria-expanded', open);
+  document.body.style.overflow = open ? 'hidden' : '';
+});
+function closeMob() {
+  mob.classList.remove('open');
+  ham.classList.remove('open');
+  ham.setAttribute('aria-expanded', 'false');
+  document.body.style.overflow = '';
+}
+
+/* ────────────────────────────────────────────
+   SCROLL REVEAL
+──────────────────────────────────────────── */
+const obs = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) { e.target.classList.add('on'); obs.unobserve(e.target); }
+  });
+}, { threshold: 0.08, rootMargin: '0px 0px -50px 0px' });
+
+document.querySelectorAll('.rv').forEach(el => obs.observe(el));
+
+/* ────────────────────────────────────────────
+   3D CARD TILT
+──────────────────────────────────────────── */
+document.querySelectorAll('.wc').forEach(card => {
+  card.addEventListener('mousemove', e => {
+    const r  = card.getBoundingClientRect();
+    const x  = e.clientX - r.left;
+    const y  = e.clientY - r.top;
+    const cx = r.width / 2, cy = r.height / 2;
+    const rY = ((x - cx) / cx) * 6;
+    const rX = -((y - cy) / cy) * 4;
+    card.style.transform = `perspective(1000px) rotateX(${rX}deg) rotateY(${rY}deg)`;
+    card.style.setProperty('--mx', `${(x / r.width) * 100}%`);
+    card.style.setProperty('--my', `${(y / r.height) * 100}%`);
+  });
+  card.addEventListener('mouseleave', () => {
+    card.style.transform = 'perspective(1000px) rotateX(0) rotateY(0)';
+  });
+});
+
+/* ────────────────────────────────────────────
+   COOKIE CONSENT
+──────────────────────────────────────────── */
+const ck = document.getElementById('cookie');
+if (localStorage.getItem('ck')) ck.classList.add('hide');
+
+function acceptCookies() {
+  localStorage.setItem('ck', '1');
+  ck.classList.add('hide');
+  autoLoadMap();
+}
+function declineCookies() {
+  localStorage.setItem('ck', '0');
+  ck.classList.add('hide');
+}
+
+/* ────────────────────────────────────────────
+   GOOGLE MAPS
+──────────────────────────────────────────── */
+function loadMap() {
+  const iframe  = document.getElementById('gmap');
+  const overlay = document.getElementById('map-overlay');
+  iframe.src = iframe.dataset.src;
+  iframe.classList.add('show');
+  overlay.classList.add('hide');
+  acceptCookies();
+}
+function autoLoadMap() {
+  const iframe  = document.getElementById('gmap');
+  const overlay = document.getElementById('map-overlay');
+  if (iframe && overlay && localStorage.getItem('ck') === '1') {
+    iframe.src = iframe.dataset.src;
+    iframe.classList.add('show');
+    overlay.classList.add('hide');
+  }
+}
+if (localStorage.getItem('ck') === '1') autoLoadMap();
+
+/* ────────────────────────────────────────────
+   LEGAL MODALS
+──────────────────────────────────────────── */
+function openModal(which) {
+  document.getElementById('lm-' + which).classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeModal(which) {
+  document.getElementById('lm-' + which).classList.remove('open');
+  document.body.style.overflow = '';
+}
+document.querySelectorAll('.lm').forEach(m => {
+  m.addEventListener('click', e => {
+    if (e.target === m) closeModal(m.id.replace('lm-', ''));
+  });
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    document.querySelectorAll('.lm.open').forEach(m => {
+      m.classList.remove('open');
+    });
+    document.body.style.overflow = '';
+  }
+});
+
+/* ────────────────────────────────────────────
+   BOOKING – pre-select workshop
+──────────────────────────────────────────── */
+const WS_MAP = {
+  anf: 'Anfänger Workshop',
+  bem: 'Keramik bemalen',
+  auf: 'Aufbaukurs / Fortgeschritten',
+  grp: 'Private Events / Gruppen (auf Anfrage)'
+};
+function buchen(key) {
+  const sel = document.getElementById('bk-ws');
+  if (sel && WS_MAP[key]) sel.value = WS_MAP[key];
+  document.getElementById('booking').scrollIntoView({ behavior: 'smooth' });
+}
+
+/* ────────────────────────────────────────────
+   FORM HANDLING (Formspree + demo mode)
+──────────────────────────────────────────── */
+function initForm(formId, confId, btnId) {
+  const form = document.getElementById(formId);
+  const conf = document.getElementById(confId);
+  const btn  = document.getElementById(btnId);
+  if (!form) return;
+
+  form.addEventListener('submit', async e => {
+    e.preventDefault();
+    // Demo mode when placeholder ID is still present
+    if (form.action.includes('DEINE_ID')) {
+      form.style.display = 'none';
+      conf.classList.add('show');
+      return;
+    }
+    btn.disabled = true;
+    btn.textContent = 'Wird gesendet…';
+    try {
+      const res = await fetch(form.action, {
+        method: 'POST',
+        body: new FormData(form),
+        headers: { Accept: 'application/json' }
+      });
+      if (res.ok) {
+        form.style.display = 'none';
+        conf.classList.add('show');
+      } else {
+        btn.disabled = false;
+        btn.textContent = btnId === 'bk-sub' ? 'Anfrage senden' : 'Nachricht senden';
+        alert('Beim Senden ist ein Fehler aufgetreten. Bitte versuche es erneut oder kontaktiere uns direkt per E-Mail.');
+      }
+    } catch {
+      btn.disabled = false;
+      btn.textContent = btnId === 'bk-sub' ? 'Anfrage senden' : 'Nachricht senden';
+      alert('Netzwerkfehler. Bitte überprüfe deine Verbindung.');
+    }
+  });
+}
+
+initForm('bk-form', 'bk-conf', 'bk-sub');
+initForm('ct-form', 'ct-conf', 'ct-sub');
+
+</script>
+
+</body>
+</html>
