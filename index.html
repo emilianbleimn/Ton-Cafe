@@ -167,6 +167,12 @@
     }
     .nav-logo { display: flex; align-items: center; gap: .55rem; }
     .logo-mark { width: 1.9rem; height: 1.9rem; flex-shrink: 0; }
+    .nav-emblem {
+      display: block; width: 42px; height: 42px; flex-shrink: 0;
+      background: url(grafik.png) no-repeat;
+      background-size: 320%;
+      background-position: 50% 4%;
+    }
     .logo-text { font-family: var(--fs); font-size: 1.9rem; color: var(--logo-green); line-height: 1; letter-spacing: -.03em; }
     .nav-links { display: flex; gap: 2.5rem; list-style: none; }
     .nav-links a {
@@ -692,6 +698,7 @@
      NAV
 ══════════════════════════════════════════ -->
 <nav id="nav" role="navigation" aria-label="Hauptnavigation">
+  <a href="#hero" class="nav-emblem" aria-label="Zurück zur Startseite"></a>
   <ul class="nav-links">
     <li><a href="#about">Konzept</a></li>
     <li><a href="#ueber-mich">Über mich</a></li>
