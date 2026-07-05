@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://benzel-kfz.de/sitemap.xml
