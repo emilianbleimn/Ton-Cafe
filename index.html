@@ -174,6 +174,19 @@
     .bk-avail-item strong { display: block; font-family: var(--fd); font-size: 1rem; font-weight: 400; margin-bottom: .15rem; }
     .bk-avail-item span { color: var(--cream-mid); font-size: .8rem; }
 
+    .info-box {
+      display: flex; gap: .9rem; align-items: flex-start;
+      margin-top: 1.6rem; padding: 1rem 1.4rem;
+      background: rgba(122,82,48,.07); border-left: 3px solid var(--bronze);
+      max-width: 480px;
+    }
+    .info-icon { color: var(--bronze); font-size: .7rem; line-height: 1.9; flex-shrink: 0; }
+    .info-box strong {
+      display: block; font-size: .68rem; letter-spacing: .18em; text-transform: uppercase;
+      color: var(--bronze); margin-bottom: .25rem;
+    }
+    .info-box div { font-size: .88rem; color: var(--cream-mid); line-height: 1.7; }
+
     .bk-form-grid {
       display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: start;
     }
@@ -407,6 +420,14 @@
       <p style="margin-top:1.2rem;font-size:.82rem;color:var(--cream-faint);">
         Pro Tag können maximal <strong style="color:var(--bronze);">18 Personen</strong> teilnehmen.
       </p>
+
+      <div class="info-box">
+        <span class="info-icon" aria-hidden="true">◆</span>
+        <div>
+          <strong>Wichtig zu wissen</strong>
+          Aktuell ist nur Barzahlung möglich.
+        </div>
+      </div>
     </div>
 
     <div class="bk-form-grid rv rv-d1">
