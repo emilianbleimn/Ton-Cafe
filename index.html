@@ -193,17 +193,15 @@
 
     #cal-container { }
 
-    /* time slots */
-    #time-slots { margin-top: 1.6rem; }
-    #time-slots.hidden { display: none; }
-    #time-slots p.ts-label { font-size: .68rem; letter-spacing: .18em; text-transform: uppercase; color: var(--bronze); margin-bottom: .8rem; }
-    .ts-grid { display: flex; flex-wrap: wrap; gap: .5rem; }
-    .ts-btn {
-      padding: .5rem 1rem; border: 1px solid rgba(122,82,48,.3);
-      font-size: .8rem; color: var(--cream-mid); background: var(--bg-1);
-      transition: background .2s, border-color .2s, color .2s;
+    /* day info */
+    #day-info {
+      margin-top: 1.6rem; padding: 1.2rem 1.6rem;
+      background: var(--bg-1); border-left: 3px solid var(--terra);
     }
-    .ts-btn:hover, .ts-btn.selected { background: var(--terra); border-color: var(--terra); color: var(--on-col); }
+    #day-info.hidden { display: none; }
+    #day-info p.ts-label { font-size: .68rem; letter-spacing: .18em; text-transform: uppercase; color: var(--bronze); margin-bottom: .5rem; }
+    .day-hours { font-family: var(--fd); font-size: 1.5rem; color: var(--cream); line-height: 1.2; }
+    .day-sub { margin-top: .6rem; font-size: .82rem; color: var(--cream-mid); line-height: 1.65; }
 
     #anfrage-note { margin-top: 1.6rem; padding: 1rem 1.4rem; background: var(--bg-1); border-left: 3px solid var(--cream-faint); font-size: .85rem; color: var(--cream-mid); display: none; }
     #anfrage-note.visible { display: block; }
@@ -358,19 +356,27 @@
       <span class="eyebrow">Termin anfragen</span>
       <span class="gold-rule"></span>
       <h2 id="bk-h" class="dmd">Keramik bemalen<br><em>anfragen</em></h2>
-      <p style="margin-top:.8rem;color:var(--cream-mid);font-size:.9rem;max-width:520px;">
-        Wähle einen Wunschtermin und schicke uns deine Anfrage — wir melden uns innerhalb von 24 Stunden.
+      <p style="margin-top:.8rem;color:var(--cream-mid);font-size:.9rem;max-width:560px;">
+        Der Kurs läuft über den ganzen Tag — du kommst einfach während der Öffnungszeiten vorbei und bleibst so lange du magst.
+        Wähle deinen Wunschtag und schicke mir deine Anfrage; ich melde mich innerhalb von 24 Stunden.
       </p>
       <div class="bk-avail">
         <div class="bk-avail-item">
           <strong>Mittwoch &amp; Donnerstag</strong>
-          <span>10:00 – 14:00 Uhr</span>
+          <span>15:00 – 18:00 Uhr</span>
         </div>
         <div class="bk-avail-item">
-          <strong>Alle anderen Tage</strong>
+          <strong>Freitag</strong>
+          <span>15:00 – 20:00 Uhr</span>
+        </div>
+        <div class="bk-avail-item">
+          <strong>Samstag &amp; Sonntag</strong>
           <span>Auf Anfrage</span>
         </div>
       </div>
+      <p style="margin-top:1.2rem;font-size:.82rem;color:var(--cream-faint);">
+        Pro Tag können maximal <strong style="color:var(--bronze);">18 Personen</strong> teilnehmen.
+      </p>
     </div>
 
     <div class="bk-form-grid rv rv-d1">
@@ -381,20 +387,15 @@
         <div id="cal-container"></div>
         <input type="hidden" id="bk-date-val" name="wunschtermin">
 
-        <div id="time-slots" class="hidden">
-          <p class="ts-label">Uhrzeit wählen</p>
-          <div class="ts-grid">
-            <button type="button" class="ts-btn" data-time="10:00">10:00</button>
-            <button type="button" class="ts-btn" data-time="11:00">11:00</button>
-            <button type="button" class="ts-btn" data-time="12:00">12:00</button>
-            <button type="button" class="ts-btn" data-time="13:00">13:00</button>
-            <button type="button" class="ts-btn" data-time="14:00">14:00</button>
-          </div>
-          <input type="hidden" id="bk-time-val" name="uhrzeit">
+        <div id="day-info" class="hidden">
+          <p class="ts-label">Öffnungszeiten an diesem Tag</p>
+          <p class="day-hours" id="day-hours">—</p>
+          <p class="day-sub">Der Kurs läuft über die gesamte Öffnungszeit. Komm einfach vorbei wann es dir passt.</p>
         </div>
 
         <div id="anfrage-note">
-          Für diesen Tag gilt: <strong>Auf Anfrage</strong> — schreib uns einfach deinen Wunsch in die Nachricht.
+          Samstag und Sonntag sind <strong>auf Anfrage</strong> — schreib mir einfach deinen Wunsch in die Nachricht,
+          ich versuche alles möglich zu machen.
         </div>
       </div>
 
@@ -427,15 +428,9 @@
                 <input type="tel" id="bk-phone" name="telefon" placeholder="+49 …" autocomplete="tel">
               </div>
               <div class="fg">
-                <label for="bk-pers">Personenanzahl *</label>
-                <select id="bk-pers" name="personen" required>
-                  <option value="">— Anzahl —</option>
-                  <option>1 Person</option>
-                  <option>2 Personen</option>
-                  <option>3 Personen</option>
-                  <option>4 Personen</option>
-                  <option>5+ Personen</option>
-                </select>
+                <label for="bk-pers">Personenanzahl * <span style="text-transform:none;letter-spacing:0;color:var(--cream-faint);">(max. 18)</span></label>
+                <input type="number" id="bk-pers" name="personen" required
+                       min="1" max="18" step="1" value="1" placeholder="1">
               </div>
             </div>
             <div class="fg">
@@ -567,12 +562,20 @@ const obs = new IntersectionObserver(entries => {
 document.querySelectorAll('.rv').forEach(el => obs.observe(el));
 
 /* ── CALENDAR ── */
-// Wed = 3, Thu = 4 (0=Sun, 1=Mon, 2=Tue, 3=Wed, 4=Thu, 5=Fri, 6=Sat)
-const AVAILABLE_DAYS = [3, 4];
-const timeSlotWrap  = document.getElementById('time-slots');
-const anfNote       = document.getElementById('anfrage-note');
-const fDate         = document.getElementById('f-date');
-const fTime         = document.getElementById('f-time');
+// Wochentage: 0=So, 1=Mo, 2=Di, 3=Mi, 4=Do, 5=Fr, 6=Sa
+const OPEN_HOURS = {
+  3: '15:00 – 18:00 Uhr',   // Mittwoch
+  4: '15:00 – 18:00 Uhr',   // Donnerstag
+  5: '15:00 – 20:00 Uhr'    // Freitag
+};
+const REQUEST_DAYS = [6, 0];            // Samstag, Sonntag – auf Anfrage
+const CLOSED_DAYS  = [1, 2];            // Montag, Dienstag – geschlossen
+
+const dayInfo  = document.getElementById('day-info');
+const dayHours = document.getElementById('day-hours');
+const anfNote  = document.getElementById('anfrage-note');
+const fDate    = document.getElementById('f-date');
+const fTime    = document.getElementById('f-time');
 
 flatpickr.localize(flatpickr.l10ns.de);
 flatpickr('#cal-container', {
@@ -580,38 +583,30 @@ flatpickr('#cal-container', {
   minDate: 'today',
   locale: 'de',
   disable: [
-    date => !AVAILABLE_DAYS.includes(date.getDay())
+    date => CLOSED_DAYS.includes(date.getDay())
   ],
   onDayCreate(dObj, dStr, fp, dayElem) {
-    if (!AVAILABLE_DAYS.includes(dayElem.dateObj.getDay())) {
-      dayElem.title = 'Auf Anfrage';
-    }
+    const d = dayElem.dateObj.getDay();
+    if (OPEN_HOURS[d])              dayElem.title = OPEN_HOURS[d];
+    else if (REQUEST_DAYS.includes(d)) dayElem.title = 'Auf Anfrage';
+    else                            dayElem.title = 'Geschlossen';
   },
   onChange(selectedDates, dateStr) {
     if (!selectedDates.length) return;
     const d = selectedDates[0].getDay();
     fDate.value = dateStr;
 
-    if (AVAILABLE_DAYS.includes(d)) {
-      timeSlotWrap.classList.remove('hidden');
+    if (OPEN_HOURS[d]) {
+      dayHours.textContent = OPEN_HOURS[d];
+      fTime.value = OPEN_HOURS[d];
+      dayInfo.classList.remove('hidden');
       anfNote.classList.remove('visible');
     } else {
-      timeSlotWrap.classList.add('hidden');
+      fTime.value = 'Auf Anfrage';
+      dayInfo.classList.add('hidden');
       anfNote.classList.add('visible');
     }
-    // reset time
-    document.querySelectorAll('.ts-btn').forEach(b => b.classList.remove('selected'));
-    fTime.value = '';
   }
-});
-
-/* ── TIME SLOTS ── */
-document.querySelectorAll('.ts-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.ts-btn').forEach(b => b.classList.remove('selected'));
-    btn.classList.add('selected');
-    fTime.value = btn.dataset.time;
-  });
 });
 
 /* ── FORM SUBMIT ── */
