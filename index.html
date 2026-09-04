@@ -201,7 +201,37 @@
     #day-info.hidden { display: none; }
     #day-info p.ts-label { font-size: .68rem; letter-spacing: .18em; text-transform: uppercase; color: var(--bronze); margin-bottom: .5rem; }
     .day-hours { font-family: var(--fd); font-size: 1.5rem; color: var(--cream); line-height: 1.2; }
+    .day-seats { margin-top: .35rem; font-size: .82rem; font-weight: 700; color: var(--bronze); letter-spacing: .02em; }
+    .day-seats.seats-low { color: var(--terra); }
     .day-sub { margin-top: .6rem; font-size: .82rem; color: var(--cream-mid); line-height: 1.65; }
+
+    /* ausgebucht */
+    #full-note {
+      margin-top: 1.6rem; padding: 1rem 1.4rem;
+      background: rgba(168,76,42,.08); border-left: 3px solid var(--terra);
+      font-size: .85rem; color: var(--cream-mid); line-height: 1.7; display: none;
+    }
+    #full-note.visible { display: block; }
+    #full-note strong { display: block; color: var(--terra); margin-bottom: .2rem; }
+
+    /* Kalender-Marker */
+    .flatpickr-day.day-full { text-decoration: line-through; }
+    .flatpickr-day.day-limited { position: relative; font-weight: 700; }
+    .flatpickr-day.day-limited::after {
+      content: ''; position: absolute; bottom: 4px; left: 50%; transform: translateX(-50%);
+      width: 4px; height: 4px; border-radius: 50%; background: var(--terra);
+    }
+    .flatpickr-day.selected.day-limited::after { background: var(--on-col); }
+
+    .cal-legend {
+      display: flex; flex-wrap: wrap; gap: 1.1rem;
+      margin-top: 1rem; font-size: .72rem; color: var(--cream-faint);
+    }
+    .cal-legend span { display: inline-flex; align-items: center; gap: .4rem; }
+    .lg-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+    .lg-free    { background: var(--bronze); opacity: .55; }
+    .lg-limited { background: var(--terra); }
+    .lg-full    { background: rgba(122,82,48,.28); }
 
     #anfrage-note { margin-top: 1.6rem; padding: 1rem 1.4rem; background: var(--bg-1); border-left: 3px solid var(--cream-faint); font-size: .85rem; color: var(--cream-mid); display: none; }
     #anfrage-note.visible { display: block; }
@@ -390,6 +420,7 @@
         <div id="day-info" class="hidden">
           <p class="ts-label">Öffnungszeiten an diesem Tag</p>
           <p class="day-hours" id="day-hours">—</p>
+          <p class="day-seats" id="day-seats"></p>
           <p class="day-sub">Der Kurs läuft über die gesamte Öffnungszeit. Komm einfach vorbei wann es dir passt.</p>
         </div>
 
@@ -397,6 +428,17 @@
           Samstag und Sonntag sind <strong>auf Anfrage</strong> — schreib mir einfach deinen Wunsch in die Nachricht,
           ich versuche alles möglich zu machen.
         </div>
+
+        <div id="full-note">
+          <strong>Dieser Tag ist leider ausgebucht.</strong>
+          Bitte wähle einen anderen Tag — oder schreib mir trotzdem, manchmal wird noch etwas frei.
+        </div>
+
+        <p class="cal-legend">
+          <span><i class="lg-dot lg-free"></i> frei</span>
+          <span><i class="lg-dot lg-limited"></i> wenige Plätze</span>
+          <span><i class="lg-dot lg-full"></i> ausgebucht / geschlossen</span>
+        </p>
       </div>
 
       <!-- Formularfelder -->
@@ -408,8 +450,9 @@
           <input type="hidden" name="_subject" value="Neue Terminanfrage – Keramik bemalen – Tonflüstern">
           <input type="hidden" name="_language" value="de">
           <input type="hidden" name="workshop" value="Keramik bemalen">
-          <input type="hidden" id="f-date" name="wunschtermin" value="">
-          <input type="hidden" id="f-time" name="uhrzeit" value="">
+          <input type="hidden" id="f-date"  name="wunschtermin" value="">
+          <input type="hidden" id="f-time"  name="uhrzeit" value="">
+          <input type="hidden" id="f-seats" name="plaetze_zum_zeitpunkt_der_anfrage" value="">
 
           <div class="bk-fields">
             <div class="fr">
@@ -561,7 +604,25 @@ const obs = new IntersectionObserver(entries => {
 }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
 document.querySelectorAll('.rv').forEach(el => obs.observe(el));
 
-/* ── CALENDAR ── */
+/* ══════════════════════════════════════════════════════════
+   BELEGUNG — HIER TRÄGST DU EIN, WIE VIELE PLÄTZE VERGEBEN SIND
+   ══════════════════════════════════════════════════════════
+   Format:  'JJJJ-MM-TT': AnzahlBereitsGebuchterPersonen
+
+   Beispiel:
+     '2026-09-09': 18,   -> Tag ist ausgebucht, im Kalender gesperrt
+     '2026-09-10': 12,   -> es sind noch 6 von 18 Plätzen frei
+
+   Einfach Zeilen ergänzen oder die Zahl ändern, sobald eine
+   Anfrage von dir bestätigt wurde. Vergangene Tage darfst du
+   löschen, sie werden ohnehin nicht mehr angezeigt.
+══════════════════════════════════════════════════════════ */
+const BOOKED = {
+  // '2026-09-09': 18,
+  // '2026-09-10': 12,
+};
+const MAX_PER_DAY = 18;
+
 // Wochentage: 0=So, 1=Mo, 2=Di, 3=Mi, 4=Do, 5=Fr, 6=Sa
 const OPEN_HOURS = {
   3: '15:00 – 18:00 Uhr',   // Mittwoch
@@ -573,9 +634,23 @@ const CLOSED_DAYS  = [1, 2];            // Montag, Dienstag – geschlossen
 
 const dayInfo  = document.getElementById('day-info');
 const dayHours = document.getElementById('day-hours');
+const daySeats = document.getElementById('day-seats');
 const anfNote  = document.getElementById('anfrage-note');
+const fullNote = document.getElementById('full-note');
 const fDate    = document.getElementById('f-date');
 const fTime    = document.getElementById('f-time');
+const fSeats   = document.getElementById('f-seats');
+const persIn   = document.getElementById('bk-pers');
+
+/* Datum -> 'JJJJ-MM-TT' */
+const dkey = d =>
+  `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+
+/* Freie Plätze an einem Tag */
+const freeSeats = d => MAX_PER_DAY - (BOOKED[dkey(d)] || 0);
+
+/* Ist der Tag ausgebucht? (nur an regulären Öffnungstagen relevant) */
+const isFull = d => OPEN_HOURS[d.getDay()] && freeSeats(d) <= 0;
 
 flatpickr.localize(flatpickr.l10ns.de);
 flatpickr('#cal-container', {
@@ -583,27 +658,65 @@ flatpickr('#cal-container', {
   minDate: 'today',
   locale: 'de',
   disable: [
-    date => CLOSED_DAYS.includes(date.getDay())
+    date => CLOSED_DAYS.includes(date.getDay()) || isFull(date)
   ],
   onDayCreate(dObj, dStr, fp, dayElem) {
-    const d = dayElem.dateObj.getDay();
-    if (OPEN_HOURS[d])              dayElem.title = OPEN_HOURS[d];
-    else if (REQUEST_DAYS.includes(d)) dayElem.title = 'Auf Anfrage';
-    else                            dayElem.title = 'Geschlossen';
+    const date = dayElem.dateObj;
+    const d    = date.getDay();
+
+    if (CLOSED_DAYS.includes(d)) {
+      dayElem.title = 'Geschlossen';
+    } else if (REQUEST_DAYS.includes(d)) {
+      dayElem.title = 'Auf Anfrage';
+    } else if (isFull(date)) {
+      dayElem.title = 'Ausgebucht';
+      dayElem.classList.add('day-full');
+    } else {
+      const free = freeSeats(date);
+      dayElem.title = `${OPEN_HOURS[d]} · noch ${free} ${free === 1 ? 'Platz' : 'Plätze'} frei`;
+      if (free < MAX_PER_DAY) dayElem.classList.add('day-limited');
+    }
   },
   onChange(selectedDates, dateStr) {
     if (!selectedDates.length) return;
-    const d = selectedDates[0].getDay();
+    const date = selectedDates[0];
+    const d    = date.getDay();
     fDate.value = dateStr;
 
+    dayInfo.classList.add('hidden');
+    anfNote.classList.remove('visible');
+    fullNote.classList.remove('visible');
+
     if (OPEN_HOURS[d]) {
+      const free = freeSeats(date);
+
+      if (free <= 0) {                      // Sicherheitsnetz
+        fullNote.classList.add('visible');
+        fTime.value = '';
+        fSeats.value = '';
+        return;
+      }
+
       dayHours.textContent = OPEN_HOURS[d];
-      fTime.value = OPEN_HOURS[d];
+      daySeats.textContent =
+        free === MAX_PER_DAY
+          ? `${MAX_PER_DAY} Plätze frei`
+          : `Noch ${free} von ${MAX_PER_DAY} ${free === 1 ? 'Platz' : 'Plätzen'} frei`;
+      daySeats.classList.toggle('seats-low', free <= 5);
+
+      fTime.value  = OPEN_HOURS[d];
+      fSeats.value = `${free} von ${MAX_PER_DAY} frei`;
+
+      // Personenanzahl auf die freien Plätze begrenzen
+      persIn.max = free;
+      if (Number(persIn.value) > free) persIn.value = free;
+
       dayInfo.classList.remove('hidden');
-      anfNote.classList.remove('visible');
-    } else {
-      fTime.value = 'Auf Anfrage';
-      dayInfo.classList.add('hidden');
+
+    } else {                                 // Samstag / Sonntag
+      fTime.value  = 'Auf Anfrage';
+      fSeats.value = '';
+      persIn.max   = MAX_PER_DAY;
       anfNote.classList.add('visible');
     }
   }
@@ -616,6 +729,18 @@ const bkSub  = document.getElementById('bk-sub');
 
 bkForm.addEventListener('submit', async e => {
   e.preventDefault();
+
+  // Plätze prüfen
+  const wunsch = Number(persIn.value);
+  const limit  = Number(persIn.max) || MAX_PER_DAY;
+  if (wunsch < 1 || wunsch > limit) {
+    alert(limit < MAX_PER_DAY
+      ? `An diesem Tag sind nur noch ${limit} ${limit === 1 ? 'Platz' : 'Plätze'} frei.`
+      : `Es können maximal ${MAX_PER_DAY} Personen pro Tag teilnehmen.`);
+    persIn.focus();
+    return;
+  }
+
   bkSub.disabled = true;
   bkSub.textContent = 'Wird gesendet …';
   try {
