@@ -468,16 +468,16 @@
 
       <!-- Formularfelder -->
       <div>
-        <form id="bk-form"
-          action="https://formspree.io/f/xrpzldnq"
-          method="POST" novalidate>
+        <form id="bk-form" action="buchung.php" method="POST" novalidate>
 
-          <input type="hidden" name="_subject" value="Neue Terminanfrage – Keramik bemalen – Tonflüstern">
-          <input type="hidden" name="_language" value="de">
-          <input type="hidden" name="workshop" value="Keramik bemalen">
           <input type="hidden" id="f-date"  name="wunschtermin" value="">
           <input type="hidden" id="f-time"  name="uhrzeit" value="">
-          <input type="hidden" id="f-seats" name="plaetze_zum_zeitpunkt_der_anfrage" value="">
+          <input type="hidden" id="f-seats" name="plaetze_frei" value="">
+
+          <!-- Spamschutz: für Menschen unsichtbar, Bots füllen es aus -->
+          <div style="position:absolute;left:-9999px;" aria-hidden="true">
+            <label>Website<input type="text" name="website" tabindex="-1" autocomplete="off"></label>
+          </div>
 
           <div class="bk-fields">
             <div class="fr">
@@ -632,28 +632,12 @@ document.querySelectorAll('.rv').forEach(el => obs.observe(el));
 /* ══════════════════════════════════════════════════════════
    BELEGUNG
    ══════════════════════════════════════════════════════════
-   Die belegten Plätze stehen in der Datei  belegung.txt
-   Diese Datei bearbeitest du — hier im Code musst du nichts
-   ändern. Schreibweise dort:   2026-09-09 = 18
+   Kommt live vom Server (belegung.php). Sobald jemand eine
+   Anfrage abschickt, zählt der Server die Plätze hoch — die
+   Website muss dafür nicht angefasst werden.
 ══════════════════════════════════════════════════════════ */
 let BOOKED = {};
 const MAX_PER_DAY = 18;
-
-/* Belegungsdatei einlesen — fehlertolerant:
-   kaputte oder fehlende Zeilen werden übersprungen,
-   die Seite funktioniert in jedem Fall weiter.        */
-function parseBelegung(text) {
-  const out = {};
-  text.split(/\r?\n/).forEach(line => {
-    line = line.trim();
-    if (!line || line.startsWith('#')) return;
-    const m = line.match(/^(\d{4})-(\d{1,2})-(\d{1,2})\s*[=:]\s*(\d{1,3})/);
-    if (!m) return;
-    const key = `${m[1]}-${m[2].padStart(2, '0')}-${m[3].padStart(2, '0')}`;
-    out[key] = Math.max(0, Math.min(Number(m[4]), MAX_PER_DAY));
-  });
-  return out;
-}
 
 // Wochentage: 0=So, 1=Mo, 2=Di, 3=Mi, 4=Do, 5=Fr, 6=Sa
 const OPEN_HOURS = {
@@ -687,7 +671,8 @@ const isFull = d => OPEN_HOURS[d.getDay()] && freeSeats(d) <= 0;
 flatpickr.localize(flatpickr.l10ns.de);
 
 function initKalender() {
-flatpickr('#cal-container', {
+if (kalenderInstanz) kalenderInstanz.destroy();
+kalenderInstanz = flatpickr('#cal-container', {
   inline: true,
   minDate: 'today',
   locale: 'de',
@@ -757,14 +742,22 @@ flatpickr('#cal-container', {
 });
 }
 
-/* Belegung laden, dann Kalender starten.
-   Schlägt das Laden fehl, startet der Kalender trotzdem —
-   dann sind alle Tage als frei sichtbar.                  */
-fetch('belegung.txt?v=' + Date.now(), { cache: 'no-store' })
-  .then(r => r.ok ? r.text() : '')
-  .then(t => { BOOKED = parseBelegung(t); })
-  .catch(() => { /* Datei fehlt oder nicht erreichbar */ })
-  .finally(() => initKalender());
+/* Aktuelle Belegung vom Server holen.
+   Ist der Server nicht erreichbar, startet der Kalender
+   trotzdem — dann sind alle Tage als frei sichtbar und
+   der Server weist eine Überbuchung beim Absenden ab.    */
+let kalenderInstanz = null;
+
+function belegungLaden() {
+  return fetch('belegung.php?v=' + Date.now(), { cache: 'no-store' })
+    .then(r => r.ok ? r.json() : null)
+    .then(j => {
+      if (j && j.belegt) BOOKED = j.belegt;
+    })
+    .catch(() => { /* offline oder Server-Problem */ });
+}
+
+belegungLaden().finally(() => initKalender());
 
 /* ── FORM SUBMIT ── */
 const bkForm = document.getElementById('bk-form');
@@ -785,25 +778,51 @@ bkForm.addEventListener('submit', async e => {
     return;
   }
 
+  if (!fDate.value) {
+    alert('Bitte wähle zuerst einen Termin im Kalender.');
+    return;
+  }
+
   bkSub.disabled = true;
   bkSub.textContent = 'Wird gesendet …';
+
+  const zuruecksetzen = () => {
+    bkSub.disabled = false;
+    bkSub.textContent = 'Anfrage senden';
+  };
+
   try {
     const res = await fetch(bkForm.action, {
       method: 'POST',
       body: new FormData(bkForm),
       headers: { Accept: 'application/json' }
     });
-    if (res.ok) {
+
+    let j = null;
+    try { j = await res.json(); } catch { /* keine JSON-Antwort */ }
+
+    if (res.ok && j && j.ok) {
       bkForm.style.display = 'none';
       bkConf.classList.add('show');
-    } else {
-      bkSub.disabled = false;
-      bkSub.textContent = 'Anfrage senden';
-      alert('Etwas ist schiefgelaufen. Bitte versuche es nochmal oder schreibe uns direkt eine E-Mail.');
+      bkConf.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
     }
+
+    // Tag wurde zwischenzeitlich voll -> Kalender neu laden
+    zuruecksetzen();
+    alert((j && j.fehler)
+      ? j.fehler
+      : 'Etwas ist schiefgelaufen. Bitte versuche es nochmal oder schreib mir direkt eine E-Mail.');
+
+    if (res.status === 409) {
+      await belegungLaden();
+      initKalender();
+      dayInfo.classList.add('hidden');
+      fDate.value = '';
+    }
+
   } catch {
-    bkSub.disabled = false;
-    bkSub.textContent = 'Anfrage senden';
+    zuruecksetzen();
     alert('Keine Verbindung. Bitte prüfe dein Internet und versuche es nochmal.');
   }
 });
