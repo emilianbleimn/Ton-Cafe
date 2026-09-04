@@ -1,0 +1,24 @@
+# ════════════════════════════════════════════════════════
+#  BELEGUNG — TONFLÜSTERN
+# ════════════════════════════════════════════════════════
+#
+#  Hier trägst du ein, wie viele Plätze an einem Tag schon
+#  vergeben sind. Pro Tag gibt es 18 Plätze.
+#
+#  Schreibweise:   JAHR-MONAT-TAG = ANZAHL
+#
+#  Beispiele:
+#    2026-09-09 = 18     ->  Tag ist voll, wird gesperrt
+#    2026-09-10 = 12     ->  noch 6 Plätze frei
+#    2026-09-11 = 3      ->  noch 15 Plätze frei
+#
+#  Zeilen die mit # beginnen sind Notizen und werden
+#  ignoriert. Vergangene Tage kannst du einfach löschen.
+#
+#  Nach dem Speichern ist die Änderung sofort auf der
+#  Website sichtbar — einmal neu laden genügt.
+#
+# ════════════════════════════════════════════════════════
+#  DEINE EINTRÄGE (ab hier):
+# ════════════════════════════════════════════════════════
+

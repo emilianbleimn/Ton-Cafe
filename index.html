@@ -630,23 +630,30 @@ const obs = new IntersectionObserver(entries => {
 document.querySelectorAll('.rv').forEach(el => obs.observe(el));
 
 /* ══════════════════════════════════════════════════════════
-   BELEGUNG — HIER TRÄGST DU EIN, WIE VIELE PLÄTZE VERGEBEN SIND
+   BELEGUNG
    ══════════════════════════════════════════════════════════
-   Format:  'JJJJ-MM-TT': AnzahlBereitsGebuchterPersonen
-
-   Beispiel:
-     '2026-09-09': 18,   -> Tag ist ausgebucht, im Kalender gesperrt
-     '2026-09-10': 12,   -> es sind noch 6 von 18 Plätzen frei
-
-   Einfach Zeilen ergänzen oder die Zahl ändern, sobald eine
-   Anfrage von dir bestätigt wurde. Vergangene Tage darfst du
-   löschen, sie werden ohnehin nicht mehr angezeigt.
+   Die belegten Plätze stehen in der Datei  belegung.txt
+   Diese Datei bearbeitest du — hier im Code musst du nichts
+   ändern. Schreibweise dort:   2026-09-09 = 18
 ══════════════════════════════════════════════════════════ */
-const BOOKED = {
-  // '2026-09-09': 18,
-  // '2026-09-10': 12,
-};
+let BOOKED = {};
 const MAX_PER_DAY = 18;
+
+/* Belegungsdatei einlesen — fehlertolerant:
+   kaputte oder fehlende Zeilen werden übersprungen,
+   die Seite funktioniert in jedem Fall weiter.        */
+function parseBelegung(text) {
+  const out = {};
+  text.split(/\r?\n/).forEach(line => {
+    line = line.trim();
+    if (!line || line.startsWith('#')) return;
+    const m = line.match(/^(\d{4})-(\d{1,2})-(\d{1,2})\s*[=:]\s*(\d{1,3})/);
+    if (!m) return;
+    const key = `${m[1]}-${m[2].padStart(2, '0')}-${m[3].padStart(2, '0')}`;
+    out[key] = Math.max(0, Math.min(Number(m[4]), MAX_PER_DAY));
+  });
+  return out;
+}
 
 // Wochentage: 0=So, 1=Mo, 2=Di, 3=Mi, 4=Do, 5=Fr, 6=Sa
 const OPEN_HOURS = {
@@ -678,6 +685,8 @@ const freeSeats = d => MAX_PER_DAY - (BOOKED[dkey(d)] || 0);
 const isFull = d => OPEN_HOURS[d.getDay()] && freeSeats(d) <= 0;
 
 flatpickr.localize(flatpickr.l10ns.de);
+
+function initKalender() {
 flatpickr('#cal-container', {
   inline: true,
   minDate: 'today',
@@ -746,6 +755,16 @@ flatpickr('#cal-container', {
     }
   }
 });
+}
+
+/* Belegung laden, dann Kalender starten.
+   Schlägt das Laden fehl, startet der Kalender trotzdem —
+   dann sind alle Tage als frei sichtbar.                  */
+fetch('belegung.txt?v=' + Date.now(), { cache: 'no-store' })
+  .then(r => r.ok ? r.text() : '')
+  .then(t => { BOOKED = parseBelegung(t); })
+  .catch(() => { /* Datei fehlt oder nicht erreichbar */ })
+  .finally(() => initKalender());
 
 /* ── FORM SUBMIT ── */
 const bkForm = document.getElementById('bk-form');
