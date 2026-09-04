@@ -134,28 +134,26 @@
       padding: clamp(5rem,10vw,9rem) clamp(1.5rem,5vw,5rem);
       background: var(--bg-1);
     }
-    .intro-grid {
-      display: grid; grid-template-columns: 1fr 1.5fr; gap: clamp(3rem,6vw,7rem); align-items: start;
-      max-width: 1200px; margin: 0 auto;
+    .intro-inner {
+      max-width: 820px; margin: 0 auto;
     }
-    .intro-label { position: sticky; top: 7rem; }
-    .intro-label .dlg { margin-top: 1rem; }
-    .intro-body p { font-size: .95rem; color: var(--cream-mid); line-height: 1.9; max-width: 540px; margin-bottom: 1.4rem; }
+    .intro-inner .eyebrow { margin-bottom: .6rem; }
+    .intro-inner .dlg { margin: .8rem 0 2rem; }
+    .intro-inner p { font-size: .95rem; color: var(--cream-mid); line-height: 1.95; margin-bottom: 1.4rem; }
+    .intro-inner strong { color: var(--cream); }
     blockquote {
       font-family: var(--fd); font-size: clamp(1.2rem,2.4vw,1.8rem); font-style: italic;
       color: var(--cream); line-height: 1.5;
       padding-left: 1.6rem; border-left: 2px solid var(--bronze);
-      margin: 2rem 0;
+      margin: 2.4rem 0;
     }
-    .feat-row { display: flex; flex-wrap: wrap; gap: 1rem; margin-top: 2rem; }
-    .badge {
-      font-size: .62rem; letter-spacing: .16em; text-transform: uppercase;
-      padding: .36rem .9rem; border: 1px solid rgba(122,82,48,.25); color: var(--cream-mid);
+    .notice-box {
+      margin-top: 2.8rem; padding: 1.4rem 1.8rem;
+      background: rgba(122,82,48,.07);
+      border-left: 3px solid var(--bronze);
+      font-size: .85rem; color: var(--cream-mid); line-height: 1.8;
     }
-    @media (max-width: 720px) {
-      .intro-grid { grid-template-columns: 1fr; }
-      .intro-label { position: static; }
-    }
+    .notice-box strong { color: var(--bronze); }
 
     /* ── BOOKING ── */
     #booking {
@@ -302,35 +300,45 @@
 
 <!-- ── INTRO ── -->
 <section id="intro" aria-labelledby="intro-h">
-  <div class="intro-grid">
+  <div class="intro-inner">
 
-    <div class="intro-label">
-      <div class="rv">
-        <span class="eyebrow">Über das Konzept</span>
-        <span class="gold-rule"></span>
-        <h2 id="intro-h" class="dlg">Wo Ton und Kaffee<br><em>aufeinandertreffen</em></h2>
-      </div>
+    <div class="rv">
+      <span class="eyebrow">Home</span>
+      <span class="gold-rule"></span>
+      <h2 id="intro-h" class="dlg">Herzlich willkommen in meinem<br><em>kleinen, gemütlichen Traum.</em></h2>
     </div>
 
-    <div class="intro-body">
-      <p class="rv">
-        <strong style="color:var(--cream)">Tonflüstern</strong> ist kein klassisches Töpferkurs-Studio.
-        Es ist ein Ort der Entschleunigung — ein Raum, in dem du mit den Händen arbeitest und für einige Stunden die Zeit vergisst.
-        Atelier und Café in einem, ohne Kompromisse bei beidem.
-      </p>
-      <blockquote class="rv rv-d1">
-        „Hier entstehen nicht nur Tassen — hier entstehen Momente."
-      </blockquote>
-      <p class="rv rv-d2">
-        Wähle einen Rohling und gib ihm deine ganz persönliche Handschrift —
-        kreativ, entspannt, ohne Vorkenntnisse.
-        Kleine Gruppen, persönliche Betreuung, kein Stress.
-      </p>
-      <div class="feat-row rv rv-d2">
-        <span class="badge">Alle Levels willkommen</span>
-        <span class="badge">Kleine Gruppen</span>
-        <span class="badge">Kreativ &amp; Entspannt</span>
-      </div>
+    <blockquote class="rv rv-d1">
+      „Wo Ton und Kaffee aufeinandertreffen."
+    </blockquote>
+
+    <p class="rv rv-d1">
+      Das <strong>„Tonflüstern"</strong> ist ein besonderer Raum der kreativen Entspannung und Begegnung.
+      Hier kannst du dich entspannt ausprobieren: Ob mit verschiedenen Farben und Maltechniken auf Keramik oder beim Gestalten mit Ton.
+      Die gemütliche, helle und liebevoll gestaltete Atmosphäre lädt dich dazu ein, bei schöner Musik und leckeren Heißgetränken im Moment anzukommen und deine kreative Seite zu genießen.
+    </p>
+
+    <p class="rv rv-d2">
+      Ob du Keramikrohlinge bemalst oder deine ganz eigenen Ideen aus Ton umsetzt – du bist allein, zu zweit oder in der Gruppe herzlich willkommen.
+      Ob Geburtstag, Junggesellenabschied, Babyparty, Teamevent, Schulklassenausflug, Weihnachten, Ostern, Muttertag, Valentinstag oder einfach ein besonderer Abend zu zweit:
+      Du hast auch die Möglichkeit, den Raum für eine geschlossene Gesellschaft zu mieten. Schreibe mir einfach dein Anliegen – ich tue alles Mögliche, um deinen Anlass unvergesslich zu machen.
+    </p>
+
+    <p class="rv rv-d2">
+      Die Anlässe und Möglichkeiten, dir selbst oder anderen im <strong>„Tonflüstern"</strong> eine Freude zu bereiten, sind vielfältig.
+      Sehr gerne stelle ich dir auch einen Gutschein aus, mit dem du flexible Kreativmomente verschenken kannst.
+      Komm einfach während der Öffnungszeiten vorbei oder schreibe mir über
+      <a href="mailto:keramikcafe@tonfluestern.de" style="color:var(--bronze);border-bottom:1px solid rgba(122,82,48,.3);">keramikcafe@tonfluestern.de</a>
+    </p>
+
+    <p class="rv rv-d3" style="font-family:var(--fd);font-size:clamp(1rem,1.6vw,1.2rem);font-style:italic;color:var(--cream);">
+      Ich freue mich darauf, dich bald im „Tonflüstern" begrüßen zu dürfen!
+    </p>
+
+    <div class="notice-box rv rv-d3">
+      <strong>Bitte hab Nachsicht mit mir</strong> — die Homepage befindet sich noch in Bearbeitung.
+      Ich gebe mir Mühe, so schnell es mir gelingt alle wichtigen Infos und genaue Beschreibungen zum „Tonflüstern" zu ergänzen.
+      Falls du Fragen hast, melde dich gerne bei mir. Danke für dein Verständnis!
     </div>
 
   </div>
@@ -481,7 +489,7 @@
     <h3>Kontakt</h3>
     <p>
       Telefon: <span class="ph">+49 XXX XXXXXXXX</span><br>
-      E-Mail: <span class="ph">hallo@tonfluestern.de</span>
+      E-Mail: <span class="ph">keramikcafe@tonfluestern.de</span>
     </p>
 
     <h3>Umsatzsteuer-ID (falls vorhanden)</h3>
@@ -509,7 +517,7 @@
     <p>
       <span class="ph">VORNAME NACHNAME / FIRMENNAME</span><br>
       Hauptstraße 43, 64711 Erbach<br>
-      E-Mail: <span class="ph">hallo@tonfluestern.de</span>
+      E-Mail: <span class="ph">keramikcafe@tonfluestern.de</span>
     </p>
 
     <h3>2. Datenerfassung – Buchungsformular</h3>
@@ -522,7 +530,7 @@
     <p>Diese Website wird gehostet bei: <span class="ph">ANBIETER, ADRESSE</span>. Technische Zugriffsdaten (IP-Adresse, Zeitstempel) werden im Rahmen des normalen Serverbetriebs protokolliert. Rechtsgrundlage: Art. 6 Abs. 1 lit. f DSGVO.</p>
 
     <h3>5. Deine Rechte</h3>
-    <p>Du hast das Recht auf Auskunft (Art. 15 DSGVO), Berichtigung (Art. 16), Löschung (Art. 17), Einschränkung der Verarbeitung (Art. 18), Datenübertragbarkeit (Art. 20) sowie Widerspruch (Art. 21). Anfragen an: <span class="ph">hallo@tonfluestern.de</span></p>
+    <p>Du hast das Recht auf Auskunft (Art. 15 DSGVO), Berichtigung (Art. 16), Löschung (Art. 17), Einschränkung der Verarbeitung (Art. 18), Datenübertragbarkeit (Art. 20) sowie Widerspruch (Art. 21). Anfragen an: <span class="ph">keramikcafe@tonfluestern.de</span></p>
 
     <p style="margin-top:2rem;padding-top:1rem;border-top:1px solid rgba(41,27,15,.06);font-size:.74rem;color:var(--cream-faint);">
       Stand: September 2025 — Dieser Text ist ein Entwurf und ersetzt keine Rechtsberatung.
