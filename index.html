@@ -669,7 +669,28 @@
 </div>
 
 <script src="flatpickr.min.js"></script>
-<script src="flatpickr-de.js"></script>
+<script>
+/* Deutsche Beschriftung direkt eingebaut — so kann keine fehlende
+   oder falsch benannte Zusatzdatei den Kalender englisch machen. */
+window.flatpickrDE = {
+  weekdays: {
+    shorthand: ['So','Mo','Di','Mi','Do','Fr','Sa'],
+    longhand:  ['Sonntag','Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag']
+  },
+  months: {
+    shorthand: ['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'],
+    longhand:  ['Januar','Februar','März','April','Mai','Juni','Juli',
+                'August','September','Oktober','November','Dezember']
+  },
+  firstDayOfWeek: 1,
+  weekAbbreviation: 'KW',
+  rangeSeparator: ' bis ',
+  scrollTitle: 'Zum Ändern scrollen',
+  toggleTitle: 'Zum Umschalten klicken',
+  time_24hr: true,
+  ordinal: function () { return '.'; }
+};
+</script>
 <script>
 /* ── SCROLL RESTORATION ── */
 if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
@@ -735,7 +756,9 @@ const freeSeats = d => MAX_PER_DAY - (BOOKED[dkey(d)] || 0);
 /* Ist der Tag ausgebucht? (nur an regulären Öffnungstagen relevant) */
 const isFull = d => OPEN_HOURS[d.getDay()] && freeSeats(d) <= 0;
 
-flatpickr.localize(flatpickr.l10ns.de);
+// Deutsche Beschriftung setzen; schlaegt das fehl, bleibt der Kalender
+// benutzbar und zeigt lediglich englische Monatsnamen
+try { flatpickr.localize(window.flatpickrDE); } catch (e) {}
 
 function initKalender() {
 if (kalenderInstanz) kalenderInstanz.destroy();
