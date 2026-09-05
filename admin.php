@@ -54,6 +54,7 @@ if (!($_SESSION['auth'] ?? false)) {
 $hinweis = '';
 
 if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
+  try {
 
     // Anfrage stornieren -> Plätze werden wieder frei
     if (isset($_POST['stornieren'])) {
@@ -106,10 +107,16 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
             $hinweis = 'Das Datum war ungültig.';
         }
     }
+
+  } catch (Throwable $ex) {
+      error_log('Tonfluestern Admin: ' . $ex->getMessage());
+      $hinweis = 'Die Änderung konnte nicht gespeichert werden: ' . $ex->getMessage()
+               . '. Es wurde nichts überschrieben.';
+  }
 }
 
 /* ── Daten aufbereiten ── */
-$d     = daten_laden();
+$d     = daten_laden_sicher();
 $heute = date('Y-m-d');
 
 $offene = array_filter($d['anfragen'], fn($a) => ($a['datum'] ?? '') >= $heute);

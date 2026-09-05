@@ -67,29 +67,57 @@ function daten_verzeichnis(): void {
     }
 }
 
-/** Alle Daten laden. Gibt bei Fehlern eine leere, gültige Struktur zurück. */
-function daten_laden(): array {
+/**
+ * Alle Daten laden.
+ *
+ * Gibt NULL zurueck, wenn die Datei zwar existiert, aber nicht gelesen
+ * oder nicht ausgewertet werden kann. Das ist wichtig: frueher lieferte
+ * diese Funktion in dem Fall eine leere Struktur, die anschliessend
+ * ueber den echten Bestand geschrieben wurde — ein einziger Lesefehler
+ * haette alle Buchungen geloescht.
+ *
+ * Eine noch nicht angelegte Datei ist dagegen kein Fehler und liefert
+ * die leere Struktur.
+ */
+function daten_laden(): ?array {
     $leer = ['anfragen' => [], 'manuell' => []];
+
     if (!is_file(DATA_FILE)) {
-        return $leer;
+        return $leer;                       // gibt es noch nicht — in Ordnung
     }
+
     $roh = @file_get_contents(DATA_FILE);
-    if ($roh === false || $roh === '') {
-        return $leer;
+    if ($roh === false) {
+        return null;                        // vorhanden, aber unlesbar
     }
-    // Schutz-Präfix abschneiden
+    if (trim($roh) === '') {
+        return null;                        // leergelaufen — verdaechtig
+    }
+
+    // Schutz-Präfix abschneiden (auch mit vorangestelltem BOM)
+    $roh = preg_replace('/^\xEF\xBB\xBF/', '', $roh);
     if (strncmp($roh, '<?php', 5) === 0) {
-        $nl  = strpos($roh, "\n");
-        $roh = ($nl === false) ? '' : substr($roh, $nl + 1);
+        $nl = strpos($roh, "\n");
+        if ($nl === false) {
+            return null;                    // Guard ohne Zeilenumbruch — defekt
+        }
+        $roh = substr($roh, $nl + 1);
     }
+
     $d = json_decode($roh, true);
     if (!is_array($d)) {
-        return $leer;
+        return null;                        // kaputtes JSON
     }
+
     return [
         'anfragen' => is_array($d['anfragen'] ?? null) ? $d['anfragen'] : [],
         'manuell'  => is_array($d['manuell']  ?? null) ? $d['manuell']  : [],
     ];
+}
+
+/** Wie daten_laden(), aber nie null — fuer reine Leseansichten. */
+function daten_laden_sicher(): array {
+    return daten_laden() ?? ['anfragen' => [], 'manuell' => []];
 }
 
 /** Daten atomar speichern (erst in temporäre Datei, dann umbenennen). */
@@ -99,6 +127,11 @@ function daten_speichern(array $d): bool {
     if ($json === false) {
         return false;
     }
+    // Vorherigen Stand sichern, damit ein Fehlgriff reparierbar bleibt
+    if (is_file(DATA_FILE)) {
+        @copy(DATA_FILE, DATA_FILE . '.bak');
+    }
+
     $tmp = DATA_FILE . '.tmp';
     if (@file_put_contents($tmp, DATA_GUARD . $json, LOCK_EX) === false) {
         return false;
@@ -113,22 +146,32 @@ function daten_speichern(array $d): bool {
  */
 function mit_sperre(callable $fn) {
     daten_verzeichnis();
+
     $fh = @fopen(LOCK_FILE, 'c');
-    if ($fh === false) {                    // Notfall: ohne Sperre weiter
-        $d = daten_laden();
-        $r = $fn($d);
-        daten_speichern($d);
-        return $r;
+    if ($fh !== false) {
+        @flock($fh, LOCK_EX);
     }
-    @flock($fh, LOCK_EX);
+
     try {
         $d = daten_laden();
+
+        // Bestand nicht lesbar -> auf keinen Fall darueber schreiben
+        if ($d === null) {
+            throw new RuntimeException('Datenbestand nicht lesbar');
+        }
+
         $r = $fn($d);
-        daten_speichern($d);
+
+        if (!daten_speichern($d)) {
+            throw new RuntimeException('Datenbestand nicht speicherbar');
+        }
+
         return $r;
     } finally {
-        @flock($fh, LOCK_UN);
-        @fclose($fh);
+        if ($fh !== false) {
+            @flock($fh, LOCK_UN);
+            @fclose($fh);
+        }
     }
 }
 

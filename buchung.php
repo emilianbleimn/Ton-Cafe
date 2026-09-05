@@ -67,6 +67,7 @@ $oeffnung  = OPEN_HOURS[$wt] ?? 'Auf Anfrage';
 $auf_anfr  = !isset(OPEN_HOURS[$wt]);
 
 /* ── Speichern unter Sperre, damit die Plätze nicht doppelt vergeben werden ── */
+try {
 $ergebnis = mit_sperre(function (array &$d) use (
     $datum, $personen, $name, $email, $telefon, $nachricht, $oeffnung, $angebot
 ) {
@@ -99,6 +100,17 @@ $ergebnis = mit_sperre(function (array &$d) use (
 
     return ['ok' => true, 'frei' => $noch_frei - $personen];
 });
+} catch (Throwable $ex) {
+    // Bestand nicht lesbar oder nicht schreibbar: lieber ehrlich abbrechen,
+    // als eine Anfrage stillschweigend zu verlieren oder Daten zu ueberschreiben
+    error_log('Tonfluestern Buchung: ' . $ex->getMessage());
+    antwort([
+        'ok'     => false,
+        'fehler' => 'Die Anfrage konnte gerade nicht gespeichert werden. '
+                  . 'Bitte versuche es in ein paar Minuten noch einmal oder '
+                  . 'schreib mir direkt an ' . EMPFAENGER . '.',
+    ], 503);
+}
 
 if (!$ergebnis['ok']) {
     $fehler = $ergebnis['grund'] === 'ausgebucht'

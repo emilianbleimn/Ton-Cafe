@@ -8,7 +8,7 @@ require __DIR__ . '/config.php';
 header('Content-Type: application/json; charset=utf-8');
 header('Cache-Control: no-store, no-cache, must-revalidate');
 
-$d     = daten_laden();
+$d     = daten_laden_sicher();
 $heute = date('Y-m-d');
 $summe = [];
 

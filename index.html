@@ -876,6 +876,16 @@ bkForm.addEventListener('submit', async e => {
     try { j = await res.json(); } catch { /* keine JSON-Antwort */ }
 
     if (res.ok && j && j.ok) {
+      // Belegung neu holen und Kalender neu zeichnen, sonst zeigt die
+      // linke Spalte weiter die alte Platzzahl an
+      await belegungLaden();
+      initKalender();
+      dayInfo.classList.add('hidden');
+      anfNote.classList.remove('visible');
+      fullNote.classList.remove('visible');
+      fDate.value = ''; fTime.value = ''; fSeats.value = '';
+      persIn.max = MAX_PER_DAY;
+
       bkForm.style.display = 'none';
       bkConf.classList.add('show');
       bkConf.scrollIntoView({ behavior: 'smooth', block: 'center' });
