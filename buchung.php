@@ -39,6 +39,7 @@ $email    = $feld('email', 150);
 $telefon  = $feld('telefon', 60);
 $datum    = $feld('wunschtermin', 10);
 $nachricht= $feld('nachricht', 2000);
+$angebot  = $feld('angebot', 60);
 $personen = (int)($_POST['personen'] ?? 0);
 
 /* ── Prüfungen ── */
@@ -47,6 +48,9 @@ if ($name === '' || mb_strlen($name) < 2) {
 }
 if ($email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
     antwort(['ok' => false, 'fehler' => 'Bitte gib eine gültige E-Mail-Adresse an.'], 422);
+}
+if (!in_array($angebot, ANGEBOTE, true)) {
+    antwort(['ok' => false, 'fehler' => 'Bitte wähle aus, ob du Keramik bemalen oder töpfern möchtest.'], 422);
 }
 if ($personen < 1 || $personen > MAX_PER_DAY) {
     antwort(['ok' => false, 'fehler' => 'Bitte gib eine Personenanzahl zwischen 1 und ' . MAX_PER_DAY . ' an.'], 422);
@@ -64,7 +68,7 @@ $auf_anfr  = !isset(OPEN_HOURS[$wt]);
 
 /* ── Speichern unter Sperre, damit die Plätze nicht doppelt vergeben werden ── */
 $ergebnis = mit_sperre(function (array &$d) use (
-    $datum, $personen, $name, $email, $telefon, $nachricht, $oeffnung
+    $datum, $personen, $name, $email, $telefon, $nachricht, $oeffnung, $angebot
 ) {
     $noch_frei = frei($d, $datum);
 
@@ -81,6 +85,7 @@ $ergebnis = mit_sperre(function (array &$d) use (
     $d['anfragen'][] = [
         'id'        => bin2hex(random_bytes(8)),
         'datum'     => $datum,
+        'angebot'   => $angebot,
         'personen'  => $personen,
         'name'      => $name,
         'email'     => $email,
@@ -107,11 +112,12 @@ if (!$ergebnis['ok']) {
 $wochentage = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
 $datum_lang = $wochentage[$wt] . ', ' . date('d.m.Y', strtotime($datum));
 
-$betreff = 'Neue Terminanfrage: ' . $datum_lang . ' – ' . $personen
+$betreff = 'Neue Anfrage: ' . $angebot . ' am ' . $datum_lang . ' – ' . $personen
          . ($personen === 1 ? ' Person' : ' Personen');
 
 $text = "Neue Terminanfrage über tonfluestern.de\n"
       . str_repeat('=', 45) . "\n\n"
+      . "Angebot:     $angebot\n"
       . "Termin:      $datum_lang\n"
       . "Zeit:        $oeffnung" . ($auf_anfr ? "  (auf Anfrage)" : "") . "\n"
       . "Personen:    $personen\n"

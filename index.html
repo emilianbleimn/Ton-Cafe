@@ -4,12 +4,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Tonflüstern – Keramikcafé in Erbach</title>
-  <meta name="description" content="Tonflüstern — Keramik bemalen in entspannter Café-Atmosphäre. Wähle einen Rohling und gestalte ihn nach deiner Handschrift. Jetzt Termin anfragen.">
+  <meta name="description" content="Tonflüstern — Keramik bemalen oder Töpfern in entspannter Café-Atmosphäre. Erbach im Odenwald. Jetzt Termin anfragen.">
 
   <meta property="og:url" content="https://tonfluestern.de">
   <meta property="og:type" content="website">
   <meta property="og:title" content="Tonflüstern – Keramikcafé">
-  <meta property="og:description" content="Keramik bemalen in entspannter Café-Atmosphäre. Erbach im Odenwald.">
+  <meta property="og:description" content="Keramik bemalen oder Töpfern in entspannter Café-Atmosphäre. Erbach im Odenwald.">
   <meta property="og:image" content="https://tonfluestern.de/DSC_5393.JPG">
   <meta property="og:image:alt" content="Tonflüstern Keramikcafé in Erbach">
   <meta property="og:locale" content="de_DE">
@@ -292,6 +292,33 @@
     .fg input:focus, .fg select:focus, .fg textarea:focus { outline: none; border-color: var(--bronze); }
     .fg textarea { min-height: 110px; resize: vertical; }
     .fg select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='7'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%237a5230' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 1rem center; padding-right: 2.5rem; }
+    /* Angebotswahl – zwei Schaltflächen statt Auswahlliste,
+       damit beide Angebote sofort sichtbar sind */
+    .ang-wahl { display: flex; gap: .6rem; flex-wrap: wrap; }
+    .ang-opt { flex: 1 1 150px; cursor: pointer; display: flex; }
+    .ang-opt input {
+      position: absolute; opacity: 0; width: 0; height: 0;
+    }
+    .ang-opt span {
+      flex: 1;
+      display: flex; align-items: center; justify-content: center;
+      text-align: center; line-height: 1.35;
+      min-height: 3rem; padding: .7rem 1rem;
+      background: var(--bg-1);
+      border: 1px solid rgba(122,82,48,.2);
+      color: var(--cream-mid);
+      font-size: .74rem; font-weight: 500;
+      letter-spacing: .14em; text-transform: uppercase;
+      transition: background .25s, border-color .25s, color .25s;
+    }
+    .ang-opt:hover span { border-color: var(--bronze); color: var(--cream); }
+    .ang-opt input:checked + span {
+      background: var(--terra); border-color: var(--terra); color: var(--on-col);
+    }
+    .ang-opt input:focus-visible + span {
+      outline: 2px solid var(--bronze); outline-offset: 2px;
+    }
+
     .fr { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
     @media (max-width: 500px) { .fr { grid-template-columns: 1fr; } }
     .form-legal { font-size: .74rem; color: var(--cream-faint); line-height: 1.6; }
@@ -429,7 +456,7 @@
     <div class="bk-head rv">
       <span class="eyebrow">Termin anfragen</span>
       <span class="gold-rule"></span>
-      <h2 id="bk-h" class="dmd">Keramik bemalen<br><em>anfragen</em></h2>
+      <h2 id="bk-h" class="dmd">Keramik bemalen oder<br>Töpfern <em>anfragen</em></h2>
       <p style="margin-top:.8rem;color:var(--cream-mid);font-size:.9rem;max-width:560px;">
         Der Kurs läuft über den ganzen Tag — du kommst einfach während der Öffnungszeiten vorbei und bleibst so lange du magst.
         Wähle deinen Wunschtag und schicke mir deine Anfrage; ich melde mich innerhalb von 24 Stunden.
@@ -467,7 +494,6 @@
       <div>
         <p class="eyebrow" style="margin-bottom:.8rem;">Wunschtermin wählen</p>
         <div id="cal-container"></div>
-        <input type="hidden" id="bk-date-val" name="wunschtermin">
 
         <div id="day-info" class="hidden">
           <p class="ts-label">Öffnungszeiten an diesem Tag</p>
@@ -508,6 +534,19 @@
           </div>
 
           <div class="bk-fields">
+            <div class="fg">
+              <label id="ang-label">Was möchtest du machen? *</label>
+              <div class="ang-wahl" role="radiogroup" aria-labelledby="ang-label">
+                <label class="ang-opt">
+                  <input type="radio" name="angebot" value="Keramik bemalen" required>
+                  <span>Keramik bemalen</span>
+                </label>
+                <label class="ang-opt">
+                  <input type="radio" name="angebot" value="Töpfern" required>
+                  <span>Töpfern</span>
+                </label>
+              </div>
+            </div>
             <div class="fr">
               <div class="fg">
                 <label for="bk-name">Name *</label>
@@ -806,8 +845,15 @@ bkForm.addEventListener('submit', async e => {
     return;
   }
 
+  if (!bkForm.querySelector('input[name="angebot"]:checked')) {
+    alert('Bitte wähle aus, ob du Keramik bemalen oder töpfern möchtest.');
+    document.querySelector('.ang-wahl').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    return;
+  }
+
   if (!fDate.value) {
     alert('Bitte wähle zuerst einen Termin im Kalender.');
+    document.getElementById('cal-container').scrollIntoView({ behavior: 'smooth', block: 'center' });
     return;
   }
 

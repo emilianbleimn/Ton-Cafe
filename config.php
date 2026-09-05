@@ -28,6 +28,11 @@ const CLOSED_DAYS  = [1, 2];  // Montag, Dienstag – geschlossen
 /* Wie weit im Voraus darf gebucht werden (Tage)? */
 const VORLAUF_TAGE = 365;
 
+/* Welche Angebote koennen angefragt werden?
+   Aendere hier, wenn ein Angebot dazukommt oder wegfaellt —
+   Formular und Pruefung ziehen die Liste automatisch nach. */
+const ANGEBOTE = ['Keramik bemalen', 'Töpfern'];
+
 
 /* ══════════════════════════════════════════════════════════
    AB HIER TECHNIK — normalerweise nichts zu ändern

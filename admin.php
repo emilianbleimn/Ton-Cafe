@@ -163,6 +163,8 @@ $e = fn($s) => htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8');
   td{padding:.7rem 1.2rem;border-bottom:1px solid rgba(122,82,48,.09);vertical-align:top}
   tr.storniert td{opacity:.45;text-decoration:line-through}
   .msg{color:#5e4535;font-size:.82rem;max-width:320px;white-space:pre-wrap;word-break:break-word}
+  .ang{display:inline-block;font-size:.75rem;padding:.15rem .5rem;background:rgba(122,82,48,.1);
+       border:1px solid rgba(122,82,48,.2);white-space:nowrap}
   button{font-family:inherit;font-size:.72rem;padding:.3rem .7rem;border:1px solid rgba(122,82,48,.35);
          background:#f4ece0;color:#5e4535;cursor:pointer;white-space:nowrap}
   button:hover{background:#d4c5af}
@@ -178,7 +180,7 @@ $e = fn($s) => htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8');
   a{color:#7a5230}
   @media(max-width:640px){
     body{padding:1rem}
-    th:nth-child(4),td:nth-child(4){display:none}
+    th:nth-child(4),td:nth-child(4),th:nth-child(5),td:nth-child(5){display:none}
   }
 </style>
 </head>
@@ -219,12 +221,13 @@ $e = fn($s) => htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8');
       <?php if ($liste): ?>
       <table>
         <tr>
-          <th>Pers.</th><th>Name</th><th>Kontakt</th><th>Nachricht</th><th></th>
+          <th>Pers.</th><th>Angebot</th><th>Name</th><th>Kontakt</th><th>Nachricht</th><th></th>
         </tr>
         <?php foreach ($liste as $a):
             $stor = ($a['status'] ?? 'offen') === 'storniert'; ?>
           <tr class="<?= $stor ? 'storniert' : '' ?>">
             <td><strong><?= (int)$a['personen'] ?></strong></td>
+            <td><span class="ang"><?= $e($a['angebot'] ?? '—') ?></span></td>
             <td>
               <?= $e($a['name'] ?? '') ?><br>
               <span style="font-size:.75rem;color:#a8917a">
