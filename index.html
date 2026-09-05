@@ -19,7 +19,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;1,9..144,300;1,9..144,400&family=Lato:ital,wght@0,300;0,400;0,700;1,300;1,400&family=Pinyon+Script&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr@4/dist/flatpickr.min.css">
+  <link rel="stylesheet" href="flatpickr.min.css">
 
   <style>
     /* ── TOKENS ── */
@@ -200,7 +200,7 @@
     .flatpickr-calendar { font-family: var(--fb) !important; background: var(--bg-1) !important; border: 1px solid rgba(122,82,48,.2) !important; box-shadow: 0 8px 32px rgba(41,27,15,.1) !important; border-radius: 0 !important; }
     .flatpickr-day { border-radius: 0 !important; color: var(--cream) !important; }
     .flatpickr-day.selected, .flatpickr-day.selected:hover { background: var(--terra) !important; border-color: var(--terra) !important; color: var(--on-col) !important; }
-    .flatpickr-day.flatpickr-disabled { color: rgba(122,82,48,.3) !important; text-decoration: line-through; }
+    .flatpickr-day.flatpickr-disabled { color: rgba(122,82,48,.3) !important; }
     .flatpickr-months .flatpickr-month { background: var(--bg-2) !important; color: var(--cream) !important; }
     .flatpickr-current-month span.cur-month { color: var(--cream) !important; }
     .flatpickr-current-month input.cur-year { color: var(--cream) !important; }
@@ -231,8 +231,14 @@
     #full-note.visible { display: block; }
     #full-note strong { display: block; color: var(--terra); margin-bottom: .2rem; }
 
-    /* Kalender-Marker */
-    .flatpickr-day.day-full { text-decoration: line-through; }
+    /* ── Kalender-Marker ──
+       ausgebucht und geschlossen müssen unterscheidbar sein:
+       ausgebucht = rötlich + durchgestrichen, geschlossen = nur blass */
+    .flatpickr-day.day-full {
+      color: rgba(168,76,42,.55) !important;
+      text-decoration: line-through;
+      text-decoration-thickness: 1px;
+    }
     .flatpickr-day.day-limited { position: relative; font-weight: 700; }
     .flatpickr-day.day-limited::after {
       content: ''; position: absolute; bottom: 4px; left: 50%; transform: translateX(-50%);
@@ -240,15 +246,36 @@
     }
     .flatpickr-day.selected.day-limited::after { background: var(--on-col); }
 
+    /* ── Legende: zeigt echte Miniatur-Tage, keine erfundenen Punkte ── */
     .cal-legend {
-      display: flex; flex-wrap: wrap; gap: 1.1rem;
-      margin-top: 1rem; font-size: .72rem; color: var(--cream-faint);
+      display: flex; flex-wrap: wrap; gap: .7rem 1.3rem;
+      margin-top: 1rem; font-size: .72rem; color: var(--cream-mid);
     }
-    .cal-legend span { display: inline-flex; align-items: center; gap: .4rem; }
-    .lg-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
-    .lg-free    { background: var(--bronze); opacity: .55; }
-    .lg-limited { background: var(--terra); }
-    .lg-full    { background: rgba(122,82,48,.28); }
+    .cal-legend span { display: inline-flex; align-items: center; gap: .45rem; }
+    .lg-day {
+      width: 22px; height: 22px; flex-shrink: 0; position: relative;
+      display: inline-flex; align-items: center; justify-content: center;
+      font-style: normal; font-size: .72rem; line-height: 1;
+      border: 1px solid rgba(122,82,48,.22);
+      background: var(--bg-0);
+      color: var(--cream);
+    }
+    .lg-limited { font-weight: 700; }
+    .lg-limited::after {
+      content: ''; position: absolute; bottom: 3px; left: 50%; transform: translateX(-50%);
+      width: 4px; height: 4px; border-radius: 50%; background: var(--terra);
+    }
+    .lg-full {
+      background: rgba(168,76,42,.08);
+      border-color: rgba(168,76,42,.26);
+      color: rgba(168,76,42,.6);
+      text-decoration: line-through;
+    }
+    .lg-closed {
+      background: rgba(122,82,48,.04);
+      border-color: rgba(122,82,48,.12);
+      color: rgba(122,82,48,.32);
+    }
 
     #anfrage-note { margin-top: 1.6rem; padding: 1rem 1.4rem; background: var(--bg-1); border-left: 3px solid var(--cream-faint); font-size: .85rem; color: var(--cream-mid); display: none; }
     #anfrage-note.visible { display: block; }
@@ -460,9 +487,10 @@
         </div>
 
         <p class="cal-legend">
-          <span><i class="lg-dot lg-free"></i> frei</span>
-          <span><i class="lg-dot lg-limited"></i> wenige Plätze</span>
-          <span><i class="lg-dot lg-full"></i> ausgebucht / geschlossen</span>
+          <span><i class="lg-day">5</i> frei</span>
+          <span><i class="lg-day lg-limited">5</i> wenige Plätze</span>
+          <span><i class="lg-day lg-full">5</i> ausgebucht</span>
+          <span><i class="lg-day lg-closed">5</i> geschlossen</span>
         </p>
       </div>
 
@@ -601,8 +629,8 @@
   </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/flatpickr@4"></script>
-<script src="https://cdn.jsdelivr.net/npm/flatpickr@4/dist/l10n/de.js"></script>
+<script src="flatpickr.min.js"></script>
+<script src="flatpickr-de.js"></script>
 <script>
 /* ── SCROLL RESTORATION ── */
 if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
