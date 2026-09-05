@@ -246,36 +246,6 @@
     }
     .flatpickr-day.selected.day-limited::after { background: var(--on-col); }
 
-    /* ── Legende: zeigt echte Miniatur-Tage, keine erfundenen Punkte ── */
-    .cal-legend {
-      display: flex; flex-wrap: wrap; gap: .7rem 1.3rem;
-      margin-top: 1rem; font-size: .72rem; color: var(--cream-mid);
-    }
-    .cal-legend span { display: inline-flex; align-items: center; gap: .45rem; }
-    .lg-day {
-      width: 22px; height: 22px; flex-shrink: 0; position: relative;
-      display: inline-flex; align-items: center; justify-content: center;
-      font-style: normal; font-size: .72rem; line-height: 1;
-      border: 1px solid rgba(122,82,48,.22);
-      background: var(--bg-0);
-      color: var(--cream);
-    }
-    .lg-limited { font-weight: 700; }
-    .lg-limited::after {
-      content: ''; position: absolute; bottom: 3px; left: 50%; transform: translateX(-50%);
-      width: 4px; height: 4px; border-radius: 50%; background: var(--terra);
-    }
-    .lg-full {
-      background: rgba(168,76,42,.08);
-      border-color: rgba(168,76,42,.26);
-      color: rgba(168,76,42,.6);
-      text-decoration: line-through;
-    }
-    .lg-closed {
-      background: rgba(122,82,48,.04);
-      border-color: rgba(122,82,48,.12);
-      color: rgba(122,82,48,.32);
-    }
 
     #anfrage-note { margin-top: 1.6rem; padding: 1rem 1.4rem; background: var(--bg-1); border-left: 3px solid var(--cream-faint); font-size: .85rem; color: var(--cream-mid); display: none; }
     #anfrage-note.visible { display: block; }
@@ -475,9 +445,6 @@
           <span>Auf Anfrage</span>
         </div>
       </div>
-      <p style="margin-top:1.2rem;font-size:.82rem;color:var(--cream-faint);">
-         <strong style="color:var(--bronze);"></strong> 
-      </p>
 
       <div class="info-box">
         <span class="info-icon" aria-hidden="true">◆</span>
@@ -512,12 +479,6 @@
          
         </div>
 
-        <p class="cal-legend">
-          <span><i class="lg-day">5</i></span>
-          <span><i class="lg-day lg-limited">5</i> </span>
-          <span><i class="lg-day lg-full">5</i> </span>
-          <span><i class="lg-day lg-closed">5</i></span>
-        </p>
       </div>
 
       <!-- Formularfelder -->
