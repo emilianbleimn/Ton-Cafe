@@ -42,15 +42,11 @@ const KALENDER_KEY = 'omlry06src94to43dz477kss4cb5';
 /* Adresse, unter der sich im Webmail direkt eine neue E-Mail
    verfassen laesst. {to}, {subject} und {body} werden eingesetzt.
 
-   LEER LASSEN ist die sichere Voreinstellung: dann oeffnet der Knopf
-   das Standard-Mailprogramm des Rechners. In Firefox laesst sich das
-   Webmail als Standard fuer E-Mail-Links einstellen — dann landet die
-   fertige Vorlage genau dort.
-
-   Kennst du die Adresse deines Webmails zum Verfassen einer Mail,
-   trage sie hier ein, zum Beispiel:
-   'https://webmail.your-server.de/imp/dynamic.php?page=compose&to={to}&subject={subject}&body={body}'  */
-const WEBMAIL_COMPOSE = '';
+   Eingetragen ist das Hetzner-Webmail (Horde, dynamische Ansicht).
+   Sollte der Knopf einmal ins Leere fuehren, setze den Wert auf einen
+   leeren Text ('') — dann oeffnet sich das Standard-Mailprogramm.
+   "Text kopieren" funktioniert unabhaengig davon immer.            */
+const WEBMAIL_COMPOSE = 'https://webmail.your-server.de/imp/dynamic.php?page=compose&to={to}&subject={subject}&body={body}';
 
 /* Absenderangaben fuer die Textvorlagen */
 const ABSENDER = "Herzliche Grüße\nTatjana Bleim Muntanion\nTonflüstern – Keramikcafé\nHauptstraße 43, 64711 Erbach\nTelefon: +49 152 29221996";
