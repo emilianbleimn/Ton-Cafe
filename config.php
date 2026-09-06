@@ -33,6 +33,12 @@ const VORLAUF_TAGE = 365;
    Formular und Pruefung ziehen die Liste automatisch nach. */
 const ANGEBOTE = ['Keramik bemalen', 'Töpfern'];
 
+/* Schluessel fuer den Kalender-Abo-Link (kalender.php).
+   Er steht in der Adresse, die du in deinem Kalender eintraegst,
+   und schuetzt die Kundendaten vor fremdem Zugriff.
+   Aenderst du ihn, musst du das Abo im Kalender neu einrichten. */
+const KALENDER_KEY = 'omlry06src94to43dz477kss4cb5';
+
 
 /* ══════════════════════════════════════════════════════════
    AB HIER TECHNIK — normalerweise nichts zu ändern

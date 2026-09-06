@@ -724,8 +724,13 @@ const dkey = d =>
 /* Freie Plätze an einem Tag */
 const freeSeats = d => MAX_PER_DAY - (BOOKED[dkey(d)] || 0);
 
-/* Ist der Tag ausgebucht? (nur an regulären Öffnungstagen relevant) */
-const isFull = d => OPEN_HOURS[d.getDay()] && freeSeats(d) <= 0;
+/* Kann an diesem Tag ueberhaupt gebucht werden?
+   Mi/Do/Fr mit festen Zeiten, Sa/So auf Anfrage.        */
+const buchbar = d => Boolean(OPEN_HOURS[d.getDay()]) || REQUEST_DAYS.includes(d.getDay());
+
+/* Ausgebucht gilt fuer JEDEN buchbaren Tag — auch fuer
+   Samstag und Sonntag, wenn die Plaetze von Hand belegt sind. */
+const isFull = d => buchbar(d) && freeSeats(d) <= 0;
 
 // Deutsche Beschriftung setzen; schlaegt das fehl, bleibt der Kalender
 // benutzbar und zeigt lediglich englische Monatsnamen
@@ -744,13 +749,19 @@ kalenderInstanz = flatpickr('#cal-container', {
     const date = dayElem.dateObj;
     const d    = date.getDay();
 
+    // Ausgebucht zuerst pruefen, sonst wuerden Sa/So immer als
+    // "Auf Anfrage" durchgehen, auch wenn sie voll belegt sind
     if (CLOSED_DAYS.includes(d)) {
       dayElem.title = 'Geschlossen';
-    } else if (REQUEST_DAYS.includes(d)) {
-      dayElem.title = 'Auf Anfrage';
     } else if (isFull(date)) {
       dayElem.title = 'Ausgebucht';
       dayElem.classList.add('day-full');
+    } else if (REQUEST_DAYS.includes(d)) {
+      const free = freeSeats(date);
+      dayElem.title = free < MAX_PER_DAY
+        ? `Auf Anfrage · noch ${free} ${free === 1 ? 'Platz' : 'Plätze'} frei`
+        : 'Auf Anfrage';
+      if (free < MAX_PER_DAY) dayElem.classList.add('day-limited');
     } else {
       const free = freeSeats(date);
       dayElem.title = `${OPEN_HOURS[d]} · noch ${free} ${free === 1 ? 'Platz' : 'Plätze'} frei`;
@@ -794,9 +805,18 @@ kalenderInstanz = flatpickr('#cal-container', {
       dayInfo.classList.remove('hidden');
 
     } else {                                 // Samstag / Sonntag
+      const free = freeSeats(date);
+
+      if (free <= 0) {                       // von Hand komplett blockiert
+        fullNote.classList.add('visible');
+        fTime.value = ''; fSeats.value = '';
+        return;
+      }
+
       fTime.value  = 'Auf Anfrage';
-      fSeats.value = '';
-      persIn.max   = MAX_PER_DAY;
+      fSeats.value = `${free} von ${MAX_PER_DAY} frei`;
+      persIn.max   = free;
+      if (Number(persIn.value) > free) persIn.value = free;
       anfNote.classList.add('visible');
     }
   }

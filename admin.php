@@ -137,6 +137,12 @@ foreach (array_keys($d['manuell']) as $datum) {
 ksort($tage);
 
 $wt_namen = ['Sonntag','Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag'];
+
+// Abo-Adresse fuer den Kalender zusammenbauen
+$schema  = (($_SERVER['HTTPS'] ?? '') === 'on' || ($_SERVER['SERVER_PORT'] ?? '') == 443) ? 'https' : 'http';
+$host    = $_SERVER['HTTP_HOST'] ?? 'tonfluestern.de';
+$basis   = rtrim(dirname((string)($_SERVER['SCRIPT_NAME'] ?? '')), '/\\');
+$kal_url = $schema . '://' . $host . $basis . '/kalender.php?key=' . KALENDER_KEY;
 $e = fn($s) => htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8');
 ?>
 <!DOCTYPE html>
@@ -277,6 +283,19 @@ $e = fn($s) => htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8');
       <input type="number" name="manuell_anzahl" min="0" max="<?= MAX_PER_DAY ?>" value="0" required style="width:90px">
       <button type="submit">Speichern</button>
     </form>
+  </div>
+
+  <div class="manuell" style="margin-top:1.5rem">
+    <h2>Kalender abonnieren</h2>
+    <p>
+      Trage diese Adresse einmal in deinem Kalender ein (Hetzner Webmail, Handy, Outlook &hellip;)
+      &mdash; danach erscheinen alle Anfragen dort automatisch. Die Adresse enth&auml;lt
+      Kundendaten, gib sie also nicht weiter.
+    </p>
+    <p style="background:#f4ece0;border:1px solid rgba(122,82,48,.25);padding:.7rem 1rem;
+              font-family:ui-monospace,monospace;font-size:.78rem;word-break:break-all;margin:0">
+      <?= $e($kal_url) ?>
+    </p>
   </div>
 
   <p class="fuss">
