@@ -29,6 +29,7 @@ if (!($_SESSION['auth'] ?? false)) {
     <!DOCTYPE html><html lang="de"><head><meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <title>Anmeldung – Tonflüstern</title>
+    <link rel="icon" href="favicon.ico" sizes="any">
     <style>
       body{font-family:system-ui,sans-serif;background:#f4ece0;color:#291b0f;
            display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0}
@@ -152,6 +153,7 @@ $e = fn($s) => htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8');
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex,nofollow">
 <title>Anfragen – Tonflüstern</title>
+<link rel="icon" href="favicon.ico" sizes="any">
 <style>
   *{box-sizing:border-box}
   body{font-family:system-ui,-apple-system,sans-serif;background:#f4ece0;color:#291b0f;
