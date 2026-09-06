@@ -382,7 +382,7 @@ Ich freue mich auf dich!
                 <textarea id="<?= $rid ?>-body" rows="16"><?= $e($vb['text']) ?></textarea>
 
                 <div class="mailaktionen">
-                  <button type="button" class="gruen" onclick="mailOeffnen('<?= $rid ?>')">Im Webmail öffnen</button>
+                  <button type="button" class="gruen" onclick="mailOeffnen('<?= $rid ?>')"><?= WEBMAIL_COMPOSE !== '' ? 'Im Webmail öffnen' : 'In E-Mail-Programm öffnen' ?></button>
                   <button type="button" onclick="mailKopieren('<?= $rid ?>', this)">Text kopieren</button>
                   <button type="button" onclick="mailZu('<?= $rid ?>')">Schließen</button>
                 </div>
