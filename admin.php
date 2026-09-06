@@ -57,6 +57,17 @@ $hinweis = '';
 if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
   try {
 
+    // Anfrage bestätigen
+    if (isset($_POST['bestaetigen'])) {
+        $id = (string)$_POST['bestaetigen'];
+        mit_sperre(function (array &$d) use ($id) {
+            foreach ($d['anfragen'] as &$a) {
+                if (($a['id'] ?? '') === $id) { $a['status'] = 'bestaetigt'; }
+            }
+        });
+        $hinweis = 'Anfrage bestätigt. Schick der Kundin oder dem Kunden jetzt die Bestätigung.';
+    }
+
     // Anfrage stornieren -> Plätze werden wieder frei
     if (isset($_POST['stornieren'])) {
         $id = (string)$_POST['stornieren'];
@@ -145,6 +156,64 @@ $host    = $_SERVER['HTTP_HOST'] ?? 'tonfluestern.de';
 $basis   = rtrim(dirname((string)($_SERVER['SCRIPT_NAME'] ?? '')), '/\\');
 $kal_url = $schema . '://' . $host . $basis . '/kalender.php?key=' . KALENDER_KEY;
 $e = fn($s) => htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8');
+
+/**
+ * Baut Betreff und Text für die Antwort an die Kundin oder den Kunden.
+ * $art: 'bestaetigt' oder 'storniert'
+ */
+function vorlage(array $a, string $art): array {
+    $wt_lang = ['Sonntag','Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag'];
+    $ts    = strtotime((string)($a['datum'] ?? 'now'));
+    $tag   = $wt_lang[(int)date('w', $ts)] . ', ' . date('d.m.Y', $ts);
+    $vname = trim(explode(' ', trim((string)($a['name'] ?? '')))[0]);
+    $pers  = (int)($a['personen'] ?? 0);
+    $ang   = (string)($a['angebot'] ?? 'Keramik bemalen');
+    $zeit  = (string)($a['zeit'] ?? 'Auf Anfrage');
+
+    if ($art === 'storniert') {
+        return [
+            'betreff' => 'Deine Anfrage im Tonflüstern – ' . $tag,
+            'text' =>
+"Hallo $vname,
+
+vielen Dank für deine Anfrage im Tonflüstern.
+
+Leider kann ich dir den Termin am $tag nicht anbieten.
+
+[Hier kurz den Grund ergänzen – zum Beispiel: der Tag ist inzwischen
+ausgebucht, oder wir haben an dem Tag geschlossen.]
+
+Sehr gerne finden wir einen anderen Termin. Melde dich einfach bei mir,
+dann schauen wir gemeinsam, was passt.
+
+" . ABSENDER,
+        ];
+    }
+
+    return [
+        'betreff' => 'Dein Termin im Tonflüstern am ' . $tag . ' ist bestätigt',
+        'text' =>
+"Hallo $vname,
+
+vielen Dank für deine Anfrage – dein Termin steht!
+
+   Angebot:   $ang
+   Termin:    $tag
+   Uhrzeit:   $zeit
+   Personen:  $pers
+
+Der Kurs läuft über die gesamte Öffnungszeit. Du kannst also kommen,
+wann es dir passt, und so lange bleiben, wie du magst.
+
+Bezahlen kannst du bei uns bar oder per PayPal.
+
+Falls sich etwas ändert oder du Fragen hast, melde dich einfach.
+
+Ich freue mich auf dich!
+
+" . ABSENDER,
+    ];
+}
 ?>
 <!DOCTYPE html>
 <html lang="de">
@@ -184,6 +253,24 @@ $e = fn($s) => htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8');
          background:#f4ece0;color:#5e4535;cursor:pointer;white-space:nowrap}
   button:hover{background:#d4c5af}
   button.rot{border-color:rgba(168,76,42,.4);color:#a84c2a}
+  button.gruen{background:#4a6b3a;border-color:#4a6b3a;color:#f4ece0}
+  button.gruen:hover{background:#3d5930}
+  .mailknopf{margin-top:.35rem;width:100%;background:#e1d5c2;border-color:rgba(122,82,48,.3)}
+  .st{display:inline-block;font-size:.66rem;letter-spacing:.08em;text-transform:uppercase;
+      padding:.08rem .45rem;border:1px solid;margin-right:.35rem}
+  .st-offen{color:#7a5230;border-color:rgba(122,82,48,.35)}
+  .st-best{color:#4a6b3a;border-color:rgba(74,107,58,.45);background:rgba(74,107,58,.09)}
+  .st-stor{color:#a84c2a;border-color:rgba(168,76,42,.4)}
+  .mailzeile td{background:rgba(122,82,48,.05);padding:0}
+  .mailbox{padding:1.2rem}
+  .mailbox label{display:block;font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;
+                 color:#7a5230;margin:.8rem 0 .25rem}
+  .mailbox label:first-child{margin-top:0}
+  .mailbox input,.mailbox textarea{width:100%;padding:.55rem .7rem;background:#fff;
+       border:1px solid rgba(122,82,48,.25);font-family:inherit;font-size:.85rem;color:#291b0f}
+  .mailbox textarea{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;line-height:1.55;resize:vertical}
+  .mailaktionen{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.9rem}
+  .mailaktionen button{padding:.5rem 1.1rem;font-size:.75rem}
   .manuell{background:#ebe2d2;padding:1.2rem;margin-top:2.5rem;border-left:3px solid #7a5230}
   .manuell h2{font-size:1rem;margin:0 0 .5rem;font-weight:600}
   .manuell p{font-size:.83rem;color:#5e4535;margin:0 0 1rem}
@@ -239,13 +326,20 @@ $e = fn($s) => htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8');
           <th>Pers.</th><th>Angebot</th><th>Name</th><th>Kontakt</th><th>Nachricht</th><th></th>
         </tr>
         <?php foreach ($liste as $a):
-            $stor = ($a['status'] ?? 'offen') === 'storniert'; ?>
+            $status = $a['status'] ?? 'offen';
+            $stor   = $status === 'storniert';
+            $best   = $status === 'bestaetigt';
+            $vb     = vorlage($a, $stor ? 'storniert' : 'bestaetigt');
+            $rid    = 'm' . preg_replace('/[^a-z0-9]/i', '', (string)($a['id'] ?? '')); ?>
           <tr class="<?= $stor ? 'storniert' : '' ?>">
             <td><strong><?= (int)$a['personen'] ?></strong></td>
             <td><span class="ang"><?= $e($a['angebot'] ?? '—') ?></span></td>
             <td>
               <?= $e($a['name'] ?? '') ?><br>
-              <span style="font-size:.75rem;color:#a8917a">
+              <span class="st <?= $stor ? 'st-stor' : ($best ? 'st-best' : 'st-offen') ?>">
+                <?= $stor ? 'storniert' : ($best ? 'bestätigt' : 'offen') ?>
+              </span>
+              <span style="font-size:.72rem;color:#a8917a">
                 <?= $e(date('d.m. H:i', strtotime($a['erstellt'] ?? 'now'))) ?>
               </span>
             </td>
@@ -261,11 +355,38 @@ $e = fn($s) => htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8');
                 <?php if ($stor): ?>
                   <button name="aktivieren" value="<?= $e($a['id'] ?? '') ?>">Aktivieren</button>
                 <?php else: ?>
+                  <?php if (!$best): ?>
+                    <button class="gruen" name="bestaetigen" value="<?= $e($a['id'] ?? '') ?>">Bestätigen</button>
+                  <?php endif; ?>
                   <button name="stornieren" value="<?= $e($a['id'] ?? '') ?>">Stornieren</button>
                 <?php endif; ?>
                 <button class="rot" name="loeschen" value="<?= $e($a['id'] ?? '') ?>"
                         onclick="return confirm('Diese Anfrage endgültig löschen?')">Löschen</button>
               </form>
+              <button type="button" class="mailknopf" onclick="mailAuf('<?= $rid ?>')">
+                <?= $stor ? 'Absage schreiben' : 'Bestätigung schreiben' ?>
+              </button>
+            </td>
+          </tr>
+
+          <tr class="mailzeile" id="<?= $rid ?>" hidden>
+            <td colspan="6">
+              <div class="mailbox">
+                <label>Empfänger</label>
+                <input type="text" id="<?= $rid ?>-to" value="<?= $e($a['email'] ?? '') ?>">
+
+                <label>Betreff</label>
+                <input type="text" id="<?= $rid ?>-sub" value="<?= $e($vb['betreff']) ?>">
+
+                <label>Nachricht — du kannst den Text vor dem Senden anpassen</label>
+                <textarea id="<?= $rid ?>-body" rows="16"><?= $e($vb['text']) ?></textarea>
+
+                <div class="mailaktionen">
+                  <button type="button" class="gruen" onclick="mailOeffnen('<?= $rid ?>')">Im Webmail öffnen</button>
+                  <button type="button" onclick="mailKopieren('<?= $rid ?>', this)">Text kopieren</button>
+                  <button type="button" onclick="mailZu('<?= $rid ?>')">Schließen</button>
+                </div>
+              </div>
             </td>
           </tr>
         <?php endforeach; ?>
@@ -309,5 +430,56 @@ $e = fn($s) => htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8');
   </p>
 
 </div>
+<script>
+/* Aufklappen der Mail-Vorlage */
+function mailAuf(id) {
+  const z = document.getElementById(id);
+  z.hidden = false;
+  z.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  document.getElementById(id + '-body').focus();
+}
+function mailZu(id) { document.getElementById(id).hidden = true; }
+
+/* Vorlage im Webmail oeffnen.
+   Ist WEBMAIL_COMPOSE leer, wird das normale Mailprogramm verwendet. */
+const WEBMAIL = <?= json_encode(WEBMAIL_COMPOSE) ?>;
+
+function mailOeffnen(id) {
+  const to   = document.getElementById(id + '-to').value.trim();
+  const sub  = document.getElementById(id + '-sub').value;
+  const body = document.getElementById(id + '-body').value;
+
+  if (!to) { alert('Es ist keine Empfängeradresse eingetragen.'); return; }
+
+  const url = WEBMAIL
+    ? WEBMAIL.replace('{to}', encodeURIComponent(to))
+             .replace('{subject}', encodeURIComponent(sub))
+             .replace('{body}', encodeURIComponent(body))
+    : 'mailto:' + encodeURIComponent(to)
+        + '?subject=' + encodeURIComponent(sub)
+        + '&body='    + encodeURIComponent(body);
+
+  window.open(url, '_blank', 'noopener');
+}
+
+/* Fallback: Text in die Zwischenablage */
+async function mailKopieren(id, knopf) {
+  const t = document.getElementById(id + '-body').value;
+  const fertig = () => {
+    const alt = knopf.textContent;
+    knopf.textContent = 'Kopiert';
+    setTimeout(() => { knopf.textContent = alt; }, 1600);
+  };
+  try {
+    await navigator.clipboard.writeText(t);
+    fertig();
+  } catch {
+    const f = document.getElementById(id + '-body');
+    f.select(); f.setSelectionRange(0, 99999);
+    try { document.execCommand('copy'); fertig(); }
+    catch { alert('Kopieren hat nicht geklappt — bitte den Text von Hand markieren.'); }
+  }
+}
+</script>
 </body>
 </html>

@@ -39,6 +39,18 @@ const ANGEBOTE = ['Keramik bemalen', 'Töpfern'];
    Aenderst du ihn, musst du das Abo im Kalender neu einrichten. */
 const KALENDER_KEY = 'omlry06src94to43dz477kss4cb5';
 
+/* Adresse, unter der sich im Webmail eine neue E-Mail verfassen laesst.
+   {to}, {subject} und {body} werden automatisch eingesetzt.
+
+   Voreingestellt ist das Hetzner-Webmail (Horde). Sollte der Knopf
+   "Im Webmail oeffnen" bei dir nicht funktionieren, setze den Wert auf
+   einen leeren Text ('') — dann oeffnet sich stattdessen dein normales
+   E-Mail-Programm. Der Knopf "Text kopieren" geht in jedem Fall.       */
+const WEBMAIL_COMPOSE = 'https://webmail.your-server.de/imp/compose.php?to={to}&subject={subject}&body={body}';
+
+/* Absenderangaben fuer die Textvorlagen */
+const ABSENDER = "Herzliche Grüße\nTatjana Bleim Muntanion\nTonflüstern – Keramikcafé\nHauptstraße 43, 64711 Erbach\nTelefon: +49 152 29221996";
+
 
 /* ══════════════════════════════════════════════════════════
    AB HIER TECHNIK — normalerweise nichts zu ändern
