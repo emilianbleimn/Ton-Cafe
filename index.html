@@ -18,16 +18,10 @@
   <link rel="icon" type="image/png" href="favicon.png" sizes="180x180">
   <link rel="apple-touch-icon" href="favicon.png">
 
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <!-- Schriften laden im Hintergrund. Sind sie langsam erreichbar, zeigt der
-       Browser zuerst die Ersatzschriften an, statt die ganze Seite anzuhalten. -->
-  <link rel="stylesheet" media="print" onload="this.media='all'"
-        href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;1,9..144,300;1,9..144,400&family=Lato:ital,wght@0,300;0,400;0,700;1,300;1,400&family=Pinyon+Script&display=swap">
-  <noscript>
-    <link rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;1,9..144,300;1,9..144,400&family=Lato:ital,wght@0,300;0,400;0,700;1,300;1,400&family=Pinyon+Script&display=swap">
-  </noscript>
+  <!-- Schriften liegen auf dem eigenen Server. Zuvor kamen sie von
+       Google; dabei ging bei jedem Seitenaufruf die IP-Adresse der
+       Besucher an Google in die USA — ohne Einwilligung. -->
+  <link rel="stylesheet" href="schriften.css">
   <link rel="stylesheet" href="flatpickr.min.css">
   <script>
     /* Kennzeichnet, dass JavaScript laeuft — erst dann wird die
@@ -809,16 +803,40 @@
       Du kannst die Löschung jederzeit verlangen (siehe Punkt 6).
     </p>
 
-    <h3>4. Cookies</h3>
+    <h3>4. Cookies und eingebundene Inhalte</h3>
     <p>
-      Diese Website setzt keine Cookies zu Werbe- oder Analysezwecken und bindet keine
-      Tracking-Dienste ein. Beim Aufruf der Übersichtsseite für den Betreiber wird ein
-      technisch notwendiges Sitzungs-Cookie gesetzt; für Besucher der Website entsteht
-      dabei kein Cookie.
+      Diese Website setzt für Besucherinnen und Besucher <strong>keine Cookies</strong> —
+      weder zu Werbe- noch zu Analysezwecken. Es werden auch keine Tracking-Dienste,
+      Zählpixel oder sozialen Netzwerke eingebunden.
+    </p>
+    <p>
+      Alle Bestandteile der Seite — Schriften, Bilder und Programmbibliotheken —
+      werden <strong>ausschließlich von unserem eigenen Server geladen</strong>.
+      Beim Aufruf der Seite werden daher keine Daten an Dritte übertragen.
+    </p>
+    <p>
+      Lediglich beim Aufruf der internen Übersichtsseite für den Betrieb wird ein
+      technisch notwendiges Sitzungs-Cookie gesetzt. Für Besucher der Website
+      entsteht dabei kein Cookie.
     </p>
 
-    <h3>5. Hosting</h3>
-    <p>Diese Website wird gehostet bei: Hetzner Online GmbH, Industriestr. 25, 91710 Gunzenhausen, Deutschland. Technische Zugriffsdaten (IP-Adresse, Zeitstempel) werden im Rahmen des normalen Serverbetriebs protokolliert. Rechtsgrundlage: Art. 6 Abs. 1 lit. f DSGVO.</p>
+    <h3>5. Hosting und Server-Protokolle</h3>
+    <p>
+      Diese Website wird gehostet bei der <strong>Hetzner Online GmbH</strong>,
+      Industriestr. 25, 91710 Gunzenhausen, Deutschland. Die Server stehen in
+      Deutschland. Mit dem Anbieter besteht ein Vertrag über die Auftragsverarbeitung
+      nach Art. 28 DSGVO.
+    </p>
+    <p>
+      Beim Aufruf der Website erfasst der Server automatisch Angaben, die Ihr Browser
+      übermittelt, und speichert sie in sogenannten Server-Protokolldateien:
+      IP-Adresse, Datum und Uhrzeit des Zugriffs, die aufgerufene Seite, die zuvor
+      besuchte Seite, Browser und Betriebssystem sowie die übertragene Datenmenge.
+      Diese Angaben werden nicht mit anderen Daten zusammengeführt und dienen allein
+      dem sicheren und störungsfreien Betrieb der Website. Sie werden nach kurzer Zeit
+      automatisch gelöscht.
+    </p>
+    <p>Rechtsgrundlage: Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse am sicheren Betrieb).</p>
 
     <h3>6. Deine Rechte</h3>
     <p>
