@@ -60,7 +60,7 @@ const ANTWORTFRIST = '24 Stunden';
 const GRUSS = "Liebe Grüße\nTatjana\nTonflüstern\nwww.tonfluestern.de";
 
 /* Ausfuehrliche Absenderangaben, falls sie irgendwo gebraucht werden */
-const ABSENDER = "Herzliche Grüße\nTatjana Bleim Muntanion\nTonflüstern – Keramikcafé\nHauptstraße 43, 64711 Erbach\nTelefon: +49 152 29221996";
+const ABSENDER = "Herzliche Grüße\nTatjana Bleim-Muntanion\nTonflüstern – Keramikcafé\nHauptstraße 43, 64711 Erbach\nTelefon: +49 152 29221996";
 
 
 /* ══════════════════════════════════════════════════════════
