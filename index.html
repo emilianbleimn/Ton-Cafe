@@ -431,6 +431,9 @@
       overflow-y: auto; padding: 3rem 1rem;
     }
     .lm.open { display: block; }
+    /* Ohne JavaScript oeffnet die Adresse selbst das Fenster —
+       Impressum und Datenschutz bleiben so immer erreichbar. */
+    html:not(.js) .lm:target { display: block; }
     .lm-inner {
       max-width: 700px; margin: auto; background: var(--bg-0);
       padding: 3rem clamp(1.5rem,5vw,3.5rem); position: relative;
@@ -440,6 +443,7 @@
       font-size: 1.5rem; color: var(--cream-faint); transition: color .3s;
     }
     .lm-close:hover { color: var(--cream); }
+    a.lm-close { text-decoration: none; line-height: 1; }
     .lm-inner h2 { font-family: var(--fd); font-size: 2rem; margin-bottom: 2rem; }
     .lm-inner h3 { font-family: var(--fd); font-size: 1.1rem; margin: 1.6rem 0 .5rem; font-weight: 400; }
     .lm-inner p  { font-size: .88rem; color: var(--cream-mid); line-height: 1.8; margin-bottom: .8rem; }
@@ -690,7 +694,7 @@
             </div>
             <p class="form-legal">
               Mit dem Absenden stimmst du der Verarbeitung deiner Daten zur Bearbeitung deiner Anfrage zu.
-              Details in der <a href="#" onclick="openModal('dse');return false;">Datenschutzerklärung</a>.
+              Details in der <a href="#datenschutz">Datenschutzerklärung</a>.
             </p>
             <div>
               <button type="submit" class="sub-btn" id="bk-sub">Anfrage senden</button>
@@ -717,16 +721,16 @@
     <span>Hauptstraße 43, 64711 Erbach</span>
   </div>
   <ul class="ft-links">
-    <li><a href="#" onclick="openModal('imp');return false;">Impressum</a></li>
-    <li><a href="#" onclick="openModal('dse');return false;">Datenschutz</a></li>
+    <li><a href="#impressum">Impressum</a></li>
+    <li><a href="#datenschutz">Datenschutz</a></li>
   </ul>
   <p class="ft-copy">© 2026 Tonflüstern. Alle Rechte vorbehalten.</p>
 </footer>
 
 <!-- ── IMPRESSUM MODAL ── -->
-<div class="lm" id="lm-imp" role="dialog" aria-modal="true" aria-label="Impressum">
+<div class="lm" id="impressum" role="dialog" aria-modal="true" aria-label="Impressum">
   <div class="lm-inner">
-    <button class="lm-close" onclick="closeModal('imp')" aria-label="Schließen">&times;</button>
+    <a class="lm-close" href="#" role="button" aria-label="Schließen">&times;</a>
     <h2>Impressum</h2>
 
     <h3>Angaben gemäß § 5 DDG</h3>
@@ -763,9 +767,9 @@
 </div>
 
 <!-- ── DATENSCHUTZ MODAL ── -->
-<div class="lm" id="lm-dse" role="dialog" aria-modal="true" aria-label="Datenschutzerklärung">
+<div class="lm" id="datenschutz" role="dialog" aria-modal="true" aria-label="Datenschutzerklärung">
   <div class="lm-inner">
-    <button class="lm-close" onclick="closeModal('dse')" aria-label="Schließen">&times;</button>
+    <a class="lm-close" href="#" role="button" aria-label="Schließen">&times;</a>
     <h2>Datenschutzerklärung</h2>
 
     <h3>1. Verantwortlicher</h3>
@@ -815,6 +819,12 @@
       Beim Aufruf der Seite werden daher keine Daten an Dritte übertragen.
     </p>
     <p>
+      Das gilt auch für die Bezahlung: Auf dieser Website gibt es keinen
+      Bezahlvorgang und keine Schaltfläche eines Zahlungsdienstes. Bezahlt
+      wird erst vor Ort im Café — bar oder per PayPal. Über die Website
+      fließen dabei keine Daten an PayPal.
+    </p>
+    <p>
       Lediglich beim Aufruf der internen Übersichtsseite für den Betrieb wird ein
       technisch notwendiges Sitzungs-Cookie gesetzt. Für Besucher der Website
       entsteht dabei kein Cookie.
@@ -854,7 +864,7 @@
     </p>
 
     <p style="margin-top:2rem;padding-top:1rem;border-top:1px solid rgba(41,27,15,.06);font-size:.74rem;color:var(--cream-faint);">
-      Stand: September 2026 — Dieser Text ist ein Entwurf und ersetzt keine Rechtsberatung.
+      Stand: September 2026
     </p>
   </div>
 </div>
@@ -883,14 +893,27 @@ window.flatpickrDE = {
 };
 </script>
 <script>
+/* Impressum und Datenschutz haben eine eigene Adresse und muessen
+   direkt aufrufbar bleiben — auch von aussen. Die Liste steht hier
+   ganz oben, weil schon die Scroll-Behandlung sie kennen muss.    */
+var RECHTSTEXTE = ['impressum', 'datenschutz'];
+function istRechtstext(hash) {
+  return RECHTSTEXTE.indexOf(String(hash).replace(/^#/, '')) !== -1;
+}
+
 /* ── SCROLL RESTORATION ── */
 if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
-if (window.location.hash) history.replaceState(null, '', window.location.pathname);
-window.scrollTo(0, 0);
+/* Die Seite soll oben beginnen, damit die Vorschau nicht uebersprungen
+   wird. Eine Adresse wie #booking wird darum verworfen — die der
+   Rechtstexte aber nicht, sonst waeren sie nicht mehr verlinkbar. */
+if (window.location.hash && !istRechtstext(window.location.hash)) {
+  history.replaceState(null, '', window.location.pathname);
+}
+if (!istRechtstext(window.location.hash)) window.scrollTo(0, 0);
 
 /* ── LOAD: reveal above-fold + scroll-to-top ── */
 window.addEventListener('load', () => {
-  window.scrollTo(0, 0);
+  if (!istRechtstext(window.location.hash)) window.scrollTo(0, 0);
   requestAnimationFrame(() => {
     document.querySelectorAll('.rv').forEach(el => {
       if (el.getBoundingClientRect().top < window.innerHeight) el.classList.add('on');
@@ -1146,21 +1169,78 @@ bkForm.addEventListener('submit', async e => {
   }
 });
 
-/* ── MODALS ── */
+/* ── IMPRESSUM UND DATENSCHUTZ ──
+   Beide haben eine eigene Adresse: tonfluestern.de/#impressum und
+   tonfluestern.de/#datenschutz. Der Link laesst sich damit weitergeben
+   und aufrufen — auch von aussen, etwa aus einem Branchenverzeichnis.
+   Ist JavaScript abgeschaltet, oeffnet die Adresse das Fenster ueber
+   CSS (:target). Die Rechtstexte sind also immer erreichbar.
+   Die Liste RECHTSTEXTE steht weiter oben bei der Scroll-Behandlung. */
+
 function openModal(id) {
-  document.getElementById('lm-' + id).classList.add('open');
+  var m = document.getElementById(id);
+  if (!m) return;
+  m.classList.add('open');
   document.body.style.overflow = 'hidden';
+  var schliessen = m.querySelector('.lm-close');
+  if (schliessen) schliessen.focus();
 }
+
 function closeModal(id) {
-  document.getElementById('lm-' + id).classList.remove('open');
+  var m = document.getElementById(id);
+  if (!m || !m.classList.contains('open')) return;   // war gar nicht offen
+  m.classList.remove('open');
   document.body.style.overflow = '';
+  // Adresse wieder aufraeumen, ohne die Seite zu bewegen
+  if (location.hash.slice(1) === id) {
+    history.replaceState(null, '', location.pathname + location.search);
+  }
 }
-document.querySelectorAll('.lm').forEach(m => {
-  m.addEventListener('click', e => { if (e.target === m) closeModal(m.id.replace('lm-', '')); });
+
+function alleSchliessen() {
+  RECHTSTEXTE.forEach(closeModal);
+}
+
+/* Klick auf einen Link zu einem Rechtstext */
+document.addEventListener('click', function (e) {
+  var a = e.target.closest ? e.target.closest('a[href]') : null;
+  if (!a) return;
+  var ziel = a.getAttribute('href');
+
+  if (ziel && RECHTSTEXTE.indexOf(ziel.slice(1)) !== -1) {
+    e.preventDefault();
+    history.replaceState(null, '', ziel);
+    openModal(ziel.slice(1));
+    return;
+  }
+  // Schliesskreuz
+  if (a.classList.contains('lm-close')) {
+    e.preventDefault();
+    alleSchliessen();
+  }
 });
-document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') document.querySelectorAll('.lm.open').forEach(m => closeModal(m.id.replace('lm-', '')));
+
+/* Klick auf den Hintergrund schliesst */
+document.querySelectorAll('.lm').forEach(function (m) {
+  m.addEventListener('click', function (e) { if (e.target === m) closeModal(m.id); });
 });
+
+/* Escape schliesst */
+document.addEventListener('keydown', function (e) {
+  if (e.key === 'Escape') alleSchliessen();
+});
+
+/* Direkt aufgerufene Adresse oeffnet das passende Fenster */
+function ausAdresseOeffnen() {
+  var id = location.hash.slice(1);
+  if (RECHTSTEXTE.indexOf(id) !== -1) openModal(id);
+}
+window.addEventListener('hashchange', function () {
+  var id = location.hash.slice(1);
+  RECHTSTEXTE.forEach(function (r) { if (r !== id) closeModal(r); });
+  ausAdresseOeffnen();
+});
+ausAdresseOeffnen();
 </script>
 </body>
 </html>
