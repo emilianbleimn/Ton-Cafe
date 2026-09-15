@@ -1,22 +1,50 @@
 <?php
 /* ══════════════════════════════════════════════════════════
-   DATENSCHUTZERKLAERUNG — EIGENE SEITE
+   IMPRESSUM UND DATENSCHUTZ ALS EIGENE SEITE
    ══════════════════════════════════════════════════════════
-   Erreichbar unter /datenschutz.php — eine Adresse ohne Raute,
-   damit der Link sich ueberall eintragen laesst.
+   Diese Datei zeigt den Rechtstext an, der zu ihrem eigenen
+   DATEINAMEN passt:
 
-   Diese Datei braucht KEINE weitere Datei ausser der
-   index.html. Sie laeuft fuer sich allein — es kann also
-   nichts kaputtgehen, weil beim Hochladen etwas fehlt.
+       impressum.php    -> zeigt das Impressum
+       datenschutz.php  -> zeigt die Datenschutzerklaerung
 
-   Sie haelt auch KEINE eigene Kopie des Rechtstextes,
-   sondern liest ihn bei jedem Aufruf aus der index.html.
-   Damit gibt es den Text nur ein einziges Mal. Wird er dort
-   geaendert, aendert er sich hier automatisch mit.
+   Beide Dateien sind deshalb voellig gleich. Es ist egal,
+   welche du unter welchem Namen hochlaedst — entscheidend
+   ist allein, wie sie auf dem Server heisst. Vertauschen
+   kann man sie damit nicht mehr.
+
+   Sie braucht keine weitere Datei ausser der index.html und
+   haelt auch keine eigene Kopie des Rechtstextes, sondern
+   liest ihn bei jedem Aufruf von dort. Den Text gibt es also
+   nur ein einziges Mal; wird er dort geaendert, aendert er
+   sich hier automatisch mit.
 ══════════════════════════════════════════════════════════ */
 
-$rechtstext_id    = 'datenschutz';
-$rechtstext_titel = 'Datenschutzerklärung';
+/* Welcher Text ist gemeint? Der eigene Dateiname sagt es.
+   Ein angehaengtes "(1)", wie es Browser beim Herunterladen
+   manchmal erzeugen, stoert dabei nicht. */
+$datei = strtolower(basename(__FILE__, '.php'));
+
+if (strncmp($datei, 'impressum', 9) === 0) {
+    $rechtstext_id    = 'impressum';
+    $rechtstext_titel = 'Impressum';
+} elseif (strncmp($datei, 'datenschutz', 11) === 0) {
+    $rechtstext_id    = 'datenschutz';
+    $rechtstext_titel = 'Datenschutzerklärung';
+} else {
+    /* Unter diesem Namen weiss die Datei nicht, was sie
+       zeigen soll. Lieber ehrlich auf die Startseite
+       verweisen, als irgendetwas zu raten. */
+    http_response_code(404);
+    header('Content-Type: text/html; charset=utf-8');
+    echo '<!doctype html><html lang="de"><meta charset="utf-8">'
+       . '<title>Seite nicht gefunden – Tonflüstern</title>'
+       . '<p style="font:1rem/1.7 system-ui;max-width:34rem;margin:4rem auto;padding:0 1.5rem">'
+       . 'Diese Datei muss <strong>impressum.php</strong> oder '
+       . '<strong>datenschutz.php</strong> heißen. '
+       . 'Zur <a href="/">Startseite</a>.</p></html>';
+    exit;
+}
 
 /**
  * Holt den Inhalt eines Rechtstextes aus der index.html.
