@@ -290,7 +290,7 @@ Personen: $pers
 
 $hinweis
 
-Die Bezahlung ist vor Ort bar oder per PayPal möglich. Falls sich noch etwas ändern sollte oder {$w['fragen']} gerne bei mir.
+Die Bezahlung ist vor Ort bar, mit Karte oder per PayPal möglich. Falls sich noch etwas ändern sollte oder {$w['fragen']} gerne bei mir.
 
 Ich freue mich auf eine schöne kreative Zeit mit {$w['dativ']}!
 
