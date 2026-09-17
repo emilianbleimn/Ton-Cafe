@@ -601,7 +601,7 @@
         </div>
         <div class="bk-avail-item">
           <strong>Samstag &amp; Sonntag</strong>
-          <span>Auf Anfrage</span>
+          <span>Auf Anfrage · ab 11 Uhr am besten</span>
         </div>
       </div>
 
@@ -986,6 +986,11 @@ if (kalenderInstanz) kalenderInstanz.destroy();
 kalenderInstanz = flatpickr('#cal-container', {
   inline: true,
   minDate: 'today',
+  // Vorgelesenes Datum auf Deutsch. Ohne das liest der Screenreader
+  // die englische Reihenfolge vor ("September 19, 2026"). Der
+  // Wochentag steht bewusst mit davor — er entscheidet hier ueber
+  // die Oeffnungszeiten.
+  ariaDateFormat: 'l, j. F Y',
   // kein locale-Name noetig: die deutsche Beschriftung ist oben per
   // flatpickr.localize() als Standard gesetzt
   disable: [
@@ -1012,6 +1017,17 @@ kalenderInstanz = flatpickr('#cal-container', {
       const free = freeSeats(date);
       dayElem.title = `${OPEN_HOURS[d]} · noch ${free} ${free === 1 ? 'Platz' : 'Plätze'} frei`;
       if (free < MAX_PER_DAY) dayElem.classList.add('day-limited');
+    }
+
+    /* Was der Tag bedeutet, gehoert auch ins vorgelesene Etikett.
+       Der title allein reicht nicht: sobald ein aria-label gesetzt
+       ist, ueberlesen die meisten Screenreader ihn. Ohne diese
+       Ergaenzung hoert ein blinder Gast nur das Datum und erfaehrt
+       nicht, ob der Tag geschlossen, ausgebucht oder auf Anfrage
+       ist. */
+    if (dayElem.title) {
+      const datum = dayElem.getAttribute('aria-label') || '';
+      dayElem.setAttribute('aria-label', datum + ' – ' + dayElem.title);
     }
   },
   onChange(selectedDates, dateStr) {
