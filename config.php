@@ -55,6 +55,14 @@ const AUTO_ANTWORT = true;
 /* Innerhalb welcher Frist wird geantwortet? Steht so in der Mail. */
 const ANTWORTFRIST = '24 Stunden';
 
+/* Samstag und Sonntag laufen auf Anfrage. Ab welcher Uhrzeit
+   passt ein Termin am besten? Der Hinweis steht dann in der
+   Eingangsbestaetigung fuer das Wochenende.
+   Leer lassen ('') , wenn kein Hinweis erscheinen soll.
+   Achtung: derselbe Hinweis steht auch in der index.html im
+   Kasten "anfrage-note" — dort bei einer Aenderung mitziehen. */
+const WOCHENEND_AB = '11 Uhr';
+
 /* Gruss am Ende aller Nachrichten an Kundinnen und Kunden —
    in den automatischen Mails wie in den Vorlagen der Uebersicht. */
 const GRUSS = "Liebe Grüße\nTatjana\nTonflüstern\nwww.tonfluestern.de";

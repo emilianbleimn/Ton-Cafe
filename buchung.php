@@ -186,6 +186,7 @@ if (AUTO_ANTWORT) {
             'aufWen'   => 'euch',
             'anfrage'  => 'Eure Anfrage',
             'possessiv'=> 'Eure',
+            'abZeit'   => 'wenn ihr ab ' . WOCHENEND_AB . ' kommen könntet',
           ]
         : [
             'moechte'  => 'Sie zu Tonflüstern kommen möchten',
@@ -195,9 +196,16 @@ if (AUTO_ANTWORT) {
             'aufWen'   => 'Sie',
             'anfrage'  => 'Ihre Anfrage',
             'possessiv'=> 'Ihre',
+            'abZeit'   => 'wenn Sie ab ' . WOCHENEND_AB . ' kommen könnten',
           ];
 
     $gruss = GRUSS . "\n";
+
+    /* Hinweis auf die guenstigste Uhrzeit am Wochenende. Ist in
+       der config.php keine Zeit hinterlegt, entfaellt der Satz. */
+    $wochenend_hinweis = (WOCHENEND_AB !== '')
+        ? ' Am besten würde es passen, ' . $w['abZeit'] . '.'
+        : '';
 
     if ($auf_anfr) {
         /* ── Samstag / Sonntag: Anfrage eingegangen ── */
@@ -212,7 +220,8 @@ Angebot: $angebot
 Datum: $datum_kurz
 Personen: $personen
 
-Samstag und Sonntag sind bei uns nur auf Anfrage möglich. Ich schaue, ob ich den Termin einrichten kann, und melde mich innerhalb von " . ANTWORTFRIST . " bei {$w['dativ']} — dann auch mit einer festen Uhrzeit.
+Samstag und Sonntag sind bei uns nur auf Anfrage möglich. Ich schaue, ob ich den Termin einrichten kann, und melde mich innerhalb von " . ANTWORTFRIST . " bei {$w['dativ']} — dann auch mit einer festen Uhrzeit." . $wochenend_hinweis . "
+
 
 Die Bezahlung ist vor Ort bar, mit Karte oder per PayPal möglich. Falls sich noch etwas ändern sollte oder {$w['fragen']} gerne bei mir.
 
