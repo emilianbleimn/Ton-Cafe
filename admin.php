@@ -420,7 +420,16 @@ Ich freue mich auf eine schöne kreative Zeit mit {$w['dativ']}!
             $rid    = 'm' . preg_replace('/[^a-z0-9]/i', '', (string)($a['id'] ?? '')); ?>
           <tr class="<?= $stor ? 'storniert' : '' ?>">
             <td><strong><?= (int)$a['personen'] ?></strong></td>
-            <td><span class="ang"><?= $e($a['angebot'] ?? '—') ?></span></td>
+            <td><span class="ang"><?= $e($a['angebot'] ?? '—') ?></span>
+              <?php /* Am Wochenende gibt es keine feste Zeit — dann steht
+                       hier, ab wann die Gaeste kommen moechten. */
+              if (($a['wunschzeit'] ?? '') !== ''): ?>
+                <br><span style="display:inline-block;margin-top:.3rem;font-size:.76rem;
+                                 color:#7a5230;background:#f0e7d8;padding:.15rem .45rem;
+                                 border-radius:2px;white-space:nowrap;">Wunschzeit:
+                  <strong><?= $e($a['wunschzeit']) ?></strong></span>
+              <?php endif; ?>
+            </td>
             <td>
               <?= $e($a['name'] ?? '') ?><br>
               <span class="st <?= $stor ? 'st-stor' : ($best ? 'st-best' : 'st-offen') ?>">

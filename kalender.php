@@ -113,6 +113,7 @@ foreach ($d['anfragen'] as $a) {
           . "E-Mail:    " . ($a['email'] ?? '—') . "\n"
           . "Telefon:   " . (($a['telefon'] ?? '') !== '' ? $a['telefon'] : '—') . "\n"
           . "Zeit:      " . ($a['zeit'] ?? '—') . "\n"
+          . ((($a['wunschzeit'] ?? '') !== '') ? "Wunschzeit: " . $a['wunschzeit'] . "\n" : '')
           . "Eingegangen am " . ($a['erstellt'] ?? '—') . "\n"
           . (($a['nachricht'] ?? '') !== '' ? "\nNachricht:\n" . $a['nachricht'] . "\n" : '')
           . "\nÜbersicht: https://tonfluestern.de/admin.php";

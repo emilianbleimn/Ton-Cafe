@@ -40,6 +40,7 @@ $telefon  = $feld('telefon', 60);
 $datum    = $feld('wunschtermin', 10);
 $nachricht= $feld('nachricht', 2000);
 $angebot  = $feld('angebot', 60);
+$wunschzeit = $feld('wunschzeit', 60);
 $personen = (int)($_POST['personen'] ?? 0);
 
 /* ── Prüfungen ── */
@@ -66,6 +67,20 @@ $wt        = (int)date('w', strtotime($datum));
 $oeffnung  = OPEN_HOURS[$wt] ?? 'Auf Anfrage';
 $auf_anfr  = !isset(OPEN_HOURS[$wt]);
 
+/* Samstag und Sonntag haben keine festen Zeiten — dort muss die
+   Wunschzeit dabei sein. Im Browser ist das Feld schon als Pflicht
+   gekennzeichnet; hier wird es noch einmal geprueft, weil sich das
+   im Browser umgehen laesst. An den uebrigen Tagen gelten die
+   Oeffnungszeiten, eine mitgeschickte Zeit wird dann verworfen. */
+if ($auf_anfr) {
+    if ($wunschzeit === '') {
+        antwort(['ok' => false,
+                 'fehler' => 'Bitte gib an, ab wann du am Wochenende kommen möchtest.'], 422);
+    }
+} else {
+    $wunschzeit = '';
+}
+
 /* Kennung schon hier erzeugen: nach dem Mailversand wird der Datensatz
    damit wiedergefunden, um festzuhalten ob die Mails rausgingen. */
 $anfrage_id = bin2hex(random_bytes(8));
@@ -73,7 +88,8 @@ $anfrage_id = bin2hex(random_bytes(8));
 /* ── Speichern unter Sperre, damit die Plätze nicht doppelt vergeben werden ── */
 try {
 $ergebnis = mit_sperre(function (array &$d) use (
-    $datum, $personen, $name, $email, $telefon, $nachricht, $oeffnung, $angebot, $anfrage_id
+    $datum, $personen, $name, $email, $telefon, $nachricht, $oeffnung, $angebot, $anfrage_id,
+    $wunschzeit
 ) {
     $noch_frei = frei($d, $datum);
 
@@ -97,6 +113,7 @@ $ergebnis = mit_sperre(function (array &$d) use (
         'telefon'   => $telefon,
         'nachricht' => $nachricht,
         'zeit'      => $oeffnung,
+        'wunschzeit'=> $wunschzeit,
         'status'    => 'offen',
         'erstellt'  => date('Y-m-d H:i:s'),
         'ip'        => substr((string)($_SERVER['REMOTE_ADDR'] ?? ''), 0, 45),
@@ -136,6 +153,7 @@ $text = "Neue Terminanfrage über tonfluestern.de\n"
       . "Angebot:     $angebot\n"
       . "Termin:      $datum_lang\n"
       . "Zeit:        $oeffnung" . ($auf_anfr ? "  (auf Anfrage)" : "") . "\n"
+      . ($wunschzeit !== '' ? "Wunschzeit:  $wunschzeit\n" : '')
       . "Personen:    $personen\n"
       . "Noch frei:   " . $ergebnis['frei'] . " von " . MAX_PER_DAY . "\n\n"
       . "Name:        $name\n"
@@ -219,6 +237,7 @@ wie schön, dass {$w['moechte']}! {$w['anfrage']} ist bei mir angekommen.
 Angebot: $angebot
 Datum: $datum_kurz
 Personen: $personen
+Wunschzeit: $wunschzeit
 
 Samstag und Sonntag sind bei uns nur auf Anfrage möglich. Ich schaue, ob ich den Termin einrichten kann, und melde mich innerhalb von " . ANTWORTFRIST . " bei {$w['dativ']} — dann auch mit einer festen Uhrzeit." . $wochenend_hinweis . "
 
