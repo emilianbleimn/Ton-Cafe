@@ -204,7 +204,7 @@ if (AUTO_ANTWORT) {
             'aufWen'   => 'euch',
             'anfrage'  => 'Eure Anfrage',
             'possessiv'=> 'Eure',
-            'abZeit'   => 'wenn ihr ab ' . WOCHENEND_AB . ' kommen könntet',
+            'abZeit'   => 'wenn ihr ab ' . WOCHENEND_AB . ' ins Studio kommen könntet',
           ]
         : [
             'moechte'  => 'Sie zu Tonflüstern kommen möchten',
@@ -214,7 +214,7 @@ if (AUTO_ANTWORT) {
             'aufWen'   => 'Sie',
             'anfrage'  => 'Ihre Anfrage',
             'possessiv'=> 'Ihre',
-            'abZeit'   => 'wenn Sie ab ' . WOCHENEND_AB . ' kommen könnten',
+            'abZeit'   => 'wenn Sie ab ' . WOCHENEND_AB . ' ins Studio kommen könnten',
           ];
 
     $gruss = GRUSS . "\n";
