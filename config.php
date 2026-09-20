@@ -33,6 +33,15 @@ const VORLAUF_TAGE = 365;
    Formular und Pruefung ziehen die Liste automatisch nach. */
 const ANGEBOTE = ['Keramik bemalen', 'Töpfern'];
 
+/* Zu welchem Anlass kommen die Gaeste? Steht als Auswahl im
+   Formular. Wer den letzten Eintrag waehlt, muss zusaetzlich
+   kurz beschreiben, worum es geht — sonst waere "Sonstiges"
+   eine Antwort, mit der sich nichts anfangen laesst.
+   Aenderst du die Liste, zieht die Pruefung automatisch nach;
+   die Auswahl in der index.html musst du dann mitaendern. */
+const ANLAESSE        = ['Einfach so', 'Geburtstag', 'Team-Event', 'Sonstiges'];
+const ANLASS_FREITEXT = 'Sonstiges';
+
 /* Schluessel fuer den Kalender-Abo-Link (kalender.php).
    Er steht in der Adresse, die du in deinem Kalender eintraegst,
    und schuetzt die Kundendaten vor fremdem Zugriff.

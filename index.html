@@ -354,6 +354,8 @@
        Kasten verborgen ist, darf das Feld kein "required" tragen,
        sonst blockiert der Browser das Absenden mit einer Meldung,
        die niemand sehen kann. Das schaltet das Skript mit um.   */
+    #anlass-frei { display: none; }
+    #anlass-frei.visible { display: flex; }
     #wz-feld { display: none; }
     #wz-feld.visible { display: flex; }
     .wz-hint { display: block; text-transform: none; letter-spacing: 0;
@@ -679,6 +681,24 @@
             </div>
             <div class="fr">
               <div class="fg">
+                <label for="bk-anlass">Anlass *</label>
+                <select id="bk-anlass" name="anlass" required>
+                  <option value="">Bitte wählen …</option>
+                  <option>Einfach so</option>
+                  <option>Geburtstag</option>
+                  <option>Team-Event</option>
+                  <option>Sonstiges</option>
+                </select>
+              </div>
+              <div class="fg" id="anlass-frei">
+                <label for="bk-anlass-text">Worum geht es? *</label>
+                <input type="text" id="bk-anlass-text" name="anlass_text"
+                       placeholder="z. B. Junggesellinnenabschied" maxlength="80" autocomplete="off">
+              </div>
+            </div>
+
+            <div class="fr">
+              <div class="fg">
                 <label for="bk-name">Name *</label>
                 <input type="text" id="bk-name" name="name" required placeholder="Dein Name" autocomplete="name">
               </div>
@@ -979,6 +999,28 @@ const fDate    = document.getElementById('f-date');
 const fTime    = document.getElementById('f-time');
 const fSeats   = document.getElementById('f-seats');
 const persIn   = document.getElementById('bk-pers');
+const anlassIn   = document.getElementById('bk-anlass');
+const anlassFrei = document.getElementById('anlass-frei');
+const anlassText = document.getElementById('bk-anlass-text');
+
+/* "Sonstiges" allein sagt nichts — dann wird kurz nachgefragt.
+   Das "required" wandert mit, wie bei der Wunschzeit: ein
+   verborgenes Pflichtfeld wuerde das Absenden blockieren, ohne
+   dass jemand sieht, woran es liegt. */
+function anlassFreitext() {
+  if (!anlassIn || !anlassFrei || !anlassText) return;
+  const noetig = anlassIn.value === 'Sonstiges';
+  anlassFrei.classList.toggle('visible', noetig);
+  if (noetig) {
+    anlassText.setAttribute('required', '');
+  } else {
+    anlassText.removeAttribute('required');
+    anlassText.value = '';
+  }
+}
+if (anlassIn) anlassIn.addEventListener('change', anlassFreitext);
+anlassFreitext();
+
 const wzFeld   = document.getElementById('wz-feld');
 const wzIn     = document.getElementById('bk-wunschzeit');
 
@@ -1198,6 +1240,8 @@ bkForm.addEventListener('submit', async e => {
       anfNote.classList.remove('visible');
       fullNote.classList.remove('visible');
       wunschzeitZeigen(false);
+      if (anlassIn) anlassIn.value = '';
+      anlassFreitext();
       fDate.value = ''; fTime.value = ''; fSeats.value = '';
       persIn.max = MAX_PER_DAY;
 

@@ -429,6 +429,12 @@ Ich freue mich auf eine schöne kreative Zeit mit {$w['dativ']}!
                                  border-radius:2px;white-space:nowrap;">Wunschzeit:
                   <strong><?= $e($a['wunschzeit']) ?></strong></span>
               <?php endif; ?>
+              <?php /* Anlass — bei "Sonstiges" mit der kurzen Erklaerung */
+              if (($a['anlass'] ?? '') !== ''): ?>
+                <br><span style="display:inline-block;margin-top:.3rem;font-size:.76rem;color:#5e4535;">
+                  <?= $e($a['anlass']) ?><?= ($a['anlass_text'] ?? '') !== ''
+                      ? ' — ' . $e($a['anlass_text']) : '' ?></span>
+              <?php endif; ?>
             </td>
             <td>
               <?= $e($a['name'] ?? '') ?><br>

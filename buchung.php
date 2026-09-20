@@ -41,6 +41,8 @@ $datum    = $feld('wunschtermin', 10);
 $nachricht= $feld('nachricht', 2000);
 $angebot  = $feld('angebot', 60);
 $wunschzeit = $feld('wunschzeit', 60);
+$anlass      = $feld('anlass', 60);
+$anlass_text = $feld('anlass_text', 80);
 $personen = (int)($_POST['personen'] ?? 0);
 
 /* ── Prüfungen ── */
@@ -52,6 +54,16 @@ if ($email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
 }
 if (!in_array($angebot, ANGEBOTE, true)) {
     antwort(['ok' => false, 'fehler' => 'Bitte wähle aus, ob du Keramik bemalen oder töpfern möchtest.'], 422);
+}
+if (!in_array($anlass, ANLAESSE, true)) {
+    antwort(['ok' => false, 'fehler' => 'Bitte wähle aus, zu welchem Anlass ihr kommt.'], 422);
+}
+if ($anlass === ANLASS_FREITEXT) {
+    if ($anlass_text === '') {
+        antwort(['ok' => false, 'fehler' => 'Bitte beschreibe kurz, worum es geht.'], 422);
+    }
+} else {
+    $anlass_text = '';          // gehoert nur zum Freitext-Eintrag
 }
 if ($personen < 1 || $personen > MAX_PER_DAY) {
     antwort(['ok' => false, 'fehler' => 'Bitte gib eine Personenanzahl zwischen 1 und ' . MAX_PER_DAY . ' an.'], 422);
@@ -89,7 +101,7 @@ $anfrage_id = bin2hex(random_bytes(8));
 try {
 $ergebnis = mit_sperre(function (array &$d) use (
     $datum, $personen, $name, $email, $telefon, $nachricht, $oeffnung, $angebot, $anfrage_id,
-    $wunschzeit
+    $wunschzeit, $anlass, $anlass_text
 ) {
     $noch_frei = frei($d, $datum);
 
@@ -114,6 +126,8 @@ $ergebnis = mit_sperre(function (array &$d) use (
         'nachricht' => $nachricht,
         'zeit'      => $oeffnung,
         'wunschzeit'=> $wunschzeit,
+        'anlass'     => $anlass,
+        'anlass_text'=> $anlass_text,
         'status'    => 'offen',
         'erstellt'  => date('Y-m-d H:i:s'),
         'ip'        => substr((string)($_SERVER['REMOTE_ADDR'] ?? ''), 0, 45),
@@ -154,6 +168,7 @@ $text = "Neue Terminanfrage über tonfluestern.de\n"
       . "Termin:      $datum_lang\n"
       . "Zeit:        $oeffnung" . ($auf_anfr ? "  (auf Anfrage)" : "") . "\n"
       . ($wunschzeit !== '' ? "Wunschzeit:  $wunschzeit\n" : '')
+      . "Anlass:      $anlass" . ($anlass_text !== '' ? " — $anlass_text" : '') . "\n"
       . "Personen:    $personen\n"
       . "Noch frei:   " . $ergebnis['frei'] . " von " . MAX_PER_DAY . "\n\n"
       . "Name:        $name\n"
