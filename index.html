@@ -187,6 +187,16 @@
       display: block; width: 42px; height: 42px; flex-shrink: 0;
       background: url(favicon.png) no-repeat center / contain;
     }
+    .nav-link {
+      font-size: .68rem; letter-spacing: .16em; text-transform: uppercase;
+      color: var(--cream-mid); margin-right: 1.4rem;
+      border-bottom: 1px solid transparent; padding-bottom: .15rem;
+      transition: color .3s, border-color .3s;
+    }
+    .nav-link:hover { color: var(--bronze); border-color: var(--bronze); }
+    /* Auf schmalen Geraeten wuerde der Text neben dem Knopf umbrechen */
+    @media (max-width: 560px) { .nav-link { display: none; } }
+
     .nav-book {
       font-size: .68rem; letter-spacing: .16em; text-transform: uppercase;
       padding: .55rem 1.4rem;
@@ -361,6 +371,51 @@
     .wz-hint { display: block; text-transform: none; letter-spacing: 0;
                color: var(--cream-faint); font-size: .74rem; margin-top: .15rem; }
 
+    /* ── KINDERGEBURTSTAG ── */
+    #kigeb { padding: clamp(4rem,9vw,7rem) clamp(1.5rem,6vw,4rem); background: var(--bg-1); }
+    .kg-inner { max-width: 1100px; margin: 0 auto; }
+    .kg-kopf { max-width: 640px; margin-bottom: clamp(2.5rem,5vw,4rem); }
+    .kg-kopf p { font-size: .95rem; color: var(--cream-mid); line-height: 1.95; margin-top: 1.2rem; }
+
+    /* Die harten Zahlen zuerst — danach sucht man beim Planen. */
+    .kg-fakten { display: flex; flex-wrap: wrap; gap: .6rem; margin-top: 1.8rem; }
+    .kg-fakt {
+      font-size: .78rem; color: var(--bronze);
+      background: var(--bg-0); border-left: 2px solid var(--bronze);
+      padding: .5rem .9rem; line-height: 1.5;
+    }
+    .kg-fakt strong { color: var(--cream); }
+
+    .kg-block { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(1.5rem,4vw,3.5rem);
+                align-items: center; margin-bottom: clamp(3rem,6vw,5rem); }
+    .kg-block:last-of-type { margin-bottom: 0; }
+    .kg-block > figure { margin: 0; }
+    .kg-block img { width: 100%; height: clamp(260px,42vw,460px); object-fit: cover; display: block; }
+    .kg-block--gedreht > figure { order: 2; }
+    .kg-text h3 { font-family: var(--fd); font-weight: 400;
+                  font-size: clamp(1.4rem,2.6vw,2rem); margin-bottom: .4rem; }
+    .kg-text .kg-sub { font-size: .7rem; letter-spacing: .2em; text-transform: uppercase;
+                       color: var(--cream-faint); display: block; margin-bottom: 1rem; }
+    .kg-text p { font-size: .9rem; color: var(--cream-mid); line-height: 1.9; margin-bottom: .9rem; }
+    .kg-text strong { color: var(--cream); }
+    .kg-text ul { list-style: none; margin: 0 0 .9rem; padding: 0; }
+    .kg-text li { font-size: .9rem; color: var(--cream-mid); line-height: 1.8;
+                  padding-left: 1.1rem; position: relative; margin-bottom: .35rem; }
+    .kg-text li::before { content: '·'; position: absolute; left: .25rem; color: var(--bronze); font-weight: 700; }
+
+    .kg-preis { display: inline-block; font-family: var(--fd); font-size: 1.15rem;
+                color: var(--terra); margin: .2rem 0 1rem; }
+
+    .kg-ruf { margin-top: clamp(2.5rem,5vw,4rem); padding-top: 1.8rem;
+              border-top: 1px solid rgba(122,82,48,.15); font-size: .9rem; color: var(--cream-mid); }
+    .kg-verweis { color: var(--bronze); border-bottom: 1px solid var(--bronze); padding-bottom: .1rem; }
+    .kg-verweis:hover { color: var(--terra); border-color: var(--terra); }
+
+    @media (max-width: 760px) {
+      .kg-block { grid-template-columns: 1fr; }
+      .kg-block--gedreht > figure { order: 0; }
+    }
+
     /* form fields */
     .bk-fields { display: flex; flex-direction: column; gap: 1.2rem; }
     .fg { display: flex; flex-direction: column; gap: .4rem; }
@@ -516,6 +571,7 @@
 <!-- ── NAV ── -->
 <nav id="nav" role="navigation" aria-label="Hauptnavigation">
   <a href="#hero" class="nav-emblem" aria-label="Zurück zur Startseite"></a>
+  <a class="nav-link" href="#kigeb">Kindergeburtstag</a>
   <a class="nav-book" href="#booking">Termin anfragen</a>
 </nav>
 
@@ -583,11 +639,148 @@
   </div>
 </section>
 
+<!-- ── FOTO BREITE: Uebergang zum Kindergeburtstag ── -->
+<div style="height:340px;overflow:hidden;background:var(--bg-3);">
+  <img src="kbschalen.jpg" alt="Gestapelte Schalen und Tassen im Regal" loading="lazy"
+       style="width:100%;height:100%;object-fit:cover;object-position:center;">
+</div>
+
+<!-- ── KINDERGEBURTSTAG ── -->
+<section id="kigeb" aria-labelledby="kg-h">
+  <div class="kg-inner">
+
+    <div class="kg-kopf rv">
+      <span class="eyebrow">Feiern</span>
+      <span class="gold-rule"></span>
+      <h2 id="kg-h" class="dmd">Kindergeburtstag<br><em>bei Tonflüstern</em></h2>
+      <p>
+        Gemeinsam kreativ sein und dabei einen besonderen Tag erleben: Ab dem
+        <strong>7. Geburtstag</strong> können Kinder bei uns Keramik bemalen oder
+        mit Ton gestalten — und nehmen am Ende eine ganz persönliche Erinnerung
+        mit nach Hause.
+      </p>
+      <div class="kg-fakten">
+        <span class="kg-fakt">ab <strong>7 Jahren</strong></span>
+        <span class="kg-fakt">ab 10 Personen <strong>30 % Rabatt</strong></span>
+        <span class="kg-fakt">Töpfern <strong>23 € pro Kind</strong></span>
+        <span class="kg-fakt">Töpfern bis zu <strong>3 Stunden</strong></span>
+      </div>
+    </div>
+
+    <!-- Keramik bemalen -->
+    <div class="kg-block rv">
+      <figure>
+        <img src="kbauswahl.jpg" alt="Regal mit unbemalten Keramikrohlingen zur Auswahl" loading="lazy" width="1066" height="1600">
+      </figure>
+      <div class="kg-text">
+        <h3>Keramik bemalen</h3>
+        <span class="kg-sub">Der eigene Rohling, ganz individuell</span>
+        <p>
+          Die Kinder lassen ihrer Fantasie freien Lauf und gestalten ihren eigenen
+          Keramikrohling. So entsteht gleichzeitig eine persönliche und bleibende
+          Erinnerung an diesen besonderen Tag.
+        </p>
+        <p>
+          Damit die Kinder während der Feier gut begleitet werden, wäre es schön,
+          wenn eine <strong>erwachsene Begleitperson</strong> mit dabei ist.
+          Natürlich darf sie auf Wunsch auch selbst einen Keramikrohling bemalen —
+          dieser wird regulär berechnet.
+        </p>
+        <p>
+          Vorab könnt ihr gerne vorbeikommen und euch einen Überblick über die
+          Keramikauswahl verschaffen. Dabei dürft ihr <strong>drei Rohlinge</strong>
+          aus einer ähnlichen Preiskategorie aussuchen, die den Kindern am
+          Geburtstag zur Wahl stehen. Alternativ sucht sich jedes Kind seinen
+          Rohling vor Ort selbst aus.
+        </p>
+      </div>
+    </div>
+
+    <!-- Töpfern -->
+    <div class="kg-block kg-block--gedreht rv">
+      <figure>
+        <img src="kbwerkbank.jpg" alt="Töpferwerkzeug und eine frisch geformte Schale" loading="lazy" width="1600" height="1066">
+      </figure>
+      <div class="kg-text">
+        <h3>Töpfern</h3>
+        <span class="kg-sub">Mit den Händen etwas Eigenes formen</span>
+        <p>
+          Aus einem Stück Ton entsteht etwas ganz Eigenes: Die Kinder formen
+          selbst und gestalten ihr Werkstück mit vielen kleinen Details.
+          Für die Feier stehen insgesamt <strong>bis zu drei Stunden</strong> zur
+          Verfügung.
+        </p>
+        <p>
+          Das Geburtstagskind entscheidet vorab, was die Gruppe gemeinsam töpfert —
+          entweder ein <strong>Schälchen</strong> oder eine <strong>Tasse</strong>.
+          Ich zeige den Kindern Schritt für Schritt den Grundaufbau, anschließend
+          darf jedes Kind sein Werk nach den eigenen Vorstellungen verzieren.
+        </p>
+        <p>
+          Zum Abschluss sucht sich jedes Kind eine Glasurfarbe aus. Nach dem
+          vollständigen Trocknen werden die Werkstücke von mir glasiert und
+          gebrannt.
+        </p>
+        <span class="kg-preis">23 € pro Kind</span>
+      </div>
+    </div>
+
+    <!-- Tisch, Verpflegung, Abholung -->
+    <div class="kg-block rv">
+      <figure>
+        <img src="kbtische.jpg" alt="Liebevoll gedeckte Tische im Cafébereich" loading="lazy" width="1066" height="1600">
+      </figure>
+      <div class="kg-text">
+        <h3>Tisch &amp; Verpflegung</h3>
+        <span class="kg-sub">Was ich vorbereite, was ihr mitbringt</span>
+        <p>
+          Den Tisch für die Geburtstagsfeier dekoriere ich liebevoll für euch.
+        </p>
+        <ul>
+          <li>Süßigkeiten, kleine Snacks und Knabbereien dürft ihr gerne mitbringen</li>
+          <li>Am besten eignen sich <strong>trockene Speisen</strong> — Muffins, trockener Kuchen, Kekse oder Salzstangen</li>
+          <li>Passende Schälchen zum Befüllen sowie Gläser stelle ich zur Verfügung</li>
+          <li>Eigene Süßgetränke dürft ihr mitbringen, <strong>Wasser gibt es kostenfrei</strong></li>
+        </ul>
+        <p>
+          Sobald alle Werkstücke fertig sind, gebe ich im WhatsApp-Kanal
+          <strong>„Tonflüstern – Keramik abholbereit"</strong> Bescheid. Sie können
+          dann gesammelt von einer zuständigen erwachsenen Person abgeholt und
+          privat an die Kinder verteilt werden.
+        </p>
+      </div>
+    </div>
+
+    <div class="kg-block kg-block--gedreht rv">
+      <figure>
+        <img src="kbfenster.jpg" alt="Schaufenster von Tonflüstern in der Hauptstraße" loading="lazy" width="1066" height="1600">
+      </figure>
+      <div class="kg-text">
+        <h3>Lust auf eine Feier bei uns?</h3>
+        <span class="kg-sub">So kommt ihr zu einem Termin</span>
+        <p>
+          Schick mir einfach eine <a href="#booking" class="kg-verweis">Anfrage</a>
+          und wähle als Anlass <strong>„Kindergeburtstag"</strong>. Schreib mir gerne
+          dazu, wie alt die Kinder sind und ob ihr bemalen oder töpfern möchtet —
+          dann melde ich mich innerhalb von 24 Stunden bei euch.
+        </p>
+        <p>
+          Lieber persönlich? Ruf an unter
+          <a href="tel:+4915229221996" class="kg-verweis">+49 152 29221996</a>
+          oder komm einfach in der Hauptstraße 43 vorbei.
+        </p>
+      </div>
+    </div>
+
+  </div>
+</section>
+
 <!-- ── FOTO 4 VOLLE BREITE ── -->
 <div style="height:400px;overflow:hidden;background:var(--bg-3);">
   <img src="DSC_5424.JPG" alt="Café-Bereich im Tonflüstern" loading="lazy"
        style="width:100%;height:100%;object-fit:cover;object-position:center;">
 </div>
+
 
 <!-- ── BOOKING ── -->
 <section id="booking" aria-labelledby="bk-h">
@@ -685,6 +878,7 @@
                 <select id="bk-anlass" name="anlass" required>
                   <option value="">Bitte wählen …</option>
                   <option>Einfach so</option>
+                  <option>Kindergeburtstag</option>
                   <option>Geburtstag</option>
                   <option>Team-Event</option>
                   <option>Sonstiges</option>

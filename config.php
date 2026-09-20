@@ -39,7 +39,7 @@ const ANGEBOTE = ['Keramik bemalen', 'Töpfern'];
    eine Antwort, mit der sich nichts anfangen laesst.
    Aenderst du die Liste, zieht die Pruefung automatisch nach;
    die Auswahl in der index.html musst du dann mitaendern. */
-const ANLAESSE        = ['Einfach so', 'Geburtstag', 'Team-Event', 'Sonstiges'];
+const ANLAESSE        = ['Einfach so', 'Kindergeburtstag', 'Geburtstag', 'Team-Event', 'Sonstiges'];
 const ANLASS_FREITEXT = 'Sonstiges';
 
 /* Schluessel fuer den Kalender-Abo-Link (kalender.php).
