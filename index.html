@@ -391,6 +391,10 @@
     .kg-block:last-of-type { margin-bottom: 0; }
     .kg-block > figure { margin: 0; }
     .kg-block img { width: 100%; height: clamp(260px,42vw,460px); object-fit: cover; display: block; }
+    /* Zwei Bilder in einem Block: untereinander, jedes etwas
+       niedriger, damit der Block nicht aus der Reihe faellt. */
+    .kg-bilder { display: grid; gap: 6px; }
+    .kg-bilder img { height: clamp(180px,24vw,280px); }
     .kg-block--gedreht > figure { order: 2; }
     .kg-text h3 { font-family: var(--fd); font-weight: 400;
                   font-size: clamp(1.4rem,2.6vw,2rem); margin-bottom: .4rem; }
@@ -727,8 +731,9 @@
 
     <!-- Tisch, Verpflegung, Abholung -->
     <div class="kg-block rv">
-      <figure>
+      <figure class="kg-bilder">
         <img src="kbtheke.jpg" alt="Theke mit Kaffeemaschine im Cafébereich" loading="lazy" width="1600" height="1066">
+        <img src="kbtische.jpg" alt="Gedeckte Tische im Cafébereich" loading="lazy" width="1066" height="1600">
       </figure>
       <div class="kg-text">
         <h3>Tisch &amp; Verpflegung</h3>
