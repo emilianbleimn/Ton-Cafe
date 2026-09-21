@@ -42,6 +42,20 @@ const ANGEBOTE = ['Keramik bemalen', 'Töpfern'];
 const ANLAESSE        = ['Einfach so', 'Kindergeburtstag', 'Geburtstag', 'Team-Event', 'Sonstiges'];
 const ANLASS_FREITEXT = 'Sonstiges';
 
+/* ── Bewertungen ──────────────────────────────────────────
+   Eine Bewertung erscheint NICHT sofort. Sie landet erst in
+   der Uebersicht und wird dort freigegeben. Alles andere waere
+   fahrlaessig: ein oeffentlich beschreibbares Feld im Netz ist
+   innerhalb von Tagen voller Werbung, und bis jemand es merkt,
+   steht sie auf der Startseite.
+
+   BEWERTUNGEN_AN auf false setzt das Ganze still: das Formular
+   verschwindet, bereits freigegebene Bewertungen bleiben stehen. */
+const BEWERTUNGEN_AN      = true;
+const BEWERTUNG_MAX_ZEICHEN = 800;      // Laenge des Textes
+const BEWERTUNG_ANZEIGE     = 12;       // wie viele auf der Seite erscheinen
+const BEWERTUNG_SPERRE_MIN  = 10;       // Minuten, bevor dieselbe Person erneut schreiben darf
+
 /* Schluessel fuer den Kalender-Abo-Link (kalender.php).
    Er steht in der Adresse, die du in deinem Kalender eintraegst,
    und schuetzt die Kundendaten vor fremdem Zugriff.
@@ -126,7 +140,7 @@ function daten_verzeichnis(): void {
  * die leere Struktur.
  */
 function daten_laden(): ?array {
-    $leer = ['anfragen' => [], 'manuell' => []];
+    $leer = ['anfragen' => [], 'manuell' => [], 'bewertungen' => []];
 
     if (!is_file(DATA_FILE)) {
         return $leer;                       // gibt es noch nicht — in Ordnung
@@ -156,14 +170,17 @@ function daten_laden(): ?array {
     }
 
     return [
-        'anfragen' => is_array($d['anfragen'] ?? null) ? $d['anfragen'] : [],
-        'manuell'  => is_array($d['manuell']  ?? null) ? $d['manuell']  : [],
+        'anfragen'    => is_array($d['anfragen']    ?? null) ? $d['anfragen']    : [],
+        'manuell'     => is_array($d['manuell']     ?? null) ? $d['manuell']     : [],
+        // Kam spaeter dazu: aeltere Datendateien haben den Schluessel
+        // nicht. Fehlt er, ist das kein Fehler, sondern nur leer.
+        'bewertungen' => is_array($d['bewertungen'] ?? null) ? $d['bewertungen'] : [],
     ];
 }
 
 /** Wie daten_laden(), aber nie null — fuer reine Leseansichten. */
 function daten_laden_sicher(): array {
-    return daten_laden() ?? ['anfragen' => [], 'manuell' => []];
+    return daten_laden() ?? ['anfragen' => [], 'manuell' => [], 'bewertungen' => []];
 }
 
 /** Daten atomar speichern (erst in temporäre Datei, dann umbenennen). */

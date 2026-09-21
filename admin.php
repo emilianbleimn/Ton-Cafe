@@ -69,6 +69,35 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
     }
 
     // Anfrage stornieren -> Plätze werden wieder frei
+    if (isset($_POST['bw_frei'])) {
+        $id = (string)$_POST['bw_frei'];
+        mit_sperre(function (array &$d) use ($id) {
+            foreach ($d['bewertungen'] as &$b) {
+                if (($b['id'] ?? '') === $id) { $b['status'] = 'frei'; }
+            }
+        });
+        $hinweis = 'Bewertung freigegeben — sie steht jetzt auf der Website.';
+    }
+    if (isset($_POST['bw_zurueck'])) {
+        $id = (string)$_POST['bw_zurueck'];
+        mit_sperre(function (array &$d) use ($id) {
+            foreach ($d['bewertungen'] as &$b) {
+                if (($b['id'] ?? '') === $id) { $b['status'] = 'neu'; }
+            }
+        });
+        $hinweis = 'Bewertung von der Website genommen.';
+    }
+    if (isset($_POST['bw_loeschen'])) {
+        $id = (string)$_POST['bw_loeschen'];
+        mit_sperre(function (array &$d) use ($id) {
+            $d['bewertungen'] = array_values(array_filter(
+                $d['bewertungen'],
+                fn($b) => ($b['id'] ?? '') !== $id
+            ));
+        });
+        $hinweis = 'Bewertung gelöscht.';
+    }
+
     if (isset($_POST['stornieren'])) {
         $id = (string)$_POST['stornieren'];
         mit_sperre(function (array &$d) use ($id) {
@@ -515,6 +544,60 @@ Ich freue mich auf eine schöne kreative Zeit mit {$w['dativ']}!
       <?php endif; ?>
     </div>
   <?php endforeach; ?>
+
+  <?php
+  /* ── BEWERTUNGEN ──────────────────────────────────────────
+     Neue zuerst: das sind die, die auf eine Entscheidung warten.
+     Nichts davon steht auf der Website, solange es nicht
+     freigegeben wurde.                                       */
+  $bw_neu  = [];
+  $bw_frei = [];
+  foreach (array_reverse($d['bewertungen']) as $b) {
+      if (($b['status'] ?? 'neu') === 'frei') { $bw_frei[] = $b; } else { $bw_neu[] = $b; }
+  }
+  $sterne = fn(int $n) => str_repeat('★', max(0, min(5, $n))) . str_repeat('☆', 5 - max(0, min(5, $n)));
+  ?>
+  <div class="manuell">
+    <h2>Bewertungen<?= $bw_neu ? ' — ' . count($bw_neu) . ' wartet' . (count($bw_neu) === 1 ? '' : 'en') . ' auf dich' : '' ?></h2>
+    <p>
+      Neue Bewertungen stehen <strong>nicht</strong> auf der Website. Sie erscheinen
+      dort erst, wenn du sie hier freigibst.
+    </p>
+
+    <?php if (!$bw_neu && !$bw_frei): ?>
+      <p style="color:#a8917a">Noch keine Bewertungen eingegangen.</p>
+    <?php endif; ?>
+
+    <?php foreach ([['Wartet auf Freigabe', $bw_neu, false], ['Steht auf der Website', $bw_frei, true]] as [$titel, $gruppe, $ist_frei]):
+      if (!$gruppe) continue; ?>
+      <h3 style="font-size:.8rem;letter-spacing:.14em;text-transform:uppercase;color:#7a5230;margin:1.4rem 0 .6rem;">
+        <?= $e($titel) ?> (<?= count($gruppe) ?>)
+      </h3>
+      <?php foreach ($gruppe as $b): ?>
+        <div style="background:#fff;border-left:3px solid <?= $ist_frei ? '#4a7a3a' : '#a84c2a' ?>;padding:.8rem 1rem;margin-bottom:.6rem;">
+          <div style="font-size:.85rem;">
+            <strong><?= $e($b['name'] ?? '') ?></strong>
+            <span style="color:#c8a24a;letter-spacing:.1em;"><?= $sterne((int)($b['sterne'] ?? 0)) ?></span>
+            <span style="color:#a8917a;font-size:.75rem;">
+              <?= $e(date('d.m.Y H:i', strtotime($b['erstellt'] ?? 'now'))) ?>
+            </span>
+          </div>
+          <p style="font-size:.85rem;color:#5e4535;margin:.4rem 0 .6rem;white-space:pre-wrap;"><?= $e($b['text'] ?? '') ?></p>
+          <form method="post" style="display:inline">
+            <?php if ($ist_frei): ?>
+              <button type="submit" name="bw_zurueck" value="<?= $e($b['id'] ?? '') ?>">Von der Website nehmen</button>
+            <?php else: ?>
+              <button type="submit" name="bw_frei" value="<?= $e($b['id'] ?? '') ?>" class="gruen">Freigeben</button>
+            <?php endif; ?>
+          </form>
+          <form method="post" style="display:inline"
+                onsubmit="return confirm('Diese Bewertung endgültig löschen?')">
+            <button type="submit" name="bw_loeschen" value="<?= $e($b['id'] ?? '') ?>">Löschen</button>
+          </form>
+        </div>
+      <?php endforeach; ?>
+    <?php endforeach; ?>
+  </div>
 
   <div class="manuell">
     <h2>Plätze von Hand blocken</h2>

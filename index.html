@@ -420,6 +420,58 @@
       .kg-block--gedreht > figure { order: 0; }
     }
 
+    /* ── REFERENZEN ── */
+    #refs { padding: clamp(4rem,9vw,7rem) clamp(1.5rem,6vw,4rem); }
+    .rf-inner { max-width: 1100px; margin: 0 auto; }
+    .rf-kopf { max-width: 640px; margin-bottom: 2.5rem; }
+    .rf-kopf p { font-size: .95rem; color: var(--cream-mid); line-height: 1.95; margin-top: 1.2rem; }
+    .rf-schnitt { display: flex; align-items: baseline; gap: .7rem; margin-top: 1.4rem; flex-wrap: wrap; }
+    .rf-schnitt b { font-family: var(--fd); font-size: 2rem; font-weight: 400; color: var(--cream); }
+    .rf-schnitt .rf-sterne { font-size: 1.1rem; }
+    .rf-schnitt span { font-size: .8rem; color: var(--cream-faint); }
+
+    .rf-sterne { color: #c8a24a; letter-spacing: .12em; white-space: nowrap; }
+
+    .rf-liste { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+                gap: 1rem; margin-bottom: clamp(2.5rem,5vw,4rem); }
+    .rf-karte { background: var(--bg-1); border-left: 3px solid var(--bronze);
+                padding: 1.2rem 1.4rem; }
+    .rf-karte .rf-oben { display: flex; justify-content: space-between; align-items: baseline;
+                         gap: .6rem; margin-bottom: .5rem; flex-wrap: wrap; }
+    .rf-karte strong { font-family: var(--fd); font-weight: 400; font-size: 1rem; }
+    .rf-karte time { font-size: .72rem; color: var(--cream-faint); }
+    .rf-karte p { font-size: .88rem; color: var(--cream-mid); line-height: 1.8;
+                  margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+    .rf-leer { font-size: .9rem; color: var(--cream-faint); margin-bottom: 2.5rem; }
+
+    /* Formular */
+    .rf-form { max-width: 640px; }
+    .rf-form h3 { font-family: var(--fd); font-weight: 400;
+                  font-size: clamp(1.3rem,2.4vw,1.7rem); margin-bottom: .4rem; }
+    .rf-form > p { font-size: .85rem; color: var(--cream-mid); line-height: 1.8; margin-bottom: 1.6rem; }
+
+    /* Sternwahl: die Eingabefelder liegen in umgekehrter Reihenfolge
+       im Dokument, damit sich per CSS alle Sterne links vom gewaehlten
+       mitfaerben lassen. Die Anzeige dreht row-reverse wieder um. */
+    /* Die Sterne stehen in einem .fg-Block, und dessen Regel
+       ".fg label" steht weiter unten im Stylesheet. Bei gleicher
+       Gewichtung gewinnt die spaetere — die Sterne waeren sonst
+       11 px gross, in Grossbuchstaben und in voller Bronzefarbe.
+       Das "#refs" davor wiegt schwerer und stellt das richtig.  */
+    #refs .rf-wahl { display: flex; flex-direction: row-reverse; justify-content: flex-end; gap: .15rem; }
+    #refs .rf-wahl input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+    #refs .rf-wahl label { font-size: 1.7rem; line-height: 1; color: rgba(122,82,48,.22);
+                     letter-spacing: 0; text-transform: none;
+                     cursor: pointer; transition: color .2s; padding: 0 .05rem; }
+    #refs .rf-wahl input:checked ~ label,
+    #refs .rf-wahl label:hover, #refs .rf-wahl label:hover ~ label { color: #c8a24a; }
+    #refs .rf-wahl input:focus-visible + label { outline: 2px solid var(--bronze); outline-offset: 2px; }
+
+    .rf-hinweis { font-size: .78rem; color: var(--cream-faint); line-height: 1.7; margin-top: .8rem; }
+    .rf-meldung { font-size: .88rem; padding: .9rem 1.2rem; margin-top: 1rem; display: none; }
+    .rf-meldung.gut  { display: block; background: var(--bg-2); border-left: 3px solid var(--bronze); color: var(--cream); }
+    .rf-meldung.fehl { display: block; background: rgba(168,76,42,.1); border-left: 3px solid var(--terra); color: var(--terra); }
+
     /* form fields */
     .bk-fields { display: flex; flex-direction: column; gap: 1.2rem; }
     .fg { display: flex; flex-direction: column; gap: .4rem; }
@@ -780,6 +832,83 @@
   </div>
 </section>
 
+<!-- ── REFERENZEN ── -->
+<section id="refs" aria-labelledby="rf-h">
+  <div class="rf-inner">
+
+    <div class="rf-kopf rv">
+      <span class="eyebrow">Referenzen</span>
+      <span class="gold-rule"></span>
+      <h2 id="rf-h" class="dmd">Das sagen<br><em>unsere Gäste</em></h2>
+      <div id="rf-schnitt" class="rf-schnitt" hidden>
+        <b id="rf-wert"></b>
+        <span class="rf-sterne" id="rf-bild"></span>
+        <span id="rf-anzahl"></span>
+      </div>
+    </div>
+
+    <div id="rf-liste" class="rf-liste rv rv-d1"></div>
+    <p id="rf-leer" class="rf-leer" hidden>
+      Hier ist noch nichts — magst du die erste Bewertung schreiben?
+    </p>
+
+    <div class="rf-form rv rv-d1" id="rf-formbereich">
+      <h3>Wie war es bei uns?</h3>
+      <p>
+        Über ein paar Zeilen freue ich mich sehr. Deine Bewertung erscheint
+        nach einer kurzen Prüfung hier auf der Seite.
+      </p>
+
+      <form id="rf-form" novalidate>
+        <div style="position:absolute;left:-9999px;" aria-hidden="true">
+          <label>Website<input type="text" name="website" tabindex="-1" autocomplete="off"></label>
+        </div>
+
+        <div class="bk-fields">
+          <div class="fr">
+            <div class="fg">
+              <label for="rf-name">Dein Name *</label>
+              <input type="text" id="rf-name" name="name" required maxlength="60"
+                     placeholder="Vorname genügt" autocomplete="name">
+            </div>
+            <div class="fg">
+              <label id="rf-sternlabel">Deine Bewertung *</label>
+              <div class="rf-wahl" role="radiogroup" aria-labelledby="rf-sternlabel">
+                <input type="radio" id="rf-s5" name="sterne" value="5" required><label for="rf-s5" title="5 von 5 Sternen">★</label>
+                <input type="radio" id="rf-s4" name="sterne" value="4"><label for="rf-s4" title="4 von 5 Sternen">★</label>
+                <input type="radio" id="rf-s3" name="sterne" value="3"><label for="rf-s3" title="3 von 5 Sternen">★</label>
+                <input type="radio" id="rf-s2" name="sterne" value="2"><label for="rf-s2" title="2 von 5 Sternen">★</label>
+                <input type="radio" id="rf-s1" name="sterne" value="1"><label for="rf-s1" title="1 von 5 Sternen">★</label>
+              </div>
+            </div>
+          </div>
+
+          <div class="fg">
+            <label for="rf-text">Deine Erfahrung *</label>
+            <textarea id="rf-text" name="text" required maxlength="800"
+                      placeholder="Was hat dir gefallen? Was nimmst du mit?"></textarea>
+          </div>
+
+          <div>
+            <button type="submit" class="sub-btn" id="rf-sub">Bewertung senden</button>
+          </div>
+        </div>
+      </form>
+
+      <p id="rf-meldung" class="rf-meldung" role="status"></p>
+
+      <p class="rf-hinweis">
+        Dein Name und dein Text erscheinen nach der Prüfung öffentlich auf dieser
+        Seite — schreib also gerne nur den Vornamen. Wir lesen jede Bewertung vor
+        der Veröffentlichung, prüfen aber nicht nach, ob jede Person tatsächlich
+        bei uns war. Mehr dazu in der
+        <a href="#datenschutz">Datenschutzerklärung</a>.
+      </p>
+    </div>
+
+  </div>
+</section>
+
 <!-- ── FOTO BREITE: Uebergang zum Anfrageformular ── -->
 <div style="height:400px;overflow:hidden;background:var(--bg-3);">
   <img src="kbauslage.jpg" alt="Schaufensterauslage mit Keramik zum Bemalen" loading="lazy"
@@ -1020,12 +1149,12 @@
       Diese Angaben werden <strong>auf unserem Webspace beim Hosting-Anbieter</strong>
       gespeichert und zusätzlich per E-Mail an uns übermittelt. Das Postfach
       keramikcafe@tonfluestern.de gehört zum selben Hosting-Paket — es ist also
-      derselbe Anbieter, den Punkt 5 nennt. Ein weiterer E-Mail-Dienst ist nicht
+      derselbe Anbieter, den Punkt 6 nennt. Ein weiterer E-Mail-Dienst ist nicht
       beteiligt.</p>
     <p>
       Eine Weitergabe an unbefugte Dritte findet nicht statt. Soweit Dienstleister
       dabei personenbezogene Daten verarbeiten, geschieht das ausschließlich in
-      unserem Auftrag und nach unseren Weisungen (siehe Punkt 5). Die Übertragung
+      unserem Auftrag und nach unseren Weisungen (siehe Punkt 6). Die Übertragung
       erfolgt verschlüsselt (TLS).
     </p>
     <p>
@@ -1034,16 +1163,37 @@
       der Abwehr von Missbrauch).
     </p>
 
-    <h3>3. Speicherdauer</h3>
+    <h3>3. Bewertungen</h3>
+    <p>
+      Wenn du eine Bewertung abschickst, verarbeiten wir den von dir angegebenen
+      Namen, die Sternzahl und deinen Text. Zusätzlich speichern wir Zeitpunkt und
+      IP-Adresse, um Missbrauch des Formulars zu erkennen.
+    </p>
+    <p>
+      <strong>Name, Sternzahl und Text werden auf dieser Website veröffentlicht</strong>,
+      sobald wir die Bewertung geprüft haben. Zeitpunkt und IP-Adresse werden nicht
+      veröffentlicht. Gib deshalb bitte nur einen Namen an, mit dem du öffentlich
+      genannt werden möchtest — der Vorname genügt.
+    </p>
+    <p>
+      Rechtsgrundlage ist Art. 6 Abs. 1 lit. a DSGVO (Einwilligung, die du mit dem
+      Absenden erteilst), für die IP-Adresse Art. 6 Abs. 1 lit. f DSGVO (berechtigtes
+      Interesse an der Abwehr von Missbrauch). Du kannst deine Einwilligung jederzeit
+      widerrufen und die Löschung deiner Bewertung verlangen — eine kurze Nachricht
+      an <a href="mailto:keramikcafe@tonfluestern.de">keramikcafe@tonfluestern.de</a>
+      genügt.
+    </p>
+
+    <h3>4. Speicherdauer</h3>
     <p>
       Anfragen bleiben gespeichert, solange sie für die Terminabwicklung benötigt werden,
       und werden danach gelöscht. Bestehen steuerliche oder handelsrechtliche
       Aufbewahrungspflichten, speichern wir die betroffenen Angaben bis zu deren Ablauf.
       Du kannst unter den gesetzlichen Voraussetzungen die Löschung deiner Daten verlangen
-      (siehe Punkt 6). Gesetzliche Aufbewahrungspflichten bleiben davon unberührt.
+      (siehe Punkt 7). Gesetzliche Aufbewahrungspflichten bleiben davon unberührt.
     </p>
 
-    <h3>4. Cookies und eingebundene Inhalte</h3>
+    <h3>5. Cookies und eingebundene Inhalte</h3>
     <p>
       Diese Website setzt für Besucherinnen und Besucher <strong>keine Cookies</strong> —
       weder zu Werbe- noch zu Analysezwecken. Es werden auch keine Tracking-Dienste,
@@ -1066,7 +1216,7 @@
       entsteht dabei kein Cookie.
     </p>
 
-    <h3>5. Hosting und Server-Protokolle</h3>
+    <h3>6. Hosting und Server-Protokolle</h3>
     <p>
       Diese Website und das zugehörige E-Mail-Postfach werden gehostet bei der
       <strong>Hetzner Online GmbH</strong>, Industriestr. 25, 91710 Gunzenhausen,
@@ -1087,7 +1237,7 @@
     </p>
     <p>Rechtsgrundlage: Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse am sicheren Betrieb).</p>
 
-    <h3>6. Deine Rechte</h3>
+    <h3>7. Deine Rechte</h3>
     <p>
       Du hast das Recht auf Auskunft (Art. 15 DSGVO), Berichtigung (Art. 16),
       Löschung (Art. 17), Einschränkung der Verarbeitung (Art. 18),
@@ -1468,6 +1618,118 @@ bkForm.addEventListener('submit', async e => {
     alert('Keine Verbindung. Bitte prüfe dein Internet und versuche es nochmal.');
   }
 });
+
+/* ── REFERENZEN ── */
+(function () {
+  const liste   = document.getElementById('rf-liste');
+  const leer    = document.getElementById('rf-leer');
+  const form    = document.getElementById('rf-form');
+  const bereich = document.getElementById('rf-formbereich');
+  const meldung = document.getElementById('rf-meldung');
+  const knopf   = document.getElementById('rf-sub');
+  if (!liste || !form) return;
+
+  const sterne = n => '★'.repeat(n) + '☆'.repeat(5 - n);
+
+  /* Der Text kommt von fremden Leuten. Er wird deshalb als Text
+     gesetzt, nie als HTML — sonst koennte jemand Schadcode in die
+     Seite schreiben, der bei allen Besuchern mitlaeuft. */
+  function karte(b) {
+    const el = document.createElement('article');
+    el.className = 'rf-karte';
+
+    const oben = document.createElement('div');
+    oben.className = 'rf-oben';
+
+    const name = document.createElement('strong');
+    name.textContent = b.name;
+
+    const zeit = document.createElement('time');
+    if (b.datum) {
+      zeit.dateTime = b.datum;
+      const t = b.datum.split('-');
+      zeit.textContent = t.length === 3 ? `${t[2]}.${t[1]}.${t[0]}` : b.datum;
+    }
+    oben.append(name, zeit);
+
+    const st = document.createElement('div');
+    st.className = 'rf-sterne';
+    st.textContent = sterne(b.sterne);
+    st.setAttribute('aria-label', b.sterne + ' von 5 Sternen');
+
+    const p = document.createElement('p');
+    p.textContent = b.text;
+
+    el.append(oben, st, p);
+    return el;
+  }
+
+  async function laden() {
+    try {
+      const r = await fetch('bewertungen.php', { cache: 'no-store' });
+      const d = await r.json();
+
+      liste.replaceChildren();
+      (d.liste || []).forEach(b => liste.appendChild(karte(b)));
+      leer.hidden = (d.anzahl || 0) > 0;
+
+      const kasten = document.getElementById('rf-schnitt');
+      if (d.anzahl > 0 && d.schnitt) {
+        document.getElementById('rf-wert').textContent   = String(d.schnitt).replace('.', ',');
+        /* Abgerundet, nicht gerundet: aus 4,7 werden vier volle
+           Sterne, nicht fuenf. Die genaue Zahl steht daneben —
+           eine Anzeige, die besser aussieht als der Schnitt, will
+           man bei Bewertungen nicht haben. */
+        document.getElementById('rf-bild').textContent   = sterne(Math.floor(d.schnitt));
+        document.getElementById('rf-anzahl').textContent =
+          'aus ' + d.anzahl + (d.anzahl === 1 ? ' Bewertung' : ' Bewertungen');
+        kasten.hidden = false;
+      } else {
+        kasten.hidden = true;
+      }
+
+      // Abgeschaltet? Dann nur noch lesen, nicht schreiben.
+      if (d.an === false && bereich) bereich.hidden = true;
+    } catch (e) {
+      // Kein Netz oder Server weg: die Seite bleibt benutzbar,
+      // der Abschnitt zeigt dann einfach nichts an.
+      leer.hidden = false;
+    }
+  }
+
+  function sagen(text, gut) {
+    meldung.textContent = text;
+    meldung.className = 'rf-meldung ' + (gut ? 'gut' : 'fehl');
+  }
+
+  form.addEventListener('submit', async e => {
+    e.preventDefault();
+    if (!form.reportValidity()) return;
+
+    knopf.disabled = true;
+    const alt = knopf.textContent;
+    knopf.textContent = 'Wird gesendet …';
+
+    try {
+      const r = await fetch('bewertung.php', { method: 'POST', body: new FormData(form) });
+      const d = await r.json();
+      if (d.ok) {
+        form.reset();
+        sagen('Danke dir! Deine Bewertung ist angekommen und erscheint, '
+            + 'sobald ich sie gelesen habe.', true);
+      } else {
+        sagen(d.fehler || 'Das hat nicht geklappt.', false);
+      }
+    } catch (err) {
+      sagen('Keine Verbindung. Bitte prüfe dein Internet und versuch es nochmal.', false);
+    } finally {
+      knopf.disabled = false;
+      knopf.textContent = alt;
+    }
+  });
+
+  laden();
+})();
 
 /* ── IMPRESSUM UND DATENSCHUTZ ──
    Beide haben eine eigene Adresse: tonfluestern.de/#impressum und
