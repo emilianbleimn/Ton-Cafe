@@ -4,6 +4,8 @@ durch passendere ersetzt.
 
   kbauswahl.jpg   Regal mit unbemalten Keramikrohlingen
   kbwerkbank.jpg  Toepferwerkzeug und eine geformte Schale
+  kbscheibe.jpg   Toepferscheibe — stand beim Block "Toepfern",
+                  dort jetzt kbtonarbeiten.jpg
   DSC_5424.JPG    Cafebereich — stand bis zuletzt ueber dem
                   Anfrageformular, dort jetzt kbauslage.jpg
 
