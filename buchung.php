@@ -257,7 +257,7 @@ Wunschzeit: $wunschzeit
 Samstag und Sonntag sind bei uns nur auf Anfrage möglich. Ich schaue, ob ich den Termin einrichten kann, und melde mich innerhalb von " . ANTWORTFRIST . " bei {$w['dativ']} — dann auch mit einer festen Uhrzeit." . $wochenend_hinweis . "
 
 
-Die Bezahlung ist vor Ort bar, mit Karte oder per PayPal möglich. Falls sich noch etwas ändern sollte oder {$w['fragen']} gerne bei mir.
+Die Bezahlung ist vor Ort bar oder mit Karte möglich. Falls sich noch etwas ändern sollte oder {$w['fragen']} gerne bei mir.
 
 Ich freue mich auf {$w['aufWen']}!
 
@@ -284,7 +284,7 @@ Personen: $personen
 
 Bitte {$w['kommt']} zur angegebenen Anfangszeit, damit {$w['dativ']} genügend Zeit zum kreativen Gestalten bleibt.
 
-Die Bezahlung ist vor Ort bar, mit Karte oder per PayPal möglich. Falls sich noch etwas ändern sollte oder {$w['fragen']} gerne bei mir.
+Die Bezahlung ist vor Ort bar oder mit Karte möglich. Falls sich noch etwas ändern sollte oder {$w['fragen']} gerne bei mir.
 
 Ich freue mich auf eine schöne kreative Zeit mit {$w['dativ']}!
 
