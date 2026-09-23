@@ -340,12 +340,23 @@
     }
     #full-note.visible { display: block; }
     #full-note strong { display: block; color: var(--terra); margin-bottom: .2rem; }
+    #full-note.zu { background: var(--bg-1); border-left-color: var(--bronze); }
+    #full-note.zu strong { color: var(--bronze); }
 
     /* ── Kalender-Marker ──
        ausgebucht und geschlossen müssen unterscheidbar sein:
        ausgebucht = rötlich + durchgestrichen, geschlossen = nur blass */
     .flatpickr-day.day-full {
       color: rgba(168,76,42,.55) !important;
+      text-decoration: line-through;
+      text-decoration-thickness: 1px;
+    }
+    /* Von Hand zugemacht: ebenfalls durchgestrichen, damit man
+       gleich sieht, dass hier nichts geht — aber in gedecktem
+       Braun statt im warnenden Rot. Ausgebucht ist Pech,
+       geschlossen ist eine Entscheidung.                      */
+    .flatpickr-day.day-zu {
+      color: rgba(94,69,53,.5) !important;
       text-decoration: line-through;
       text-decoration-thickness: 1px;
     }
@@ -973,8 +984,8 @@
         </div>
 
         <div id="full-note">
-          <strong>.</strong>
-         
+          <strong id="fn-titel"></strong>
+          <span id="fn-text"></span>
         </div>
 
       </div>
@@ -1335,6 +1346,7 @@ document.querySelectorAll('.rv').forEach(el => obs.observe(el));
    Website muss dafür nicht angefasst werden.
 ══════════════════════════════════════════════════════════ */
 let BOOKED = {};
+let HANDEINTRAG = {};      // Tage, die der Betrieb selbst zugemacht hat
 const MAX_PER_DAY = 18;
 
 // Wochentage: 0=So, 1=Mo, 2=Di, 3=Mi, 4=Do, 5=Fr, 6=Sa
@@ -1403,6 +1415,53 @@ const dkey = d =>
 /* Freie Plätze an einem Tag */
 const freeSeats = d => MAX_PER_DAY - (BOOKED[dkey(d)] || 0);
 
+/* Ein Tag kann aus zwei Gruenden keinen Platz mehr haben: Gaeste
+   haben ihn ausgebucht, oder der Betrieb hat ihn von Hand zu
+   gemacht — etwa fuer eine geschlossene Gesellschaft oder einen
+   freien Tag. Fuer Besucher ist das ein Unterschied: "ausgebucht"
+   klingt nach Pech, "geschlossen" nach einer Entscheidung. Und
+   wenn gar nicht geoeffnet ist, waere "ausgebucht" schlicht
+   falsch. Darum wird hier getrennt.                            */
+const zugemacht = d => (HANDEINTRAG[dkey(d)] || 0) >= MAX_PER_DAY;
+
+/* Erklaert, warum an einem Tag nichts geht.
+   Der Kasten stand vorher leer im Dokument und wurde nie
+   gezeigt: flatpickr sperrt volle Tage, und ein gesperrter Tag
+   loest kein Auswahl-Ereignis aus. Wer auf einen
+   durchgestrichenen Tag tippte, bekam also gar keine Antwort.
+   Jetzt haengt an diesen Tagen ein eigener Klick.            */
+function vollHinweis(datum) {
+  const titel  = document.getElementById('fn-titel');
+  const text   = document.getElementById('fn-text');
+  const kasten = document.getElementById('full-note');
+  if (!titel || !text || !kasten) return;
+
+  const ruhetag = CLOSED_DAYS.includes(datum.getDay());
+  const zu      = !ruhetag && zugemacht(datum);
+
+  if (ruhetag) {
+    titel.textContent = 'An diesem Wochentag ist geschlossen';
+    text.textContent  = 'Wir haben Mittwoch bis Freitag geöffnet, '
+                      + 'Samstag und Sonntag auf Anfrage.';
+  } else if (zu) {
+    titel.textContent = 'An diesem Tag ist geschlossen';
+    text.textContent  = 'Bitte wähle einen anderen Tag im Kalender. Wenn es '
+                      + 'unbedingt dieser sein soll, schreib mir gerne — '
+                      + 'vielleicht lässt sich etwas einrichten.';
+  } else {
+    titel.textContent = 'Dieser Tag ist schon ausgebucht';
+    text.textContent  = 'Bitte wähle einen anderen Tag im Kalender. '
+                      + 'Die freien Plätze siehst du direkt an den Tagen.';
+  }
+
+  kasten.classList.toggle('zu', ruhetag || zu);
+  kasten.classList.add('visible');
+  anfNote.classList.remove('visible');
+  dayInfo.classList.add('hidden');
+  wunschzeitZeigen(false);
+  fDate.value = ''; fTime.value = ''; fSeats.value = '';
+}
+
 /* Kann an diesem Tag ueberhaupt gebucht werden?
    Mi/Do/Fr mit festen Zeiten, Sa/So auf Anfrage.        */
 const buchbar = d => Boolean(OPEN_HOURS[d.getDay()]) || REQUEST_DAYS.includes(d.getDay());
@@ -1439,8 +1498,9 @@ kalenderInstanz = flatpickr('#cal-container', {
     if (CLOSED_DAYS.includes(d)) {
       dayElem.title = 'Geschlossen';
     } else if (isFull(date)) {
-      dayElem.title = 'Ausgebucht';
-      dayElem.classList.add('day-full');
+      const zu = zugemacht(date);
+      dayElem.title = zu ? 'Geschlossen' : 'Ausgebucht';
+      dayElem.classList.add(zu ? 'day-zu' : 'day-full');
     } else if (REQUEST_DAYS.includes(d)) {
       const free = freeSeats(date);
       dayElem.title = free < MAX_PER_DAY
@@ -1463,6 +1523,17 @@ kalenderInstanz = flatpickr('#cal-container', {
       const datum = dayElem.getAttribute('aria-label') || '';
       dayElem.setAttribute('aria-label', datum + ' – ' + dayElem.title);
     }
+
+    /* Gesperrte Tage sagen jetzt, warum sie gesperrt sind.
+       Ohne das passiert beim Tippen schlicht nichts.        */
+    if (dayElem.classList.contains('flatpickr-disabled')) {
+      dayElem.style.pointerEvents = 'auto';
+      dayElem.addEventListener('click', ev => {
+        ev.preventDefault();
+        ev.stopPropagation();
+        vollHinweis(date);
+      });
+    }
   },
   onChange(selectedDates, dateStr) {
     if (!selectedDates.length) return;
@@ -1479,7 +1550,7 @@ kalenderInstanz = flatpickr('#cal-container', {
       const free = freeSeats(date);
 
       if (free <= 0) {                      // Sicherheitsnetz
-        fullNote.classList.add('visible');
+        vollHinweis(date);
         fTime.value = '';
         fSeats.value = '';
         return;
@@ -1504,8 +1575,8 @@ kalenderInstanz = flatpickr('#cal-container', {
     } else {                                 // Samstag / Sonntag
       const free = freeSeats(date);
 
-      if (free <= 0) {                       // von Hand komplett blockiert
-        fullNote.classList.add('visible');
+      if (free <= 0) {
+        vollHinweis(date);
         fTime.value = ''; fSeats.value = '';
         return;
       }
@@ -1532,6 +1603,7 @@ function belegungLaden() {
     .then(r => r.ok ? r.json() : null)
     .then(j => {
       if (j && j.belegt) BOOKED = j.belegt;
+      if (j && j.manuell) HANDEINTRAG = j.manuell;
     })
     .catch(() => { /* offline oder Server-Problem */ });
 }

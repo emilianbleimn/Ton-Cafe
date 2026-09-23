@@ -20,9 +20,15 @@ foreach ($d['anfragen'] as $a) {
     $summe[$datum] = ($summe[$datum] ?? 0) + (int)($a['personen'] ?? 0);
 }
 
+/* Von Hand blockierte Plaetze werden getrennt mitgeliefert. Der
+   Kalender kann sonst nicht unterscheiden, ob ein Tag von Gaesten
+   ausgebucht wurde oder vom Betrieb geschlossen wurde — beides
+   saehe gleich aus, und "ausgebucht" waere dann schlicht falsch. */
+$handeintrag = [];
 foreach ($d['manuell'] as $datum => $anzahl) {
     if ($datum >= $heute) {
-        $summe[$datum] = ($summe[$datum] ?? 0) + (int)$anzahl;
+        $summe[$datum]       = ($summe[$datum] ?? 0) + (int)$anzahl;
+        $handeintrag[$datum] = max(0, min((int)$anzahl, MAX_PER_DAY));
     }
 }
 
@@ -33,7 +39,10 @@ foreach ($summe as $datum => $anzahl) {
 
 ksort($summe);
 
+ksort($handeintrag);
+
 echo json_encode([
-    'max'    => MAX_PER_DAY,
-    'belegt' => (object)$summe,
+    'max'     => MAX_PER_DAY,
+    'belegt'  => (object)$summe,
+    'manuell' => (object)$handeintrag,
 ], JSON_UNESCAPED_UNICODE);
