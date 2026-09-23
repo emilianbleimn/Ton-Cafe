@@ -1441,13 +1441,11 @@ function vollHinweis(datum) {
 
   if (ruhetag) {
     titel.textContent = 'An diesem Wochentag ist geschlossen';
-    text.textContent  = 'Wir haben Mittwoch bis Freitag geöffnet, '
+    text.textContent  = 'Geöffnet ist Mittwoch bis Freitag, '
                       + 'Samstag und Sonntag auf Anfrage.';
   } else if (zu) {
     titel.textContent = 'An diesem Tag ist geschlossen';
-    text.textContent  = 'Bitte wähle einen anderen Tag im Kalender. Wenn es '
-                      + 'unbedingt dieser sein soll, schreib mir gerne — '
-                      + 'vielleicht lässt sich etwas einrichten.';
+    text.textContent  = 'Bitte wähle einen anderen Tag im Kalender.';
   } else {
     titel.textContent = 'Dieser Tag ist schon ausgebucht';
     text.textContent  = 'Bitte wähle einen anderen Tag im Kalender. '
