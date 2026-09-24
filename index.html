@@ -192,23 +192,44 @@
     /* Die Seite ist lang geworden — ohne Navigation muesste man
        sehr weit scrollen. Auf schmalen Geraeten laesst sich die
        Leiste seitlich schieben, statt zu verschwinden.          */
-    .nav-links { display: flex; align-items: center; gap: 1.3rem; overflow-x: auto;
+    /* Elf Reiter muessen auf einen ueblichen Bildschirm passen.
+       Waere der Streifen breiter als der Platz, waere der letzte
+       abgeschnitten — und niemand merkt, dass dort noch etwas
+       kommt. Darum eng gesetzt; reicht es trotzdem nicht, laesst
+       er sich schieben und ein Verlauf am Rand zeigt das an.   */
+    .nav-streifen { position: relative; flex: 1; min-width: 0; margin: 0 1rem; }
+    .nav-links { display: flex; align-items: center; gap: .95rem; overflow-x: auto;
                  scrollbar-width: none; -ms-overflow-style: none; }
     .nav-links::-webkit-scrollbar { display: none; }
+    .nav-streifen::after {
+      content: ''; position: absolute; right: 0; top: 0; bottom: 0; width: 2rem;
+      pointer-events: none; opacity: 0; transition: opacity .3s, background .4s;
+      /* Ganz oben liegt die Leiste durchsichtig ueber dem Hero —
+         dort muss der Verlauf dessen Ton treffen, sonst sieht man
+         einen hellen Streifen. Sobald gescrollt wird, bekommt die
+         Leiste ihren eigenen Grund, und der Verlauf zieht nach. */
+      background: linear-gradient(90deg, rgba(237,232,221,0), #ede8dd);
+    }
+    .nav-streifen.mehr::after { opacity: 1; }
+    #nav.sc .nav-streifen::after {
+      background: linear-gradient(90deg, rgba(244,236,224,0), #f4ece0);
+    }
     .nav-link {
-      font-size: .68rem; letter-spacing: .16em; text-transform: uppercase;
+      font-size: .66rem; letter-spacing: .09em; text-transform: uppercase;
       color: var(--cream-mid); white-space: nowrap;
       border-bottom: 1px solid transparent; padding-bottom: .15rem;
       transition: color .3s, border-color .3s;
     }
     .nav-link:hover { color: var(--bronze); border-color: var(--bronze); }
     @media (max-width: 900px) {
-      .nav-links { gap: 1rem; font-size: .64rem; margin: 0 .8rem; }
+      .nav-links { gap: .8rem; }
+      .nav-link { font-size: .62rem; letter-spacing: .07em; }
     }
     @media (max-width: 560px) {
       /* Der Knopf bleibt, die Leiste rutscht darunter */
       #nav { flex-wrap: wrap; row-gap: .5rem; }
-      .nav-links { order: 3; width: 100%; margin: 0; padding-bottom: .2rem; }
+      .nav-streifen { order: 3; width: 100%; flex: 0 0 100%; margin: 0; }
+      .nav-links { padding-bottom: .2rem; }
     }
 
     .nav-book {
@@ -788,15 +809,19 @@
 <!-- ── NAV ── -->
 <nav id="nav" role="navigation" aria-label="Hauptnavigation">
   <a href="#hero" class="nav-emblem" aria-label="Zurück zur Startseite"></a>
-  <div class="nav-links">
+  <div class="nav-streifen" id="nav-streifen"><div class="nav-links" id="nav-links">
     <a class="nav-link" href="#bemalen">Bemalen</a>
     <a class="nav-link" href="#toepfern">Töpfern</a>
     <a class="nav-link" href="#galerie">Galerie</a>
     <a class="nav-link" href="#feste">Feiern</a>
     <a class="nav-link" href="#kigeb">Kindergeburtstag</a>
     <a class="nav-link" href="#preise">Preise</a>
+    <a class="nav-link" href="#getraenke">Getränke</a>
+    <a class="nav-link" href="#gutscheine">Gutscheine</a>
+    <a class="nav-link" href="#abholen">Abholung</a>
     <a class="nav-link" href="#fragen">Fragen</a>
-  </div>
+    <a class="nav-link" href="#refs">Gästebuch</a>
+  </div></div>
   <a class="nav-book" href="#booking">Termin anfragen</a>
 </nav>
 
@@ -886,8 +911,8 @@
       </p>
       <p>
         Vorkenntnisse sind nicht erforderlich. Wenn du bei der Gestaltung, der
-        Farbauswahl oder einer bestimmten Technik Unterstützung benötigst, erhältst
-        du selbstverständlich eine passende Erklärung.
+        Farbauswahl oder einer bestimmten Technik Unterstützung benötigst, erkläre
+        ich es dir selbstverständlich.
       </p>
     </div>
 
@@ -909,14 +934,14 @@
         </p>
         <p>
           Nach dem Bemalen bleibt deine Keramik bei Tonflüstern. Sobald die Farben
-          vollständig getrocknet sind, wird das Werkstück mit einer transparenten
-          Glanzglasur überzogen und anschließend im Keramikofen gebrannt. Durch die
+          vollständig getrocknet sind, überziehe ich das Werkstück mit einer
+          transparenten Glanzglasur und brenne es anschließend im Keramikofen. Durch die
           Glanzglasur und den Brand erhalten die Farben ihre endgültige Wirkung und
           die Oberfläche ihren schönen Glanz.
         </p>
         <p>
-          Sobald deine Keramik fertig und vollständig abgekühlt ist, kann sie
-          abgeholt werden. Die Information zur Abholung erfolgt über den
+          Sobald deine Keramik fertig und vollständig abgekühlt ist, kannst du sie
+          abholen. Die Information zur Abholung gebe ich über den
           WhatsApp-Kanal
           <a href="https://whatsapp.com/channel/0029VbDPij847Xe5BQyTPg2H" target="_blank" rel="noopener noreferrer" class="kg-verweis">„Tonflüstern: Keramik abholbereit“</a>.
         </p>
@@ -958,9 +983,9 @@
         <p>
           Jede Person kann sich vor Ort einen eigenen Keramikrohling aussuchen und
           diesen individuell gestalten. Wenn für eine Gruppe ein ähnlicher
-          Preisrahmen gewünscht ist, kann vorab eine kleinere Auswahl aus drei
+          Preisrahmen gewünscht ist, stelle ich vorab eine kleinere Auswahl aus drei
           verschiedenen Keramikrohlingen in einer vergleichbaren Preisklasse
-          zusammengestellt werden.
+          zusammen.
         </p>
 
         <h3 style="margin-top:1.8rem;">Gut zu wissen</h3>
@@ -1113,9 +1138,9 @@
           individuell.
         </p>
         <p>
-          Wenn für die Gruppe ein ähnlicher Preisrahmen gewünscht ist, können vorab
-          drei unterschiedliche Keramikrohlinge aus einer vergleichbaren Preisklasse
-          zur Auswahl zusammengestellt werden. Am Veranstaltungstag entscheidet sich
+          Wenn für die Gruppe ein ähnlicher Preisrahmen gewünscht ist, stelle ich
+          vorab drei unterschiedliche Keramikrohlinge aus einer vergleichbaren
+          Preisklasse zur Auswahl zusammen. Am Veranstaltungstag entscheidet sich
           jede Person für einen dieser Rohlinge.
         </p>
         <p>
@@ -1123,9 +1148,9 @@
           trotzdem gut planbar.
         </p>
         <p>
-          Nach dem Bemalen bleiben die Werkstücke bei Tonflüstern. Sie werden mit
-          einer transparenten Glanzglasur überzogen und anschließend gebrannt. Sobald
-          die fertige Keramik abgeholt werden kann, erfolgt eine Information über den
+          Nach dem Bemalen bleiben die Werkstücke bei Tonflüstern. Ich überziehe sie
+          mit einer transparenten Glanzglasur und brenne sie anschließend. Sobald die
+          fertige Keramik abgeholt werden kann, gebe ich Bescheid über den
           WhatsApp-Kanal
           <a href="https://whatsapp.com/channel/0029VbDPij847Xe5BQyTPg2H" target="_blank" rel="noopener noreferrer" class="kg-verweis">„Tonflüstern: Keramik abholbereit“</a>.
         </p>
@@ -1135,7 +1160,7 @@
         <h3>Gemeinsam töpfern</h3>
         <p>
           Auch Töpfern ist als Gruppenveranstaltung möglich. Beim gemeinsamen
-          Workshop wird der Grundaufbau Schritt für Schritt erklärt. Anschließend
+          Workshop erkläre ich den Grundaufbau Schritt für Schritt. Anschließend
           kann jede Person ihr Werkstück mit Mustern, Stempeln, Verzierungen und
           eigenen Ideen individuell gestalten.
         </p>
@@ -1144,8 +1169,8 @@
         <h4>Töpfern mit einem Termin</h4>
         <p>
           Am Ende des Workshops sucht sich jede Person eine Glasurfarbe aus. Nach dem
-          Trocknen werden die Werkstücke bei Tonflüstern zum ersten Mal gebrannt,
-          glasiert und anschließend ein zweites Mal gebrannt. Ein weiterer Termin ist
+          Trocknen brenne ich die Werkstücke zum ersten Mal, glasiere sie und brenne
+          sie anschließend ein zweites Mal. Ein weiterer Termin ist
           für die Gruppe nicht erforderlich.
         </p>
 
@@ -1176,20 +1201,20 @@
           dürfen mitgebracht werden.
         </p>
         <p>
-          Warme Getränke wie Kaffee, Cappuccino, Latte macchiato oder Tee können bei
-          Tonflüstern bestellt werden. Wasser steht kostenlos zur Verfügung.
+          Warme Getränke wie Kaffee, Cappuccino, Latte macchiato oder Tee kannst du
+          bei mir bestellen. Wasser steht kostenlos zur Verfügung.
         </p>
         <p>
           Gläser, kleine Teller und Schälchen für eure mitgebrachten Speisen und
-          Getränke werden bereitgestellt.
+          Getränke stelle ich bereit.
         </p>
       </div>
       <div class="ab-block">
         <h3>Dekoration</h3>
         <p>
-          Auf Wunsch kann der Tisch passend zum Anlass liebevoll vorbereitet und
-          dekoriert werden. Wünsche zur Gestaltung und Dekoration können vorab
-          gemeinsam abgestimmt werden.
+          Auf Wunsch bereite ich den Tisch passend zum Anlass liebevoll vor und
+          dekoriere ihn. Wünsche zur Gestaltung und Dekoration stimmen wir vorab
+          gemeinsam ab.
         </p>
         <p>
           So entsteht ein persönlicher Rahmen für euren besonderen Anlass – mit
@@ -1242,7 +1267,7 @@
           Damit die Kinder während der Feier gut begleitet und unterstützt werden
           können, wäre es schön, wenn eine erwachsene Begleitperson mit dabei ist.
           Natürlich darf die Begleitperson auf Wunsch auch selbst einen
-          Keramikrohling bemalen. Dieser wird regulär berechnet.
+          Keramikrohling bemalen. Diesen berechne ich regulär.
         </p>
         <p>
           Bei Gruppen ab zehn Personen erhält die gesamte Gruppe 30 % Rabatt.
@@ -1250,8 +1275,8 @@
         <p>
           Vor dem Geburtstag besteht die Möglichkeit, bei Tonflüstern vorbeizukommen
           und sich einen Überblick über die Keramikauswahl zu verschaffen. Dabei
-          können drei Keramikrohlinge aus einer ähnlichen Preiskategorie ausgewählt
-          werden, die den Kindern am Geburtstag zur Auswahl stehen. Alternativ kann
+          dürft ihr drei Keramikrohlinge aus einer ähnlichen Preiskategorie
+          auswählen, die den Kindern am Geburtstag zur Auswahl stehen. Alternativ kann
           sich jedes Kind seinen Keramikrohling auch individuell vor Ort aussuchen.
         </p>
       </div>
@@ -1324,7 +1349,7 @@
         <img src="kbfenster.jpg" alt="Schaufenster von Tonflüstern in der Hauptstraße" loading="lazy" width="1066" height="1600">
       </figure>
       <div class="kg-text">
-        <h3>Lust auf eine Feier bei uns?</h3>
+        <h3>Lust auf eine Feier bei Tonflüstern?</h3>
         <span class="kg-sub">So kommt ihr zu einem Termin</span>
         <p>
           Schick mir einfach eine <a href="#booking" class="kg-verweis">Anfrage</a>
@@ -1366,8 +1391,8 @@
         <h3>Keramik bemalen in der Gruppe</h3>
         <span class="preis">5 € bis 33 € pro Person<small>je nach ausgewähltem Rohling</small></span>
         <p>
-          Auf Wunsch können vorab drei Rohlinge aus einer ähnlichen Preisklasse zur
-          Auswahl zusammengestellt werden. Geeignet für Geburtstage, Freundesgruppen
+          Auf Wunsch stelle ich vorab drei Rohlinge aus einer ähnlichen Preisklasse
+          zur Auswahl zusammen. Geeignet für Geburtstage, Freundesgruppen
           und Teamevents.
         </p>
       </div>
@@ -1499,20 +1524,20 @@
           Mittelpunkt stehen.
         </p>
         <p>
-          Die Gutscheine werden liebevoll gestaltet und sind mit ihren natürlichen
+          Die Gutscheine gestalte ich liebevoll und stimme sie mit ihren natürlichen
           Farben und feinen Details auf die besondere Atmosphäre von Tonflüstern
-          abgestimmt. Sie eignen sich für Geburtstage, Weihnachten, einen Jahrestag,
+          ab. Sie eignen sich für Geburtstage, Weihnachten, einen Jahrestag,
           besondere Anlässe oder einfach als kleine Aufmerksamkeit für einen lieben
           Menschen.
         </p>
         <p>
-          Gutscheine können während der regulären Öffnungszeiten persönlich bei
-          Tonflüstern abgeholt werden.
+          Gutscheine kannst du während der regulären Öffnungszeiten persönlich bei
+          Tonflüstern abholen.
         </p>
         <p>
           Sollten die Öffnungszeiten für dich nicht passen, kannst du dich gerne
-          persönlich melden. Nach Absprache kann ein individueller Termin zur
-          Abholung vereinbart werden.
+          persönlich melden. Nach Absprache vereinbaren wir einen individuellen
+          Termin zur Abholung.
         </p>
       </div>
     </div>
@@ -1588,8 +1613,8 @@
           <p>
             Die bei Tonflüstern verwendeten Keramikrohlinge, Farben und Glasuren sind
             für den Kontakt mit Lebensmitteln geeignet. Nach dem fachgerechten
-            Glasieren und Brennen können Tassen, Teller, Schalen und andere
-            Gebrauchsgegenstände entsprechend verwendet werden.
+            Glasieren und Brennen kannst du Tassen, Teller, Schalen und andere
+            Gebrauchsgegenstände entsprechend verwenden.
           </p>
         </div>
       </details>
@@ -1612,13 +1637,13 @@
           <p>
             Die Fertigstellung dauert in der Regel etwa zwei bis drei Wochen. Da
             Trocknung, Glasieren, Ofenbelegung und Brennvorgang unterschiedlich viel
-            Zeit benötigen können, wird kein fester Abholtag versprochen.
+            Zeit benötigen können, verspreche ich keinen festen Abholtag.
           </p>
           <p>
             Über den <a href="#abholen" class="kg-verweis">QR-Code auf der
             Homepage</a> gelangst du zum WhatsApp-Kanal
             <a href="https://whatsapp.com/channel/0029VbDPij847Xe5BQyTPg2H" target="_blank" rel="noopener noreferrer" class="kg-verweis">„Tonflüstern: Keramik abholbereit“</a>.
-            Dort werden Bilder der fertig gebrannten Werkstücke veröffentlicht.
+            Dort veröffentliche ich Bilder der fertig gebrannten Werkstücke.
             Sobald du dein eigenes Werkstück auf einem Bild entdeckst, kannst du es
             während der angegebenen Öffnungszeiten abholen.
           </p>
@@ -1930,7 +1955,7 @@
         <div class="conf" id="bk-conf" role="alert">
           <div class="conf-check">✓</div>
           <h3>Danke!</h3>
-          <p>Deine Anfrage ist bei uns eingegangen.<br>Wir melden uns innerhalb von 24 Stunden. Wir freuen uns auf dich!</p>
+          <p>Deine Anfrage ist bei mir eingegangen.<br>Ich melde mich innerhalb von 24 Stunden. Ich freue mich auf dich!</p>
         </div>
       </div>
 
@@ -1978,7 +2003,7 @@
       DE463215071</p>
 
     <h3>Verbraucherstreitbeilegung</h3>
-    <p>Wir sind nicht bereit und nicht verpflichtet, an Streitbeilegungsverfahren vor einer Verbraucherschlichtungsstelle teilzunehmen.</p>
+    <p>Ich bin nicht bereit und nicht verpflichtet, an Streitbeilegungsverfahren vor einer Verbraucherschlichtungsstelle teilzunehmen.</p>
   </div>
 </div>
 
@@ -1999,21 +2024,21 @@
 
     <h3>2. Terminanfragen über das Buchungsformular</h3>
     <p>
-      Wenn du eine Terminanfrage abschickst, verarbeiten wir folgende Angaben:
+      Wenn du eine Terminanfrage abschickst, verarbeite ich folgende Angaben:
       gewünschtes Angebot, Wunschtermin, Personenanzahl, Name, E-Mail-Adresse,
-      Telefonnummer (sofern angegeben) und deine Nachricht. Zusätzlich speichern wir
+      Telefonnummer (sofern angegeben) und deine Nachricht. Zusätzlich speichere ich
       Zeitpunkt und IP-Adresse der Anfrage, um Missbrauch des Formulars zu erkennen.
     </p>
     <p>
-      Diese Angaben werden <strong>auf unserem Webspace beim Hosting-Anbieter</strong>
-      gespeichert und zusätzlich per E-Mail an uns übermittelt. Das Postfach
+      Diese Angaben werden <strong>auf meinem Webspace beim Hosting-Anbieter</strong>
+      gespeichert und zusätzlich per E-Mail an mich übermittelt. Das Postfach
       keramikcafe@tonfluestern.de gehört zum selben Hosting-Paket — es ist also
       derselbe Anbieter, den Punkt 6 nennt. Ein weiterer E-Mail-Dienst ist nicht
       beteiligt.</p>
     <p>
       Eine Weitergabe an unbefugte Dritte findet nicht statt. Soweit Dienstleister
       dabei personenbezogene Daten verarbeiten, geschieht das ausschließlich in
-      unserem Auftrag und nach unseren Weisungen (siehe Punkt 6). Die Übertragung
+      meinem Auftrag und nach meinen Weisungen (siehe Punkt 6). Die Übertragung
       erfolgt verschlüsselt (TLS).
     </p>
     <p>
@@ -2024,13 +2049,13 @@
 
     <h3>3. Bewertungen</h3>
     <p>
-      Wenn du eine Bewertung abschickst, verarbeiten wir den von dir angegebenen
-      Namen, die Sternzahl und deinen Text. Zusätzlich speichern wir Zeitpunkt und
+      Wenn du eine Bewertung abschickst, verarbeite ich den von dir angegebenen
+      Namen, die Sternzahl und deinen Text. Zusätzlich speichere ich Zeitpunkt und
       IP-Adresse, um Missbrauch des Formulars zu erkennen.
     </p>
     <p>
       <strong>Name, Sternzahl und Text werden auf dieser Website veröffentlicht</strong>,
-      sobald wir die Bewertung geprüft haben. Zeitpunkt und IP-Adresse werden nicht
+      sobald ich die Bewertung geprüft habe. Zeitpunkt und IP-Adresse werden nicht
       veröffentlicht. Gib deshalb bitte nur einen Namen an, mit dem du öffentlich
       genannt werden möchtest — der Vorname genügt.
     </p>
@@ -2047,7 +2072,7 @@
     <p>
       Anfragen bleiben gespeichert, solange sie für die Terminabwicklung benötigt werden,
       und werden danach gelöscht. Bestehen steuerliche oder handelsrechtliche
-      Aufbewahrungspflichten, speichern wir die betroffenen Angaben bis zu deren Ablauf.
+      Aufbewahrungspflichten, speichere ich die betroffenen Angaben bis zu deren Ablauf.
       Du kannst unter den gesetzlichen Voraussetzungen die Löschung deiner Daten verlangen
       (siehe Punkt 7). Gesetzliche Aufbewahrungspflichten bleiben davon unberührt.
     </p>
@@ -2060,7 +2085,7 @@
     </p>
     <p>
       Alle Bestandteile der Seite — Schriften, Bilder und Programmbibliotheken —
-      werden <strong>ausschließlich von unserem eigenen Server geladen</strong>.
+      werden <strong>ausschließlich von meinem eigenen Server geladen</strong>.
       Beim Aufruf der Seite werden daher keine Daten an Dritte übertragen.
     </p>
     <p>
@@ -2079,7 +2104,7 @@
     <p>
       Diese Website und das zugehörige E-Mail-Postfach werden gehostet bei der
       <strong>Hetzner Online GmbH</strong>, Industriestr. 25, 91710 Gunzenhausen,
-      Deutschland. Soweit Hetzner dabei personenbezogene Daten in unserem Auftrag
+      Deutschland. Soweit Hetzner dabei personenbezogene Daten in meinem Auftrag
       verarbeitet, geschieht das im Rahmen eines Vertrags über die
       Auftragsverarbeitung nach Art. 28 DSGVO.
     </p>
@@ -2168,6 +2193,22 @@ window.addEventListener('load', () => {
     });
   });
 });
+
+/* Zeigt den Verlauf am rechten Rand nur, wenn der Streifen
+   tatsaechlich breiter ist als der Platz — und blendet ihn aus,
+   sobald man ganz nach rechts geschoben hat. */
+(function () {
+  const streifen = document.getElementById('nav-streifen');
+  const links    = document.getElementById('nav-links');
+  if (!streifen || !links) return;
+  function pruefen() {
+    const mehr = links.scrollWidth - links.clientWidth - links.scrollLeft > 4;
+    streifen.classList.toggle('mehr', mehr);
+  }
+  links.addEventListener('scroll', pruefen, { passive: true });
+  window.addEventListener('resize', pruefen, { passive: true });
+  pruefen();
+})();
 
 /* ── NAV SCROLL ── */
 const nav = document.getElementById('nav');
