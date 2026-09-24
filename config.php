@@ -153,7 +153,7 @@ function daten_verzeichnis(): void {
  * die leere Struktur.
  */
 function daten_laden(): ?array {
-    $leer = ['anfragen' => [], 'manuell' => [], 'bewertungen' => []];
+    $leer = ['anfragen' => [], 'manuell' => [], 'manuell_art' => [], 'bewertungen' => []];
 
     if (!is_file(DATA_FILE)) {
         return $leer;                       // gibt es noch nicht — in Ordnung
@@ -185,6 +185,11 @@ function daten_laden(): ?array {
     return [
         'anfragen'    => is_array($d['anfragen']    ?? null) ? $d['anfragen']    : [],
         'manuell'     => is_array($d['manuell']     ?? null) ? $d['manuell']     : [],
+        /* Zu jedem Handeintrag kann stehen, wie der Tag nach aussen
+           heissen soll: 'zu' fuer geschlossen, 'voll' fuer ausgebucht.
+           Fehlt der Eintrag — etwa bei aelteren Daten —, entscheidet
+           wie bisher die Anzahl.                                    */
+        'manuell_art' => is_array($d['manuell_art'] ?? null) ? $d['manuell_art'] : [],
         // Kam spaeter dazu: aeltere Datendateien haben den Schluessel
         // nicht. Fehlt er, ist das kein Fehler, sondern nur leer.
         'bewertungen' => is_array($d['bewertungen'] ?? null) ? $d['bewertungen'] : [],
@@ -193,7 +198,7 @@ function daten_laden(): ?array {
 
 /** Wie daten_laden(), aber nie null — fuer reine Leseansichten. */
 function daten_laden_sicher(): array {
-    return daten_laden() ?? ['anfragen' => [], 'manuell' => [], 'bewertungen' => []];
+    return daten_laden() ?? ['anfragen' => [], 'manuell' => [], 'manuell_art' => [], 'bewertungen' => []];
 }
 
 /** Daten atomar speichern (erst in temporäre Datei, dann umbenennen). */

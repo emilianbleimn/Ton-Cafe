@@ -1347,6 +1347,7 @@ document.querySelectorAll('.rv').forEach(el => obs.observe(el));
 ══════════════════════════════════════════════════════════ */
 let BOOKED = {};
 let HANDEINTRAG = {};      // Tage, die der Betrieb selbst zugemacht hat
+let ANZEIGEART  = {};      // und wie sie dort heissen sollen
 const MAX_PER_DAY = 18;
 
 // Wochentage: 0=So, 1=Mo, 2=Di, 3=Mi, 4=Do, 5=Fr, 6=Sa
@@ -1422,7 +1423,14 @@ const freeSeats = d => MAX_PER_DAY - (BOOKED[dkey(d)] || 0);
    klingt nach Pech, "geschlossen" nach einer Entscheidung. Und
    wenn gar nicht geoeffnet ist, waere "ausgebucht" schlicht
    falsch. Darum wird hier getrennt.                            */
-const zugemacht = d => (HANDEINTRAG[dkey(d)] || 0) >= MAX_PER_DAY;
+function zugemacht(d) {
+  const art = ANZEIGEART[dkey(d)];
+  // Ausdrueckliche Festlegung aus der Uebersicht hat Vorrang.
+  if (art === 'zu')   return true;
+  if (art === 'voll') return false;
+  // Sonst wie bisher: ganz von Hand geblockt heisst geschlossen.
+  return (HANDEINTRAG[dkey(d)] || 0) >= MAX_PER_DAY;
+}
 
 /* Erklaert, warum an einem Tag nichts geht.
    Der Kasten stand vorher leer im Dokument und wurde nie
@@ -1602,6 +1610,7 @@ function belegungLaden() {
     .then(j => {
       if (j && j.belegt) BOOKED = j.belegt;
       if (j && j.manuell) HANDEINTRAG = j.manuell;
+      if (j && j.art) ANZEIGEART = j.art;
     })
     .catch(() => { /* offline oder Server-Problem */ });
 }

@@ -135,15 +135,28 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
     if (isset($_POST['manuell_datum'])) {
         $datum  = (string)$_POST['manuell_datum'];
         $anzahl = (int)($_POST['manuell_anzahl'] ?? 0);
+        // Nur die beiden bekannten Werte annehmen, sonst entscheidet
+        // wie bisher die Anzahl.
+        $art    = in_array($_POST['manuell_art'] ?? '', ['zu', 'voll'], true)
+                  ? (string)$_POST['manuell_art'] : '';
         if (datum_gueltig($datum)) {
-            mit_sperre(function (array &$d) use ($datum, $anzahl) {
+            mit_sperre(function (array &$d) use ($datum, $anzahl, $art) {
                 if ($anzahl > 0) {
                     $d['manuell'][$datum] = min($anzahl, MAX_PER_DAY);
+                    if ($art !== '') {
+                        $d['manuell_art'][$datum] = $art;
+                    } else {
+                        unset($d['manuell_art'][$datum]);
+                    }
                 } else {
-                    unset($d['manuell'][$datum]);
+                    unset($d['manuell'][$datum], $d['manuell_art'][$datum]);
                 }
             });
-            $hinweis = 'Handeintrag für ' . date('d.m.Y', strtotime($datum)) . ' gespeichert.';
+            $wort = $anzahl <= 0 ? 'entfernt'
+                  : ($art === 'voll' ? 'gespeichert — der Tag erscheint als ausgebucht'
+                  : ($art === 'zu'   ? 'gespeichert — der Tag erscheint als geschlossen'
+                  : 'gespeichert'));
+            $hinweis = 'Handeintrag für ' . date('d.m.Y', strtotime($datum)) . ' ' . $wort . '.';
         } else {
             $hinweis = 'Das Datum war ungültig.';
         }
@@ -606,10 +619,85 @@ Ich freue mich auf eine schöne kreative Zeit mit {$w['dativ']}!
       Diese Plätze zählen zusätzlich zu den Anfragen oben. Trage <strong>0</strong> ein, um einen Handeintrag zu entfernen.
     </p>
     <form method="post">
+      <label style="display:block;margin-bottom:.3rem;font-size:.8rem;color:#7a5230;">Datum und Anzahl der Plätze</label>
       <input type="date" name="manuell_datum" required>
-      <input type="number" name="manuell_anzahl" min="0" max="<?= MAX_PER_DAY ?>" value="0" required style="width:90px">
+      <input type="number" name="manuell_anzahl" min="0" max="<?= MAX_PER_DAY ?>"
+             value="<?= MAX_PER_DAY ?>" required style="width:90px">
+
+      <div style="margin:.9rem 0 .2rem;">
+        <label style="display:block;margin-bottom:.4rem;font-size:.8rem;color:#7a5230;">
+          Wie soll der Tag auf der Website heißen, wenn kein Platz mehr frei ist?
+        </label>
+        <label style="display:inline-block;margin-right:1.2rem;font-size:.85rem;">
+          <input type="radio" name="manuell_art" value="zu" checked> geschlossen
+        </label>
+        <label style="display:inline-block;margin-right:1.2rem;font-size:.85rem;">
+          <input type="radio" name="manuell_art" value="voll"> ausgebucht
+        </label>
+      </div>
+      <p style="font-size:.78rem;color:#a8917a;margin:.2rem 0 .9rem;line-height:1.6;">
+        Das wirkt sich erst aus, wenn der Tag voll ist. Blockst du nur
+        einzelne Plätze, bleibt der Tag normal buchbar.
+      </p>
+
       <button type="submit">Speichern</button>
     </form>
+
+    <?php
+    /* Was gerade geblockt ist — sonst muss man raten, ob ein
+       Eintrag noch steht und wie er nach aussen heisst. */
+    $heute_str = date('Y-m-d');
+    $offen = [];
+    foreach ($d['manuell'] as $datum => $anzahl) {
+        if ($datum >= $heute_str && (int)$anzahl > 0) { $offen[$datum] = (int)$anzahl; }
+    }
+    ksort($offen);
+    if ($offen): ?>
+      <h3 style="font-size:.8rem;letter-spacing:.14em;text-transform:uppercase;color:#7a5230;margin:1.6rem 0 .6rem;">
+        Aktuell geblockt (<?= count($offen) ?>)
+      </h3>
+      <table style="width:100%;border-collapse:collapse;font-size:.85rem;">
+        <?php foreach ($offen as $datum => $anzahl):
+          $art = $d['manuell_art'][$datum] ?? '';
+          /* Ob der Tag zu ist, entscheidet die GESAMTE Belegung —
+             Handeintrag plus Anfragen. Ein Tag mit fuenf geblockten
+             Plaetzen ist nicht zu, auch wenn beim Blocken
+             "geschlossen" gewaehlt wurde. Das Wort greift erst,
+             wenn kein Platz mehr frei ist.                        */
+          $gesamt = belegt($d, $datum);
+          $rest   = max(0, MAX_PER_DAY - $gesamt);
+          $voll   = $rest <= 0;
+          // Ohne Festlegung gilt die alte Regel: ganz geblockt = geschlossen
+          $zeigt  = $art === 'voll' ? 'ausgebucht' : 'geschlossen';
+          ?>
+          <tr style="border-bottom:1px solid rgba(122,82,48,.12);">
+            <td style="padding:.45rem .6rem .45rem 0;white-space:nowrap;">
+              <strong><?= $e(date('d.m.Y', strtotime($datum))) ?></strong>
+              <?php /* date('D') liefert Englisch — die Kuerzel stehen darum hier. */
+              $kurz = ['So','Mo','Di','Mi','Do','Fr','Sa']; ?>
+              <span style="color:#a8917a"><?= $kurz[(int)date('w', strtotime($datum))] ?></span>
+            </td>
+            <td style="padding:.45rem .6rem;white-space:nowrap;">
+              <?= (int)$anzahl ?> von Hand<?= $gesamt > $anzahl ? ' · ' . ($gesamt - (int)$anzahl) . ' gebucht' : '' ?>
+            </td>
+            <td style="padding:.45rem .6rem;color:#5e4535;">
+              <?php if ($voll): ?>
+                zeigt: <strong><?= $e($zeigt) ?></strong>
+              <?php else: ?>
+                <span style="color:#a8917a">Tag bleibt buchbar — noch <?= $rest ?> frei</span>
+              <?php endif; ?>
+            </td>
+            <td style="padding:.45rem 0;text-align:right;">
+              <form method="post" style="display:inline">
+                <input type="hidden" name="manuell_datum" value="<?= $e($datum) ?>">
+                <input type="hidden" name="manuell_anzahl" value="0">
+                <button type="submit">Freigeben</button>
+              </form>
+            </td>
+          </tr>
+        <?php endforeach; ?>
+      </table>
+    <?php endif; ?>
   </div>
 
   <div class="manuell" style="margin-top:1.5rem">
