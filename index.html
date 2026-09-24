@@ -473,6 +473,26 @@
       .ab-gedreht > figure { order: 0; }
     }
 
+    /* ── ABHOLBEREIT / WHATSAPP-KANAL ── */
+    .qr-block { display: grid; grid-template-columns: auto 1fr; gap: clamp(1.5rem,4vw,3rem);
+                align-items: center; max-width: 820px; }
+    .qr-bild { background: var(--bg-0); padding: .9rem; line-height: 0; }
+    .qr-bild img { width: clamp(150px,22vw,210px); height: auto; display: block; }
+    .qr-text h3 { font-family: var(--fd); font-weight: 500;
+                  font-size: clamp(1.25rem,2.3vw,1.7rem); margin-bottom: .7rem; }
+    .qr-text p { font-size: .9rem; color: var(--cream-mid); line-height: 1.9; margin-bottom: .9rem; }
+    .qr-text strong { color: var(--cream); }
+    .qr-knopf {
+      display: inline-block; margin-top: .3rem;
+      font-size: .7rem; letter-spacing: .16em; text-transform: uppercase;
+      padding: .7rem 1.5rem; border: 1px solid var(--bronze); color: var(--bronze);
+      transition: background .3s, color .3s;
+    }
+    .qr-knopf:hover { background: var(--bronze); color: var(--on-col); }
+    @media (max-width: 620px) {
+      .qr-block { grid-template-columns: 1fr; justify-items: start; }
+    }
+
     /* ── KINDERGEBURTSTAG ── */
     #kigeb { padding: clamp(4rem,9vw,7rem) clamp(1.5rem,6vw,4rem); background: var(--bg-1); }
     .kg-inner { max-width: 1100px; margin: 0 auto; }
@@ -523,7 +543,9 @@
     }
 
     /* ── REFERENZEN ── */
-    #refs { padding: clamp(4rem,9vw,7rem) clamp(1.5rem,6vw,4rem); }
+    /* Schliesst direkt an die Fragen an — eigener Ton, damit die
+       Abschnitte sich weiter abwechseln. */
+    #refs { padding: clamp(4rem,9vw,7rem) clamp(1.5rem,6vw,4rem); background: var(--bg-1); }
     .rf-inner { max-width: 1100px; margin: 0 auto; }
     .rf-kopf { max-width: 640px; margin-bottom: 2.5rem; }
     .rf-kopf p { font-size: .95rem; color: var(--cream-mid); line-height: 1.95; margin-top: 1.2rem; }
@@ -858,7 +880,7 @@
         <p>
           Sobald deine Keramik fertig und abgekühlt ist, kannst du sie abholen.
           Bescheid gebe ich über den WhatsApp-Kanal
-          <strong>„Tonflüstern: Keramik abholbereit"</strong>.
+          <a href="https://whatsapp.com/channel/0029VbDPij847Xe5BQyTPg2H" target="_blank" rel="noopener noreferrer" class="kg-verweis"><strong>„Tonflüstern: Keramik abholbereit"</strong></a>.
         </p>
       </div>
     </div>
@@ -1020,7 +1042,7 @@
         <p>
           Nach dem Bemalen bleiben die Werkstücke hier, bekommen ihre Glanzglasur
           und werden gebrannt. Sobald sie abholbereit sind, gebe ich im
-          WhatsApp-Kanal „Tonflüstern: Keramik abholbereit" Bescheid.
+          WhatsApp-Kanal <a href="https://whatsapp.com/channel/0029VbDPij847Xe5BQyTPg2H" target="_blank" rel="noopener noreferrer" class="kg-verweis">„Tonflüstern: Keramik abholbereit"</a> Bescheid.
         </p>
       </div>
 
@@ -1189,7 +1211,7 @@
         </ul>
         <p>
           Sobald alle Werkstücke fertig sind, gebe ich im WhatsApp-Kanal
-          <strong>„Tonflüstern – Keramik abholbereit"</strong> Bescheid. Sie können
+          <a href="https://whatsapp.com/channel/0029VbDPij847Xe5BQyTPg2H" target="_blank" rel="noopener noreferrer" class="kg-verweis"><strong>„Tonflüstern: Keramik abholbereit"</strong></a> Bescheid. Sie können
           dann gesammelt von einer zuständigen erwachsenen Person abgeholt und
           privat an die Kinder verteilt werden.
         </p>
@@ -1221,7 +1243,7 @@
 </section>
 
 <!-- ── PREISE ── -->
-<section id="preise" class="ab ab--hell" aria-labelledby="pr-h">
+<section id="preise" class="ab" aria-labelledby="pr-h">
   <div class="ab-inner">
     <div class="ab-kopf rv">
       <span class="eyebrow">Preise</span>
@@ -1301,7 +1323,7 @@
 </section>
 
 <!-- ── GETRÄNKE ── -->
-<section id="getraenke" class="ab" aria-labelledby="gt-h">
+<section id="getraenke" class="ab ab--hell" aria-labelledby="gt-h">
   <div class="ab-inner">
     <div class="ab-kopf rv">
       <span class="eyebrow">Café</span>
@@ -1344,7 +1366,7 @@
 </section>
 
 <!-- ── GUTSCHEINE ── -->
-<section id="gutscheine" class="ab ab--hell" aria-labelledby="gs-h">
+<section id="gutscheine" class="ab" aria-labelledby="gs-h">
   <div class="ab-inner">
     <div class="ab-zwei ab-zwei--bild ab-gedreht rv">
       <figure>
@@ -1376,6 +1398,38 @@
           Passen die dir nicht, meld dich gerne — dann finden wir einen eigenen
           Termin.
         </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── KERAMIK ABHOLBEREIT ── -->
+<section id="abholen" class="ab ab--hell" aria-labelledby="qr-h">
+  <div class="ab-inner">
+    <div class="ab-kopf rv" style="margin-bottom:2rem;">
+      <span class="eyebrow">Abholung</span>
+      <span class="gold-rule"></span>
+      <h2 id="qr-h" class="dmd">Wenn deine Keramik<br><em>fertig ist</em></h2>
+    </div>
+
+    <div class="qr-block rv rv-d1">
+      <div class="qr-bild">
+        <img src="qrkanal.png" alt="QR-Code zum WhatsApp-Kanal „Tonflüstern: Keramik abholbereit“"
+             loading="lazy" width="564" height="564">
+      </div>
+      <div class="qr-text">
+        <h3>Tonflüstern: Keramik abholbereit</h3>
+        <p>
+          Sobald deine Keramik gebrannt und abgekühlt ist, stelle ich ein Bild
+          davon in meinen WhatsApp-Kanal. Entdeckst du dein Werkstück, kannst du
+          es während der Öffnungszeiten abholen.
+        </p>
+        <p>
+          Scann den Code mit der Handykamera oder tipp auf den Knopf. Die
+          Fertigstellung dauert in der Regel <strong>zwei bis drei Wochen</strong>.
+        </p>
+        <a class="qr-knopf" href="https://whatsapp.com/channel/0029VbDPij847Xe5BQyTPg2H"
+           target="_blank" rel="noopener noreferrer">Zum Kanal</a>
       </div>
     </div>
   </div>
@@ -1445,8 +1499,9 @@
             Abholtag.
           </p>
           <p>
-            Über den QR-Code hier auf der Seite kommst du zum WhatsApp-Kanal
-            <strong>„Tonflüstern: Keramik abholbereit"</strong>. Dort stelle ich
+            Über den <a href="#abholen" class="kg-verweis">QR-Code weiter oben</a>
+            kommst du zum WhatsApp-Kanal
+            <a href="https://whatsapp.com/channel/0029VbDPij847Xe5BQyTPg2H" target="_blank" rel="noopener noreferrer" class="kg-verweis"><strong>„Tonflüstern: Keramik abholbereit"</strong></a>. Dort stelle ich
             Bilder der fertig gebrannten Werkstücke ein. Sobald du deines
             entdeckst, kannst du es während der Öffnungszeiten abholen.
           </p>
