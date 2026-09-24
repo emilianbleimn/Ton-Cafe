@@ -493,6 +493,43 @@
       .qr-block { grid-template-columns: 1fr; justify-items: start; }
     }
 
+    /* ── GALERIE ── */
+    .gal-raster { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px,1fr)); gap: 10px; }
+    .gal-feld {
+      margin: 0; padding: 0; border: none; background: var(--bg-2);
+      cursor: zoom-in; overflow: hidden; position: relative;
+      aspect-ratio: 1 / 1; display: block; width: 100%;
+    }
+    .gal-feld img { width: 100%; height: 100%; object-fit: cover; display: block;
+                    transition: transform .6s ease; }
+    .gal-feld:hover img, .gal-feld:focus-visible img { transform: scale(1.05); }
+    .gal-feld:focus-visible { outline: 2px solid var(--bronze); outline-offset: 3px; }
+    .gal-leer { font-size: .9rem; color: var(--cream-faint); }
+
+    /* Vergroesserte Ansicht */
+    #gal-gross {
+      position: fixed; inset: 0; z-index: 1200; display: none;
+      background: rgba(41,27,15,.9); backdrop-filter: blur(4px);
+      align-items: center; justify-content: center; padding: clamp(1rem,4vw,3rem);
+    }
+    #gal-gross.auf { display: flex; }
+    #gal-gross img { max-width: 100%; max-height: 100%; object-fit: contain; display: block; }
+    .gal-zu, .gal-vor, .gal-zurueck {
+      position: absolute; background: none; border: none; color: var(--bg-0);
+      font-size: 2rem; line-height: 1; cursor: pointer; padding: .6rem .9rem;
+      opacity: .75; transition: opacity .2s;
+    }
+    .gal-zu:hover, .gal-vor:hover, .gal-zurueck:hover { opacity: 1; }
+    .gal-zu { top: .6rem; right: .8rem; font-size: 2.2rem; }
+    .gal-zurueck { left: .2rem; top: 50%; transform: translateY(-50%); }
+    .gal-vor { right: .2rem; top: 50%; transform: translateY(-50%); }
+    .gal-zaehler { position: absolute; bottom: 1rem; left: 50%; transform: translateX(-50%);
+                   font-size: .78rem; letter-spacing: .1em; color: var(--bg-3); }
+    body.gal-offen { overflow: hidden; }
+    @media (max-width: 520px) {
+      .gal-raster { grid-template-columns: repeat(auto-fill, minmax(140px,1fr)); gap: 8px; }
+    }
+
     /* ── KINDERGEBURTSTAG ── */
     #kigeb { padding: clamp(4rem,9vw,7rem) clamp(1.5rem,6vw,4rem); background: var(--bg-1); }
     .kg-inner { max-width: 1100px; margin: 0 auto; }
@@ -754,6 +791,7 @@
   <div class="nav-links">
     <a class="nav-link" href="#bemalen">Bemalen</a>
     <a class="nav-link" href="#toepfern">Töpfern</a>
+    <a class="nav-link" href="#galerie">Galerie</a>
     <a class="nav-link" href="#feste">Feiern</a>
     <a class="nav-link" href="#kigeb">Kindergeburtstag</a>
     <a class="nav-link" href="#preise">Preise</a>
@@ -979,8 +1017,35 @@
   </div>
 </section>
 
+<!-- ── GALERIE ── -->
+<section id="galerie" class="ab" aria-labelledby="ga-h">
+  <div class="ab-inner">
+    <div class="ab-kopf rv">
+      <span class="eyebrow">Galerie</span>
+      <span class="gold-rule"></span>
+      <h2 id="ga-h" class="dmd">Was hier<br><em>entsteht</em></h2>
+      <p>
+        Ein paar Stücke, die bei Tonflüstern bemalt und getöpfert wurden —
+        von ruhig bis übermütig, jedes ein Einzelstück. Tipp auf ein Bild,
+        um es größer zu sehen.
+      </p>
+    </div>
+
+    <div id="gal-raster" class="gal-raster rv rv-d1"></div>
+    <p id="gal-leer" class="gal-leer" hidden>Die Galerie füllt sich gerade.</p>
+  </div>
+</section>
+
+<div id="gal-gross" role="dialog" aria-modal="true" aria-label="Bild in groß" hidden>
+  <button type="button" class="gal-zu" aria-label="Schließen">&times;</button>
+  <button type="button" class="gal-zurueck" aria-label="Vorheriges Bild">&lsaquo;</button>
+  <img id="gal-grossbild" src="" alt="">
+  <button type="button" class="gal-vor" aria-label="Nächstes Bild">&rsaquo;</button>
+  <span class="gal-zaehler" id="gal-zaehler"></span>
+</div>
+
 <!-- ── FESTE UND ANLÄSSE ── -->
-<section id="feste" class="ab" aria-labelledby="fe-h">
+<section id="feste" class="ab ab--hell" aria-labelledby="fe-h">
   <div class="ab-inner">
 
     <div class="ab-kopf rv">
@@ -2425,6 +2490,92 @@ bkForm.addEventListener('submit', async e => {
     alert('Keine Verbindung. Bitte prüfe dein Internet und versuche es nochmal.');
   }
 });
+
+/* ── GALERIE ── */
+(function () {
+  const raster = document.getElementById('gal-raster');
+  const leer   = document.getElementById('gal-leer');
+  const gross  = document.getElementById('gal-gross');
+  if (!raster || !gross) return;
+
+  const grossBild = document.getElementById('gal-grossbild');
+  const zaehler   = document.getElementById('gal-zaehler');
+  let bilder = [];
+  let bei = 0;
+
+  /* Die Bilder kommen aus dem Ordner galerie/ — kommt eines
+     dazu, muss an dieser Seite nichts geaendert werden.   */
+  async function laden() {
+    let d;
+    try {
+      const r = await fetch('galerie.php', { cache: 'no-store' });
+      d = await r.json();
+    } catch (e) {
+      leer.hidden = false;
+      return;
+    }
+    bilder = (d && d.bilder) || [];
+    if (!bilder.length) { leer.hidden = false; return; }
+
+    const teile = document.createDocumentFragment();
+    bilder.forEach((b, i) => {
+      const knopf = document.createElement('button');
+      knopf.type = 'button';
+      knopf.className = 'gal-feld';
+      knopf.setAttribute('aria-label', 'Bild ' + (i + 1) + ' von ' + bilder.length + ' vergrößern');
+
+      const img = document.createElement('img');
+      img.src = 'galeriebild.php?b=600&d=' + encodeURIComponent(b.datei);
+      img.alt = 'Selbst gestaltete Keramik aus dem Tonflüstern';
+      img.loading = 'lazy';
+      img.decoding = 'async';
+      if (b.breite && b.hoehe) { img.width = b.breite; img.height = b.hoehe; }
+
+      knopf.appendChild(img);
+      knopf.addEventListener('click', () => oeffnen(i));
+      teile.appendChild(knopf);
+    });
+    raster.replaceChildren(teile);
+  }
+
+  function zeigen(i) {
+    bei = (i + bilder.length) % bilder.length;
+    const b = bilder[bei];
+    grossBild.src = 'galeriebild.php?b=1400&d=' + encodeURIComponent(b.datei);
+    grossBild.alt = 'Selbst gestaltete Keramik, Bild ' + (bei + 1) + ' von ' + bilder.length;
+    zaehler.textContent = (bei + 1) + ' / ' + bilder.length;
+  }
+
+  function oeffnen(i) {
+    zeigen(i);
+    gross.hidden = false;
+    gross.classList.add('auf');
+    document.body.classList.add('gal-offen');
+    gross.querySelector('.gal-zu').focus();
+  }
+
+  function schliessen() {
+    gross.classList.remove('auf');
+    gross.hidden = true;
+    document.body.classList.remove('gal-offen');
+    grossBild.src = '';
+  }
+
+  gross.querySelector('.gal-zu').addEventListener('click', schliessen);
+  gross.querySelector('.gal-vor').addEventListener('click', () => zeigen(bei + 1));
+  gross.querySelector('.gal-zurueck').addEventListener('click', () => zeigen(bei - 1));
+  // Klick auf den Hintergrund schliesst, Klick aufs Bild nicht
+  gross.addEventListener('click', e => { if (e.target === gross) schliessen(); });
+
+  document.addEventListener('keydown', e => {
+    if (!gross.classList.contains('auf')) return;
+    if (e.key === 'Escape')     schliessen();
+    if (e.key === 'ArrowRight') zeigen(bei + 1);
+    if (e.key === 'ArrowLeft')  zeigen(bei - 1);
+  });
+
+  laden();
+})();
 
 /* ── REFERENZEN ── */
 (function () {
