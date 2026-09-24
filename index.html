@@ -163,7 +163,9 @@
 
     /* ── TYPOGRAPHY ── */
     .eyebrow { font-family: var(--fb); font-size: .68rem; font-weight: 500; letter-spacing: .26em; text-transform: uppercase; color: var(--bronze); }
-    h1,h2,h3,h4 { font-family: var(--fd); font-weight: 400; line-height: 1.08; }
+    /* 500 ist bei Fraunces die schwerste vorhandene Stufe. Mehr
+       waere nur vom Browser nachgedunkelt und saehe unsauber aus. */
+    h1,h2,h3,h4 { font-family: var(--fd); font-weight: 500; line-height: 1.08; }
     .dlg { font-size: clamp(2.2rem,5vw,4.4rem); line-height: 1.05; }
     .dmd { font-size: clamp(1.8rem,3.5vw,3rem); }
     .gold-rule { display: block; width: 44px; height: 1px; background: var(--bronze); opacity: .5; margin: 1.2rem 0; }
@@ -187,15 +189,27 @@
       display: block; width: 42px; height: 42px; flex-shrink: 0;
       background: url(favicon.png) no-repeat center / contain;
     }
+    /* Die Seite ist lang geworden — ohne Navigation muesste man
+       sehr weit scrollen. Auf schmalen Geraeten laesst sich die
+       Leiste seitlich schieben, statt zu verschwinden.          */
+    .nav-links { display: flex; align-items: center; gap: 1.3rem; overflow-x: auto;
+                 scrollbar-width: none; -ms-overflow-style: none; }
+    .nav-links::-webkit-scrollbar { display: none; }
     .nav-link {
       font-size: .68rem; letter-spacing: .16em; text-transform: uppercase;
-      color: var(--cream-mid); margin-right: 1.4rem;
+      color: var(--cream-mid); white-space: nowrap;
       border-bottom: 1px solid transparent; padding-bottom: .15rem;
       transition: color .3s, border-color .3s;
     }
     .nav-link:hover { color: var(--bronze); border-color: var(--bronze); }
-    /* Auf schmalen Geraeten wuerde der Text neben dem Knopf umbrechen */
-    @media (max-width: 560px) { .nav-link { display: none; } }
+    @media (max-width: 900px) {
+      .nav-links { gap: 1rem; font-size: .64rem; margin: 0 .8rem; }
+    }
+    @media (max-width: 560px) {
+      /* Der Knopf bleibt, die Leiste rutscht darunter */
+      #nav { flex-wrap: wrap; row-gap: .5rem; }
+      .nav-links { order: 3; width: 100%; margin: 0; padding-bottom: .2rem; }
+    }
 
     .nav-book {
       font-size: .68rem; letter-spacing: .16em; text-transform: uppercase;
@@ -381,6 +395,83 @@
     #wz-feld.visible { display: flex; }
     .wz-hint { display: block; text-transform: none; letter-spacing: 0;
                color: var(--cream-faint); font-size: .74rem; margin-top: .15rem; }
+
+    /* ══ GEMEINSAME ABSCHNITTE (Angebote, Preise, Getraenke, Fragen) ══ */
+    .ab { padding: clamp(4rem,9vw,7rem) clamp(1.5rem,6vw,4rem); }
+    .ab--hell { background: var(--bg-1); }
+    .ab-inner { max-width: 1100px; margin: 0 auto; }
+    .ab-kopf { max-width: 680px; margin-bottom: clamp(2.2rem,4vw,3.2rem); }
+    .ab-kopf p { font-size: .95rem; color: var(--cream-mid); line-height: 1.95; margin-top: 1.2rem; }
+    .ab-kopf p + p { margin-top: .9rem; }
+
+    .ab-zwei { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(1.5rem,4vw,3.5rem); align-items: start; }
+    .ab-zwei--bild { align-items: center; }
+    .ab-zwei > figure { margin: 0; }
+    .ab-zwei figure img { width: 100%; height: clamp(260px,40vw,440px); object-fit: cover; display: block; }
+    .ab-gedreht > figure { order: 2; }
+
+    .ab-text h3, .ab-block h3 {
+      font-family: var(--fd); font-weight: 500;
+      font-size: clamp(1.25rem,2.3vw,1.7rem); margin-bottom: .8rem;
+    }
+    .ab-text h4, .ab-block h4 {
+      font-family: var(--fd); font-weight: 500;
+      font-size: 1.02rem; margin: 1.4rem 0 .4rem;
+    }
+    .ab-text p, .ab-block p { font-size: .9rem; color: var(--cream-mid); line-height: 1.9; margin-bottom: .9rem; }
+    .ab-text strong, .ab-block strong { color: var(--cream); }
+
+    .ab-liste { list-style: none; margin: 0 0 1rem; padding: 0; }
+    .ab-liste li { font-size: .9rem; color: var(--cream-mid); line-height: 1.8;
+                   padding-left: 1.1rem; position: relative; margin-bottom: .35rem; }
+    .ab-liste li::before { content: '·'; position: absolute; left: .25rem; color: var(--bronze); font-weight: 700; }
+
+    /* Karten fuer Preise und aehnliche Aufzaehlungen */
+    .ab-karten { display: grid; grid-template-columns: repeat(auto-fit, minmax(270px,1fr)); gap: 1rem; }
+    .ab-karte { background: var(--bg-0); border-left: 3px solid var(--bronze); padding: 1.4rem 1.5rem; }
+    .ab--hell .ab-karte { background: var(--bg-0); }
+    .ab-karte h3 { font-family: var(--fd); font-weight: 500; font-size: 1.05rem; margin-bottom: .3rem; }
+    .ab-karte .preis { display: block; font-family: var(--fd); font-size: 1.5rem;
+                       color: var(--terra); line-height: 1.2; margin: .3rem 0 .6rem; }
+    .ab-karte .preis small { font-size: .78rem; color: var(--cream-faint); font-family: var(--fb); display: block; margin-top: .2rem; }
+    .ab-karte p { font-size: .84rem; color: var(--cream-mid); line-height: 1.75; margin: 0; }
+    .ab-karte .merke { display: inline-block; margin-top: .7rem; font-size: .76rem;
+                       color: var(--bronze); background: var(--bg-2); padding: .25rem .6rem; }
+
+    /* Getraenkekarte */
+    .gk { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px,1fr)); gap: clamp(1.5rem,4vw,3rem); }
+    .gk h3 { font-family: var(--fd); font-weight: 500; font-size: 1.1rem; margin-bottom: .9rem; }
+    .gk-zeile { display: flex; align-items: baseline; gap: .6rem; padding: .45rem 0;
+                border-bottom: 1px solid rgba(122,82,48,.12); font-size: .9rem; }
+    .gk-zeile span:first-child { color: var(--cream); }
+    .gk-punkte { flex: 1; border-bottom: 1px dotted rgba(122,82,48,.3); transform: translateY(-.25rem); }
+    .gk-zeile b { font-weight: 400; color: var(--bronze); white-space: nowrap; }
+    .gk-hinweis { font-size: .84rem; color: var(--cream-faint); margin-top: 1rem; line-height: 1.7; }
+
+    /* Haeufige Fragen */
+    .fq { max-width: 780px; }
+    .fq details { border-bottom: 1px solid rgba(122,82,48,.15); }
+    .fq summary {
+      cursor: pointer; list-style: none; padding: 1.1rem 2rem 1.1rem 0; position: relative;
+      font-family: var(--fd); font-weight: 500; font-size: 1.02rem; color: var(--cream);
+    }
+    .fq summary::-webkit-details-marker { display: none; }
+    .fq summary::after {
+      content: '+'; position: absolute; right: .3rem; top: 50%; transform: translateY(-50%);
+      font-family: var(--fb); font-size: 1.3rem; color: var(--bronze); transition: transform .3s;
+    }
+    .fq details[open] summary::after { content: '–'; }
+    .fq summary:hover { color: var(--bronze); }
+    .fq summary:focus-visible { outline: 2px solid var(--bronze); outline-offset: 3px; }
+    .fq-inhalt { padding: 0 0 1.2rem; }
+    .fq-inhalt p { font-size: .9rem; color: var(--cream-mid); line-height: 1.9; margin-bottom: .8rem; }
+    .fq-inhalt p:last-child { margin-bottom: 0; }
+    .fq-inhalt strong { color: var(--cream); }
+
+    @media (max-width: 760px) {
+      .ab-zwei { grid-template-columns: 1fr; }
+      .ab-gedreht > figure { order: 0; }
+    }
 
     /* ── KINDERGEBURTSTAG ── */
     #kigeb { padding: clamp(4rem,9vw,7rem) clamp(1.5rem,6vw,4rem); background: var(--bg-1); }
@@ -638,7 +729,14 @@
 <!-- ── NAV ── -->
 <nav id="nav" role="navigation" aria-label="Hauptnavigation">
   <a href="#hero" class="nav-emblem" aria-label="Zurück zur Startseite"></a>
-  <a class="nav-link" href="#kigeb">Kindergeburtstag</a>
+  <div class="nav-links">
+    <a class="nav-link" href="#bemalen">Bemalen</a>
+    <a class="nav-link" href="#toepfern">Töpfern</a>
+    <a class="nav-link" href="#feste">Feiern</a>
+    <a class="nav-link" href="#kigeb">Kindergeburtstag</a>
+    <a class="nav-link" href="#preise">Preise</a>
+    <a class="nav-link" href="#fragen">Fragen</a>
+  </div>
   <a class="nav-book" href="#booking">Termin anfragen</a>
 </nav>
 
@@ -701,6 +799,285 @@
       <strong>Bitte hab Nachsicht mit mir</strong> — die Homepage befindet sich noch in Bearbeitung.
       Ich gebe mir Mühe, so schnell es mir gelingt alle wichtigen Infos und genaue Beschreibungen zum „Tonflüstern" zu ergänzen.
       Falls du Fragen hast, melde dich gerne bei mir. Danke für dein Verständnis!
+    </div>
+
+  </div>
+</section>
+
+<!-- ── KERAMIK BEMALEN ── -->
+<section id="bemalen" class="ab" aria-labelledby="bm-h">
+  <div class="ab-inner">
+
+    <div class="ab-kopf rv">
+      <span class="eyebrow">Angebot</span>
+      <span class="gold-rule"></span>
+      <h2 id="bm-h" class="dmd">Keramik bemalen<br><em>deine kreative Auszeit</em></h2>
+      <p>
+        Mit Farbe und Pinsel entsteht aus einem schlichten Keramikrohling etwas
+        ganz Persönliches. Beim ruhigen Gestalten darf der Alltag für einen Moment
+        in den Hintergrund treten. Du kannst dir Zeit nehmen, deiner Kreativität
+        folgen und ein individuelles Erinnerungsstück erschaffen, das deine eigene
+        Handschrift trägt.
+      </p>
+      <p>
+        <strong>Vorkenntnisse sind nicht erforderlich.</strong> Wenn du bei der
+        Gestaltung, der Farbauswahl oder einer bestimmten Technik Unterstützung
+        brauchst, erklär ich dir das gerne.
+      </p>
+    </div>
+
+    <div class="ab-zwei ab-zwei--bild rv rv-d1">
+      <figure>
+        <img src="kbfarben.jpg" alt="Regal mit Keramikfarben und Pinseln" loading="lazy" width="1066" height="1600">
+      </figure>
+      <div class="ab-text">
+        <h3>So läuft es ab</h3>
+
+        <h4>1 · Rohling aussuchen</h4>
+        <p>
+          Zur Auswahl stehen unterschiedliche Formen und Preisklassen — Tassen,
+          Becher, Teller, Schalen, Vasen oder kleine Dekorationsstücke.
+        </p>
+
+        <h4>2 · Bemalen</h4>
+        <p>
+          Gestalte deinen Rohling mit Farben, Mustern, Schriften oder eigenen
+          Motiven ganz nach deinen Vorstellungen. Dafür stehen dir etwa
+          <strong>drei Stunden</strong> zur Verfügung.
+        </p>
+
+        <h4>3 · Glasieren und brennen</h4>
+        <p>
+          Deine Keramik bleibt bei Tonflüstern. Sobald die Farben getrocknet
+          sind, kommt eine transparente Glanzglasur darüber und das Werkstück
+          in den Ofen. Erst dadurch bekommen die Farben ihre endgültige Wirkung
+          und die Oberfläche ihren Glanz.
+        </p>
+
+        <h4>4 · Abholen</h4>
+        <p>
+          Sobald deine Keramik fertig und abgekühlt ist, kannst du sie abholen.
+          Bescheid gebe ich über den WhatsApp-Kanal
+          <strong>„Tonflüstern: Keramik abholbereit"</strong>.
+        </p>
+      </div>
+    </div>
+
+    <div class="ab-zwei rv rv-d1" style="margin-top:clamp(2.5rem,5vw,4rem);">
+      <div class="ab-block">
+        <h3>Was es kostet</h3>
+        <p>
+          Die Keramikrohlinge liegen zwischen <strong>5 € und 33 €</strong>. Der
+          Preis steht direkt am Regal. <strong>Du bezahlst nur den Rohling</strong> —
+          darin ist schon alles enthalten:
+        </p>
+        <ul class="ab-liste">
+          <li>Farben und Gestaltungsmaterialien</li>
+          <li>Nutzung des Zubehörs</li>
+          <li>transparente Glanzglasur</li>
+          <li>Brennkosten</li>
+          <li>Nutzung des Arbeitsplatzes</li>
+        </ul>
+        <p>
+          Fürs Bemalen, Glasieren oder Brennen kommt nichts dazu. Getränke werden
+          separat berechnet, Wasser gibt es kostenlos.
+        </p>
+      </div>
+      <div class="ab-block">
+        <h3>In der Gruppe</h3>
+        <p>
+          Keramik bemalen eignet sich auch für Geburtstage, Teamevents oder eine
+          gemeinsame kreative Auszeit mit Familie und Freunden. Jede Person sucht
+          sich vor Ort einen eigenen Rohling aus und gestaltet ihn individuell.
+        </p>
+        <p>
+          Wenn für die Gruppe ein ähnlicher Preisrahmen gewünscht ist, stelle ich
+          vorab eine <strong>Auswahl aus drei Rohlingen</strong> in vergleichbarer
+          Preisklasse zusammen. So bleibt die Auswahl abwechslungsreich und die
+          Kosten sind planbar.
+        </p>
+        <h4>Gut zu wissen</h4>
+        <p>
+          Keramik bemalen ist für Anfängerinnen und Anfänger geeignet.
+          Künstlerische Erfahrung ist nicht nötig — im Mittelpunkt stehen die
+          Freude am Gestalten, die gemeinsame Zeit und das persönliche Ergebnis.
+          Bitte kommt zur angegebenen Anfangszeit, damit genügend Zeit zum
+          Gestalten bleibt.
+        </p>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ── TÖPFERN ── -->
+<section id="toepfern" class="ab ab--hell" aria-labelledby="tp-h">
+  <div class="ab-inner">
+
+    <div class="ab-kopf rv">
+      <span class="eyebrow">Angebot</span>
+      <span class="gold-rule"></span>
+      <h2 id="tp-h" class="dmd">Töpfern<br><em>mit den Händen gestalten</em></h2>
+      <p>
+        Aus einem Stück Ton entsteht etwas ganz Eigenes. Ich zeige dir den
+        Grundaufbau Schritt für Schritt, anschließend gestaltest du dein
+        Werkstück mit Mustern, Stempeln und eigenen Ideen. Auch hier gilt:
+        <strong>Vorkenntnisse brauchst du keine.</strong>
+      </p>
+    </div>
+
+    <div class="ab-zwei ab-zwei--bild ab-gedreht rv rv-d1">
+      <figure>
+        <img src="kbtonarbeiten.jpg" alt="Selbst geformte Schalen, Tassen und Schilder aus Ton" loading="lazy" width="1066" height="1600">
+      </figure>
+      <div class="ab-text">
+        <h3>Der Töpferkurs</h3>
+        <p>
+          Der Kurs läuft über <strong>zwei Termine</strong>. Am ersten Termin
+          formst du dein Werkstück. Danach trocknet es und wird ein erstes Mal
+          gebrannt. Am zweiten Termin bemalst du es selbst — anschließend kommt
+          die transparente Glanzglasur darüber und es geht ein zweites Mal in
+          den Ofen.
+        </p>
+        <p>
+          <strong>30 € pro Person und Termin</strong>, zusammen also 60 €.
+          Darin enthalten sind Ton, Werkzeuge, Farben, die Glanzglasur, beide
+          Brände und die Nutzung des Arbeitsplatzes.
+        </p>
+        <h4>In der Gruppe an einem Termin</h4>
+        <p>
+          Für Gruppen geht es auch an einem einzigen Termin: Am Ende sucht sich
+          jede Person eine Glasurfarbe aus, das Glasieren übernehme ich.
+          <strong>35 € pro Person</strong>, höchstens zehn Personen, ein zweiter
+          Termin ist dann nicht nötig.
+        </p>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ── FESTE UND ANLÄSSE ── -->
+<section id="feste" class="ab" aria-labelledby="fe-h">
+  <div class="ab-inner">
+
+    <div class="ab-kopf rv">
+      <span class="eyebrow">Feiern</span>
+      <span class="gold-rule"></span>
+      <h2 id="fe-h" class="dmd">Gemeinsam<br><em>kreativ feiern</em></h2>
+      <p>
+        Bei Tonflüstern dürft ihr euch Zeit füreinander nehmen, zur Ruhe kommen
+        und euren besonderen Anlass in entspannter Atmosphäre genießen. Der helle
+        Raum verbindet warme Natur- und Erdtöne mit sanfter Musik und ist bewusst
+        ruhig gehalten, damit äußere Reize für eine Weile in den Hintergrund
+        treten können.
+      </p>
+      <p>
+        Bei einem Getränk, schönen Gesprächen und kreativem Gestalten entsteht
+        eine gemeinsame Auszeit, in der jede Person etwas ganz Persönliches mit
+        den eigenen Händen gestaltet. Dafür stehen euch
+        <strong>bis zu drei Stunden</strong> zur Verfügung.
+      </p>
+    </div>
+
+    <div class="ab-zwei ab-zwei--bild rv rv-d1">
+      <figure>
+        <img src="kbtische.jpg" alt="Gedeckte Tische im Cafébereich" loading="lazy" width="1066" height="1600">
+      </figure>
+      <div class="ab-text">
+        <h3>Passend zum Beispiel für</h3>
+        <ul class="ab-liste">
+          <li>Kindergeburtstage</li>
+          <li>Geburtstage für Erwachsene</li>
+          <li>Teamevents und Betriebsausflüge</li>
+          <li>Junggesellinnen- und Junggesellenabschiede</li>
+          <li>Babypartys</li>
+          <li>Frauenabende oder kreative Männerrunden</li>
+          <li>Familien- und Freundestreffen</li>
+          <li>Weihnachtsfeiern</li>
+          <li>Jubiläen und andere besondere Anlässe</li>
+        </ul>
+        <p>
+          Alles rund um <strong>Kindergeburtstage</strong> steht ausführlich im
+          <a href="#kigeb" class="kg-verweis">eigenen Bereich weiter unten</a>.
+        </p>
+      </div>
+    </div>
+
+    <div class="ab-zwei rv rv-d1" style="margin-top:clamp(2.5rem,5vw,4rem);">
+      <div class="ab-block">
+        <h3>Keramik gemeinsam bemalen</h3>
+        <p>
+          Jede Person sucht sich einen Keramikrohling aus und gestaltet ihn mit
+          Farben, Mustern, Schriften oder eigenen Motiven.
+        </p>
+        <p>
+          Ist für die Gruppe ein ähnlicher Preisrahmen gewünscht, stelle ich vorab
+          <strong>drei Rohlinge aus einer vergleichbaren Preisklasse</strong>
+          zusammen. Am Tag selbst entscheidet sich jede Person für einen davon —
+          so bleibt die Auswahl abwechslungsreich und die Kosten planbar.
+        </p>
+        <p>
+          Nach dem Bemalen bleiben die Werkstücke hier, bekommen ihre Glanzglasur
+          und werden gebrannt. Sobald sie abholbereit sind, gebe ich im
+          WhatsApp-Kanal „Tonflüstern: Keramik abholbereit" Bescheid.
+        </p>
+      </div>
+
+      <div class="ab-block">
+        <h3>Gemeinsam töpfern</h3>
+        <p>
+          Im Workshop erkläre ich den Grundaufbau Schritt für Schritt,
+          anschließend gestaltet jede Person ihr Werkstück mit Mustern, Stempeln
+          und eigenen Ideen. Dafür gibt es zwei Wege:
+        </p>
+        <h4>An einem Termin</h4>
+        <p>
+          Am Ende sucht sich jede Person eine Glasurfarbe aus. Das Brennen,
+          Glasieren und zweite Brennen übernehme ich — ein weiterer Termin ist
+          nicht nötig.
+        </p>
+        <h4>Mit späterem Bemaltermin</h4>
+        <p>
+          Wer sein Werkstück selbst ausführlich bemalen möchte, vereinbart nach
+          dem ersten Brand einen zweiten Termin. Die Gruppe kann noch einmal
+          gemeinsam kommen; wer da nicht kann, bemalt nach Absprache zu einem
+          eigenen Termin. Dieser Termin wird separat gebucht und berechnet.
+        </p>
+        <p><strong>Beim Töpfern sind höchstens zehn Personen möglich.</strong></p>
+      </div>
+    </div>
+
+    <div class="ab-zwei rv rv-d1" style="margin-top:clamp(2.5rem,5vw,4rem);">
+      <div class="ab-block">
+        <h3>Snacks und Getränke</h3>
+        <p>
+          Eigene Snacks, kleine Häppchen sowie trockene Kuchen oder Muffins dürft
+          ihr gerne mitbringen. Bitte verzichtet auf leicht verderbliche Speisen
+          und Sahnetorten.
+        </p>
+        <p>
+          Auch eigene Fruchtsäfte sowie Sekt oder Wein zum Anstoßen dürfen mit.
+          Warme Getränke wie Kaffee, Cappuccino, Latte macchiato oder Tee gibt es
+          bei mir, Wasser steht kostenlos bereit.
+        </p>
+        <p>
+          Gläser, kleine Teller und Schälchen für eure mitgebrachten Speisen
+          stelle ich bereit.
+        </p>
+      </div>
+      <div class="ab-block">
+        <h3>Dekoration</h3>
+        <p>
+          Auf Wunsch bereite ich den Tisch passend zum Anlass vor und dekoriere
+          ihn liebevoll. Wünsche zur Gestaltung stimmen wir vorab gemeinsam ab.
+        </p>
+        <p>
+          So entsteht ein persönlicher Rahmen für euren besonderen Anlass — mit
+          gemeinsamer Zeit, kreativen Momenten und selbst gestalteten
+          Erinnerungsstücken.
+        </p>
+      </div>
     </div>
 
   </div>
@@ -843,14 +1220,303 @@
   </div>
 </section>
 
+<!-- ── PREISE ── -->
+<section id="preise" class="ab ab--hell" aria-labelledby="pr-h">
+  <div class="ab-inner">
+    <div class="ab-kopf rv">
+      <span class="eyebrow">Preise</span>
+      <span class="gold-rule"></span>
+      <h2 id="pr-h" class="dmd">Preise<br><em>im Überblick</em></h2>
+      <p>
+        Ausführliche Beschreibungen zum Ablauf findest du weiter oben bei den
+        einzelnen Angeboten.
+      </p>
+    </div>
+
+    <div class="ab-karten rv rv-d1">
+      <div class="ab-karte">
+        <h3>Keramik bemalen</h3>
+        <span class="preis">5 – 33 €<small>je nach Rohling</small></span>
+        <p>
+          Der Preis des ausgewählten Rohlings enthält Farben, Zubehör,
+          transparente Glanzglasur, Brennen und Platznutzung.
+        </p>
+      </div>
+
+      <div class="ab-karte">
+        <h3>Keramik bemalen in der Gruppe</h3>
+        <span class="preis">5 – 33 €<small>pro Person, je nach Rohling</small></span>
+        <p>
+          Auf Wunsch stelle ich vorab drei Rohlinge aus einer ähnlichen
+          Preisklasse zur Auswahl zusammen. Passend für Geburtstage,
+          Freundesgruppen und Teamevents.
+        </p>
+      </div>
+
+      <div class="ab-karte">
+        <h3>Töpferkurs — zwei Termine</h3>
+        <span class="preis">60 €<small>30 € pro Person und Termin</small></span>
+        <p>
+          Inklusive Ton, Werkzeuge, Farben, transparente Glanzglasur, zwei Brände
+          und Platznutzung.
+        </p>
+      </div>
+
+      <div class="ab-karte">
+        <h3>Töpfern in der Gruppe — ein Termin</h3>
+        <span class="preis">35 €<small>pro Person</small></span>
+        <p>
+          Inklusive Ton, Werkzeuge, Anleitung, Glasur durch mich und zwei Brände.
+          Ein zweiter Termin ist nicht nötig.
+        </p>
+        <span class="merke">höchstens 10 Personen</span>
+      </div>
+
+      <div class="ab-karte">
+        <h3>Kindergeburtstag — Keramik bemalen</h3>
+        <span class="preis">5 – 33 €<small>pro Kind, je nach Rohling</small></span>
+        <p>
+          Farben, Zubehör, transparente Glanzglasur, Brennen und Platznutzung
+          sind enthalten.
+        </p>
+        <span class="merke">ab 10 Personen 30 % Rabatt auf die Rohlinge</span>
+      </div>
+
+      <div class="ab-karte">
+        <h3>Kindergeburtstag — Töpfern</h3>
+        <span class="preis">23 €<small>pro Kind, ein Termin</small></span>
+        <p>
+          Inklusive Ton, Werkzeuge, Anleitung, Glasur durch mich sowie Schrüh-
+          und Glasurbrand.
+        </p>
+        <span class="merke">höchstens 10 Kinder</span>
+      </div>
+    </div>
+
+    <p class="rv rv-d2" style="margin-top:1.8rem;font-size:.85rem;color:var(--cream-faint);line-height:1.8;">
+      Getränke werden bei allen Angeboten separat berechnet.
+      Wasser steht kostenlos zur Verfügung.
+    </p>
+  </div>
+</section>
+
+<!-- ── GETRÄNKE ── -->
+<section id="getraenke" class="ab" aria-labelledby="gt-h">
+  <div class="ab-inner">
+    <div class="ab-kopf rv">
+      <span class="eyebrow">Café</span>
+      <span class="gold-rule"></span>
+      <h2 id="gt-h" class="dmd">Getränke<br><em>bei Tonflüstern</em></h2>
+      <p>
+        Eine kreative Auszeit darf gerne von einem warmen Getränk begleitet
+        werden. Während du malst, gestaltest oder töpferst, kannst du dir in
+        aller Ruhe eine kleine Pause gönnen.
+      </p>
+    </div>
+
+    <div class="ab-zwei ab-zwei--bild rv rv-d1">
+      <figure>
+        <img src="kbtheke.jpg" alt="Theke mit Kaffeemaschine im Cafébereich" loading="lazy" width="1600" height="1066">
+      </figure>
+      <div class="gk">
+        <div>
+          <h3>Kaffee und warme Getränke</h3>
+          <div class="gk-zeile"><span>Kaffee</span><i class="gk-punkte"></i><b>3,00 €</b></div>
+          <div class="gk-zeile"><span>Cappuccino</span><i class="gk-punkte"></i><b>3,50 €</b></div>
+          <div class="gk-zeile"><span>Espresso</span><i class="gk-punkte"></i><b>2,00 €</b></div>
+          <div class="gk-zeile"><span>Latte macchiato</span><i class="gk-punkte"></i><b>4,00 €</b></div>
+          <div class="gk-zeile"><span>Americano</span><i class="gk-punkte"></i><b>2,50 €</b></div>
+          <div class="gk-zeile"><span>Tee</span><i class="gk-punkte"></i><b>2,00 €</b></div>
+
+          <h3 style="margin-top:1.8rem;">Kleine Begleitung</h3>
+          <div class="gk-zeile"><span>Naschteller</span><i class="gk-punkte"></i><b>4,00 €</b></div>
+
+          <p class="gk-hinweis">
+            Alle Kaffeegetränke mit Milch gibt es wahlweise mit
+            <strong>Kuhmilch</strong> oder <strong>Hafermilch</strong>.<br>
+            Wasser steht kostenlos zur Verfügung und kann jederzeit
+            nachgefüllt werden.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── GUTSCHEINE ── -->
+<section id="gutscheine" class="ab ab--hell" aria-labelledby="gs-h">
+  <div class="ab-inner">
+    <div class="ab-zwei ab-zwei--bild ab-gedreht rv">
+      <figure>
+        <img src="kbauslage.jpg" alt="Schaufensterauslage mit Keramik zum Bemalen" loading="lazy" width="1600" height="1066">
+      </figure>
+      <div class="ab-text">
+        <span class="eyebrow">Verschenken</span>
+        <span class="gold-rule"></span>
+        <h2 id="gs-h" class="dmd" style="margin-bottom:1.2rem;">Gutscheine<br><em>kreative Zeit verschenken</em></h2>
+        <p>
+          Kreativität verbindet Menschen. Sie schafft Raum für gemeinsame Zeit,
+          schöne Gespräche und Erinnerungen, die bleiben. Mit einem Gutschein von
+          Tonflüstern verschenkst du deshalb nicht nur ein kreatives Erlebnis,
+          sondern auch einen besonderen Moment zum Abschalten und Wohlfühlen.
+        </p>
+        <p>
+          Er eignet sich auch wunderbar, um dem eigenen Partner oder der
+          Partnerin eine Freude zu machen — als Einladung zu einer gemeinsamen
+          kreativen Auszeit, bei der Nähe und bewusste Zeit im Mittelpunkt stehen.
+        </p>
+        <p>
+          Die Gutscheine sind liebevoll gestaltet und mit ihren natürlichen
+          Farben und feinen Details auf die Atmosphäre von Tonflüstern abgestimmt
+          — passend für Geburtstage, Weihnachten, einen Jahrestag oder einfach
+          als kleine Aufmerksamkeit.
+        </p>
+        <p>
+          <strong>Abholen kannst du sie während der Öffnungszeiten.</strong>
+          Passen die dir nicht, meld dich gerne — dann finden wir einen eigenen
+          Termin.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── HÄUFIGE FRAGEN ── -->
+<section id="fragen" class="ab" aria-labelledby="fq-h">
+  <div class="ab-inner">
+    <div class="ab-kopf rv">
+      <span class="eyebrow">Gut zu wissen</span>
+      <span class="gold-rule"></span>
+      <h2 id="fq-h" class="dmd">Häufige<br><em>Fragen</em></h2>
+      <p>
+        Damit du deinen Besuch entspannt genießen kannst — Antworten rund um
+        Kleidung, Materialien, Abholung und den Ablauf.
+      </p>
+    </div>
+
+    <div class="fq rv rv-d1">
+      <details>
+        <summary>Welche Kleidung eignet sich zum Malen und Töpfern?</summary>
+        <div class="fq-inhalt">
+          <p>
+            Die Farben sind wasserlöslich und lassen sich meist gut auswaschen,
+            besonders solange sie noch nicht eingetrocknet sind. Trotzdem
+            empfiehlt sich Kleidung, bei der ein kleiner Farbfleck nicht schlimm
+            wäre.
+          </p>
+          <p>
+            Auf Wunsch gibt es bei mir <strong>Malkittel</strong> — sprich mich
+            zu Beginn deines Termins einfach darauf an.
+          </p>
+        </div>
+      </details>
+
+      <details>
+        <summary>Ist die fertige Keramik lebensmittelecht?</summary>
+        <div class="fq-inhalt">
+          <p>
+            Ja. Die verwendeten Keramikrohlinge, Farben und Glasuren sind für den
+            Kontakt mit Lebensmitteln geeignet. Nach dem fachgerechten Glasieren
+            und Brennen kannst du Tassen, Teller, Schalen und andere
+            Gebrauchsgegenstände ganz normal verwenden.
+          </p>
+        </div>
+      </details>
+
+      <details>
+        <summary>Darf die Keramik in die Spülmaschine?</summary>
+        <div class="fq-inhalt">
+          <p>
+            Die fertig glasierte und gebrannte Keramik ist spülmaschinengeeignet.
+            Damit dein handgestaltetes Einzelstück möglichst lange schön bleibt,
+            empfehle ich trotzdem ein schonendes Programm oder die Reinigung von
+            Hand.
+          </p>
+        </div>
+      </details>
+
+      <details>
+        <summary>Wann kann ich meine Keramik abholen?</summary>
+        <div class="fq-inhalt">
+          <p>
+            Die Fertigstellung dauert in der Regel <strong>zwei bis drei
+            Wochen</strong>. Da Trocknung, Glasieren, Ofenbelegung und Brennen
+            unterschiedlich viel Zeit brauchen, verspreche ich keinen festen
+            Abholtag.
+          </p>
+          <p>
+            Über den QR-Code hier auf der Seite kommst du zum WhatsApp-Kanal
+            <strong>„Tonflüstern: Keramik abholbereit"</strong>. Dort stelle ich
+            Bilder der fertig gebrannten Werkstücke ein. Sobald du deines
+            entdeckst, kannst du es während der Öffnungszeiten abholen.
+          </p>
+        </div>
+      </details>
+
+      <details>
+        <summary>Benötige ich Vorkenntnisse?</summary>
+        <div class="fq-inhalt">
+          <p>
+            Nein. Bei Tonflüstern darfst du dich ausprobieren, etwas Neues
+            entdecken und deine kreative Zeit ohne Leistungsdruck genießen.
+          </p>
+          <p>
+            Wenn du regelmäßig kommst und bestimmte Techniken intensiver
+            kennenlernen möchtest, sprich mich gerne an. Dann schauen wir
+            gemeinsam, was du lernen möchtest und wie ich dich dabei begleiten
+            kann.
+          </p>
+        </div>
+      </details>
+
+      <details>
+        <summary>Kann beim Brennen etwas beschädigt werden?</summary>
+        <div class="fq-inhalt">
+          <p>
+            Keramik durchläuft beim Brennen sehr hohe Temperaturen. Trotz
+            sorgfältiger Trocknung und vorsichtiger Ofenführung kann es in
+            seltenen Fällen zu Rissen oder Abplatzungen kommen — etwa durch
+            Spannungen im Material, eingeschlossene Feuchtigkeit oder
+            unterschiedliche Wandstärken.
+          </p>
+          <p>
+            Nicht alles im Brennofen lässt sich vollständig beeinflussen. Sollte
+            dein Werkstück dabei beschädigt werden, darfst du
+            <strong>kostenlos einen vergleichbaren Rohling auswählen</strong> und
+            neu gestalten.
+          </p>
+        </div>
+      </details>
+    </div>
+  </div>
+</section>
+
 <!-- ── REFERENZEN ── -->
 <section id="refs" aria-labelledby="rf-h">
   <div class="rf-inner">
 
     <div class="rf-kopf rv">
-      <span class="eyebrow">Referenzen</span>
+      <span class="eyebrow">Gästebuch</span>
       <span class="gold-rule"></span>
-      <h2 id="rf-h" class="dmd">Das sagen<br><em>meine Gäste</em></h2>
+      <h2 id="rf-h" class="dmd">Eure<br><em>Worte</em></h2>
+      <p>
+        Jeder Besuch bei Tonflüstern hinterlässt seine ganz eigenen Eindrücke und
+        Erinnerungen. Vielleicht war es ein ruhiger Moment nur für dich, eine
+        besondere gemeinsame Zeit oder einfach die Freude daran, etwas mit den
+        eigenen Händen zu gestalten.
+      </p>
+      <p>
+        Wenn du möchtest, darfst du hier deine Gedanken, Erfahrungen oder ein paar
+        persönliche Worte hinterlassen. Was hat dir besonders gefallen? Wie hast du
+        die Zeit bei Tonflüstern empfunden? Und was nimmst du aus deinem kreativen
+        Moment mit?
+      </p>
+      <p>
+        <strong>Deine Rückmeldung bedeutet mir viel.</strong> Sie hilft mir dabei,
+        Tonflüstern mit Achtsamkeit weiterzuentwickeln, und schenkt anderen
+        Menschen einen kleinen Einblick in die Atmosphäre vor Ort. Danke, dass du
+        dir die Zeit nimmst, deine Worte zu teilen.
+      </p>
       <div id="rf-schnitt" class="rf-schnitt" hidden>
         <b id="rf-wert"></b>
         <span class="rf-sterne" id="rf-bild"></span>
