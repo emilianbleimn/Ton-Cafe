@@ -482,7 +482,13 @@ Ich freue mich auf eine schöne kreative Zeit mit {$w['dativ']}!
   h1{font-size:1.4rem;margin:0;font-weight:500}
   a.logout{font-size:.75rem;color:#7a5230;text-decoration:none;border:1px solid rgba(122,82,48,.35);
            padding:.4rem 1rem}
-  .hinweis{background:#e1d5c2;border-left:3px solid #7a5230;padding:.8rem 1.2rem;margin-bottom:1.5rem;font-size:.9rem}
+  .hinweis{background:#e1d5c2;border-left:3px solid #7a5230;padding:.8rem 1.2rem;
+           margin-bottom:1.5rem;font-size:.9rem;
+           /* Bleibt oben stehen, auch wenn weiter unten in der Liste
+              geklickt wurde — sonst steht die Antwort des Servers
+              ausserhalb des Bildschirms und es sieht aus, als waere
+              nichts passiert. */
+           position:sticky;top:0;z-index:5;box-shadow:0 .4rem .6rem -.4rem rgba(41,27,15,.25)}
   .tag{background:#ebe2d2;margin-bottom:1.2rem;border-left:3px solid #7a5230}
   .tag.voll{border-left-color:#a84c2a}
   .tag-kopf{padding:.9rem 1.2rem;display:flex;justify-content:space-between;
@@ -490,6 +496,10 @@ Ich freue mich auf eine schöne kreative Zeit mit {$w['dativ']}!
   .tag-kopf strong{font-size:1.05rem;font-weight:600}
   .zaehler{font-size:.85rem;font-weight:600;color:#7a5230}
   .zaehler.voll{color:#a84c2a}
+  /* Die Tabelle rollt in sich, nicht die ganze Seite. Sonst wanderten
+     auf dem Handy die Knoepfe der letzten Spalte aus dem Bild heraus
+     und liessen sich nicht mehr antippen. */
+  .tabelle{overflow-x:auto;-webkit-overflow-scrolling:touch}
   table{width:100%;border-collapse:collapse;font-size:.87rem}
   th{text-align:left;font-weight:600;font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;
      color:#7a5230;padding:.6rem 1.2rem;border-bottom:1px solid rgba(122,82,48,.15)}
@@ -541,9 +551,34 @@ Ich freue mich auf eine schöne kreative Zeit mit {$w['dativ']}!
   .leer{color:#a8917a;font-size:.9rem;padding:2rem 0;text-align:center}
   .fuss{margin-top:2.5rem;font-size:.78rem;color:#a8917a}
   a{color:#7a5230}
+  /* ── Handy ──
+     Nebeneinander passen sechs Spalten nicht auf ein Handy. Die
+     Tabelle wurde dadurch breiter als der Bildschirm, und was rechts
+     stand — also genau die Knoepfe — war nicht mehr erreichbar. Auf
+     schmalen Geraeten steht deshalb jede Anfrage als Block
+     untereinander. Jede Zeile bekommt ihre Beschriftung aus data-l,
+     damit man weiterhin erkennt, was was ist.                     */
   @media(max-width:640px){
     body{padding:1rem}
-    th:nth-child(4),td:nth-child(4),th:nth-child(5),td:nth-child(5){display:none}
+    .tabelle{overflow-x:visible}
+    .tabelle table,.tabelle tr,.tabelle td{display:block;width:auto}
+    .tabelle tr.kopf{display:none}
+    .tabelle tr{padding:.9rem 1.1rem;border-bottom:1px solid rgba(122,82,48,.15)}
+    .tabelle tr:last-child{border-bottom:0}
+    .tabelle td{border:0;padding:.3rem 0}
+    .tabelle td[data-l]::before{content:attr(data-l);display:block;
+                font-size:.66rem;letter-spacing:.09em;text-transform:uppercase;
+                color:#a8917a;margin-bottom:.15rem}
+    .msg{max-width:none}
+
+    /* Datumsfeld und Knopf untereinander und auf ganzer Breite.
+       Nebeneinander waren sie zusammen breiter als ein Handy. */
+    .umbuchen{display:block}
+    .umbuchen label{display:block;margin-bottom:.2rem}
+    .umbuchen input[type=date]{width:100%;box-sizing:border-box;
+                min-width:0;padding:.5rem .4rem}
+    .umbuchen button{width:100%;margin-top:.4rem;padding:.55rem .6rem}
+    button{min-height:2.4rem}
   }
 </style>
 </head>
@@ -582,8 +617,9 @@ Ich freue mich auf eine schöne kreative Zeit mit {$w['dativ']}!
       </div>
 
       <?php if ($liste): ?>
+      <div class="tabelle">
       <table>
-        <tr>
+        <tr class="kopf">
           <th>Pers.</th><th>Angebot</th><th>Name</th><th>Kontakt</th><th>Nachricht</th><th></th>
         </tr>
         <?php foreach ($liste as $a):
@@ -593,8 +629,8 @@ Ich freue mich auf eine schöne kreative Zeit mit {$w['dativ']}!
             $vb     = vorlage($a, $stor ? 'storniert' : 'bestaetigt');
             $rid    = 'm' . preg_replace('/[^a-z0-9]/i', '', (string)($a['id'] ?? '')); ?>
           <tr class="<?= $stor ? 'storniert' : '' ?>">
-            <td><strong><?= (int)$a['personen'] ?></strong></td>
-            <td><span class="ang"><?= $e($a['angebot'] ?? '—') ?></span>
+            <td data-l="Personen"><strong><?= (int)$a['personen'] ?></strong></td>
+            <td data-l="Angebot"><span class="ang"><?= $e($a['angebot'] ?? '—') ?></span>
               <?php /* Am Wochenende gibt es keine feste Zeit — dann steht
                        hier, ab wann die Gaeste kommen moechten. */
               if (($a['wunschzeit'] ?? '') !== ''): ?>
@@ -610,7 +646,7 @@ Ich freue mich auf eine schöne kreative Zeit mit {$w['dativ']}!
                       ? ' — ' . $e($a['anlass_text']) : '' ?></span>
               <?php endif; ?>
             </td>
-            <td>
+            <td data-l="Name">
               <?= $e($a['name'] ?? '') ?><br>
               <span class="st <?= $stor ? 'st-stor' : ($best ? 'st-best' : 'st-offen') ?>">
                 <?= $stor ? 'storniert' : ($best ? 'bestätigt' : 'offen') ?>
@@ -638,13 +674,13 @@ Ich freue mich auf eine schöne kreative Zeit mit {$w['dativ']}!
                       <span class="mailstatus ms-fehl">✕ Benachrichtigung an dich fehlgeschlagen</span>
                 <?php endif; ?>
             </td>
-            <td>
+            <td data-l="Kontakt">
               <a href="mailto:<?= $e($a['email'] ?? '') ?>"><?= $e($a['email'] ?? '') ?></a>
               <?php if (($a['telefon'] ?? '') !== ''): ?>
                 <br><a href="tel:<?= $e($a['telefon']) ?>"><?= $e($a['telefon']) ?></a>
               <?php endif; ?>
             </td>
-            <td class="msg"><?= $e($a['nachricht'] ?? '') ?: '—' ?></td>
+            <td class="msg" data-l="Nachricht"><?= $e($a['nachricht'] ?? '') ?: '—' ?></td>
             <td>
               <form method="post" style="display:flex;gap:.3rem;flex-wrap:wrap">
                 <?php if ($stor): ?>
@@ -681,10 +717,15 @@ Ich freue mich auf eine schöne kreative Zeit mit {$w['dativ']}!
                  Schreibweisen anzeigen, damit nichts verloren geht. */
               $weg = $a['verschoben'] ?? (($a['verschoben_von'] ?? '') !== '' ? [$a['verschoben_von']] : []);
               if (is_array($weg) && $weg):
-                $stationen = array_map(fn($t) => date('d.m.', strtotime($t)), $weg);
-                $stationen[] = date('d.m.Y', strtotime($a['datum'] ?? 'now')); ?>
-                <span class="umgebucht" title="<?= count($weg) ?>× verschoben">
-                  verschoben: <?= $e(implode(' → ', $stationen)) ?></span>
+                /* Bei vielen Verschiebungen wuerde die Kette sonst ueber
+                   mehrere Zeilen laufen. Interessant sind die letzten
+                   Stationen — die vollstaendige Kette steht im Tooltip. */
+                $alle = array_map(fn($t) => date('d.m.', strtotime($t)), $weg);
+                $alle[] = date('d.m.Y', strtotime($a['datum'] ?? 'now'));
+                $kurz  = count($alle) > 4 ? array_slice($alle, -4) : $alle;
+                $text  = (count($alle) > 4 ? '… → ' : '') . implode(' → ', $kurz); ?>
+                <span class="umgebucht" title="<?= count($weg) ?>× verschoben: <?= $e(implode(' → ', $alle)) ?>">
+                  verschoben: <?= $e($text) ?></span>
               <?php endif; ?>
             </td>
           </tr>
@@ -711,6 +752,7 @@ Ich freue mich auf eine schöne kreative Zeit mit {$w['dativ']}!
           </tr>
         <?php endforeach; ?>
       </table>
+      </div>
       <?php endif; ?>
     </div>
   <?php endforeach; ?>
