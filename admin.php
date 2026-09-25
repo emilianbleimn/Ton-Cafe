@@ -69,6 +69,89 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
     }
 
     // Anfrage stornieren -> Plätze werden wieder frei
+    /* ── Anfrage auf ein anderes Datum verschieben ──
+       Der neue Tag muss buchbar sein UND genug Platz haben. Ohne
+       diese Pruefung liesse sich eine Gruppe in einen vollen Tag
+       schieben — und der waere dann ueberbucht, ohne dass es
+       jemandem auffaellt. Die eigene Anfrage zaehlt beim Pruefen
+       nicht mit, sonst blockierte sie sich selbst.            */
+    if (isset($_POST['verschieben'])) {
+        $id  = (string)$_POST['verschieben'];
+        $neu = (string)($_POST['neues_datum'] ?? '');
+
+        if (!datum_gueltig($neu)) {
+            $hinweis = 'Das Datum war ungültig oder liegt zu weit weg.';
+        } elseif (!buchbarer_tag($neu)) {
+            $hinweis = 'An diesem Wochentag ist geschlossen — bitte ein anderes Datum wählen.';
+        } else {
+            $ergebnis = mit_sperre(function (array &$d) use ($id, $neu) {
+                $treffer = null;
+                foreach ($d['anfragen'] as $i => $a) {
+                    if (($a['id'] ?? '') === $id) { $treffer = $i; break; }
+                }
+                if ($treffer === null) {
+                    return ['ok' => false, 'grund' => 'weg'];
+                }
+                $a = $d['anfragen'][$treffer];
+
+                if (($a['datum'] ?? '') === $neu) {
+                    return ['ok' => false, 'grund' => 'gleich'];
+                }
+
+                /* Platz am Zieltag pruefen. Stornierte zaehlen nicht,
+                   und diese Anfrage selbst auch nicht — sie zieht ja um. */
+                $belegt_neu = (int)($d['manuell'][$neu] ?? 0);
+                foreach ($d['anfragen'] as $i => $b) {
+                    if ($i === $treffer) continue;
+                    if (($b['datum'] ?? '') !== $neu) continue;
+                    if (($b['status'] ?? 'offen') === 'storniert') continue;
+                    $belegt_neu += (int)($b['personen'] ?? 0);
+                }
+                $frei_neu = MAX_PER_DAY - $belegt_neu;
+                $pers     = (int)($a['personen'] ?? 0);
+                if ($pers > $frei_neu) {
+                    return ['ok' => false, 'grund' => 'voll', 'frei' => max(0, $frei_neu)];
+                }
+
+                /* Die Uhrzeit haengt am Wochentag: An festen Tagen gilt
+                   die Oeffnungszeit, am Wochenende laeuft es auf Anfrage.
+                   Wandert eine Anfrage vom Wochenende auf einen Werktag,
+                   passt die alte Wunschzeit nicht mehr — sie bleibt aber
+                   als Notiz erhalten, statt verloren zu gehen. */
+                $wt   = (int)date('w', strtotime($neu));
+                $alt  = (string)($a['datum'] ?? '');
+                $d['anfragen'][$treffer]['datum'] = $neu;
+                $d['anfragen'][$treffer]['zeit']  = OPEN_HOURS[$wt] ?? 'Auf Anfrage';
+
+                if (isset(OPEN_HOURS[$wt]) && ($a['wunschzeit'] ?? '') !== '') {
+                    $notiz = 'Wunschzeit vom ursprünglichen Termin: ' . $a['wunschzeit'];
+                    $bisher = (string)($a['nachricht'] ?? '');
+                    $d['anfragen'][$treffer]['nachricht'] =
+                        $bisher === '' ? $notiz : $bisher . "\n" . $notiz;
+                    $d['anfragen'][$treffer]['wunschzeit'] = '';
+                }
+
+                $d['anfragen'][$treffer]['verschoben_von'] = $alt;
+                return ['ok' => true, 'von' => $alt];
+            });
+
+            if ($ergebnis['ok']) {
+                $hinweis = 'Anfrage verschoben: '
+                    . date('d.m.Y', strtotime($ergebnis['von'])) . ' → '
+                    . date('d.m.Y', strtotime($neu))
+                    . '. Bitte gib den Gästen Bescheid.';
+            } elseif ($ergebnis['grund'] === 'voll') {
+                $hinweis = 'Verschieben nicht möglich — am '
+                    . date('d.m.Y', strtotime($neu)) . ' sind nur noch '
+                    . $ergebnis['frei'] . ' Plätze frei.';
+            } elseif ($ergebnis['grund'] === 'gleich') {
+                $hinweis = 'Die Anfrage steht bereits auf diesem Datum.';
+            } else {
+                $hinweis = 'Die Anfrage wurde nicht gefunden.';
+            }
+        }
+    }
+
     if (isset($_POST['bw_frei'])) {
         $id = (string)$_POST['bw_frei'];
         mit_sperre(function (array &$d) use ($id) {
@@ -385,6 +468,14 @@ Ich freue mich auf eine schöne kreative Zeit mit {$w['dativ']}!
   button.gruen{background:#4a6b3a;border-color:#4a6b3a;color:#f4ece0}
   button.gruen:hover{background:#3d5930}
   .mailknopf{margin-top:.35rem;width:100%;background:#e1d5c2;border-color:rgba(122,82,48,.3)}
+    .umbuchen { display: flex; gap: .3rem; align-items: center; flex-wrap: wrap;
+                margin-top: .45rem; font-size: .75rem; }
+    .umbuchen label { color: #a8917a; white-space: nowrap; }
+    .umbuchen input[type=date] { font: inherit; padding: .2rem .35rem;
+                border: 1px solid rgba(122,82,48,.3); background: #fff; color: #291b0f; }
+    .umbuchen button { font-size: .75rem; padding: .25rem .6rem; }
+    .umgebucht { display: inline-block; margin-top: .35rem; font-size: .72rem;
+                 color: #7a5230; background: #f0e7d8; padding: .12rem .45rem; }
   .st{display:inline-block;font-size:.66rem;letter-spacing:.08em;text-transform:uppercase;
       padding:.08rem .45rem;border:1px solid;margin-right:.35rem}
   .st-offen{color:#7a5230;border-color:rgba(122,82,48,.35)}
@@ -529,6 +620,21 @@ Ich freue mich auf eine schöne kreative Zeit mit {$w['dativ']}!
               <button type="button" class="mailknopf" onclick="mailAuf('<?= $rid ?>')">
                 <?= $stor ? 'Absage schreiben' : 'Bestätigung schreiben' ?>
               </button>
+
+              <?php /* Umbuchen: Der Server prueft, ob der Zieltag buchbar
+                       ist und genug Platz hat. */ ?>
+              <form method="post" class="umbuchen">
+                <label for="<?= $rid ?>-neu">Verschieben auf</label>
+                <input type="date" id="<?= $rid ?>-neu" name="neues_datum"
+                       min="<?= date('Y-m-d') ?>"
+                       max="<?= date('Y-m-d', strtotime('+' . VORLAUF_TAGE . ' days')) ?>"
+                       value="<?= $e($a['datum'] ?? '') ?>" required>
+                <button type="submit" name="verschieben" value="<?= $e($a['id'] ?? '') ?>">Verschieben</button>
+              </form>
+              <?php if (($a['verschoben_von'] ?? '') !== ''): ?>
+                <span class="umgebucht">verschoben vom
+                  <?= $e(date('d.m.Y', strtotime($a['verschoben_von']))) ?></span>
+              <?php endif; ?>
             </td>
           </tr>
 
