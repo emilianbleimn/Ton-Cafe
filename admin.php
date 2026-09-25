@@ -52,7 +52,11 @@ if (!($_SESSION['auth'] ?? false)) {
 }
 
 /* ── Aktionen ── */
-$hinweis = '';
+/* Eine Meldung aus der vorigen Aktion abholen. Sie wird in der
+   Sitzung zwischengelagert, weil die Seite nach jeder Aktion neu
+   geladen wird (siehe unten).                                  */
+$hinweis = (string)($_SESSION['hinweis'] ?? '');
+unset($_SESSION['hinweis']);
 
 if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
   try {
@@ -131,7 +135,14 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
                     $d['anfragen'][$treffer]['wunschzeit'] = '';
                 }
 
-                $d['anfragen'][$treffer]['verschoben_von'] = $alt;
+                /* Jede Verschiebung anhaengen, nicht die vorige
+                   ueberschreiben — sonst waere nach der zweiten nicht
+                   mehr zu sehen, wo der Termin urspruenglich lag. */
+                $verlauf = $a['verschoben'] ?? [];
+                if (!is_array($verlauf)) { $verlauf = []; }
+                $verlauf[] = $alt;
+                $d['anfragen'][$treffer]['verschoben'] = $verlauf;
+                unset($d['anfragen'][$treffer]['verschoben_von']);
                 return ['ok' => true, 'von' => $alt];
             });
 
@@ -145,7 +156,9 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
                     . date('d.m.Y', strtotime($neu)) . ' sind nur noch '
                     . $ergebnis['frei'] . ' Plätze frei.';
             } elseif ($ergebnis['grund'] === 'gleich') {
-                $hinweis = 'Die Anfrage steht bereits auf diesem Datum.';
+                $hinweis = 'Die Anfrage steht schon auf dem '
+                    . date('d.m.Y', strtotime($neu))
+                    . ' — wähle ein anderes Datum, um sie erneut zu verschieben.';
             } else {
                 $hinweis = 'Die Anfrage wurde nicht gefunden.';
             }
@@ -250,6 +263,22 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
       $hinweis = 'Die Änderung konnte nicht gespeichert werden: ' . $ex->getMessage()
                . '. Es wurde nichts überschrieben.';
   }
+
+  /* Nach der Aktion einmal neu laden lassen, statt die Antwort
+     direkt auf das Formular zu schicken.
+
+     Das hat zwei Gruende. Erstens fragt der Browser beim
+     Aktualisieren sonst "Formular erneut senden?" und fuehrt die
+     Aktion womoeglich ein zweites Mal aus. Zweitens — und das war
+     hier das eigentliche Problem — behalten Browser die zuletzt
+     eingetippten Feldinhalte bei, wenn eine Seite als Antwort auf
+     ein Formular kommt. Im Datumsfeld stand deshalb weiter der
+     alte Wert, und ein zweites Verschieben lief ins Leere.
+     Nach einem echten Neuladen kommen alle Felder frisch vom
+     Server.                                                     */
+  $_SESSION['hinweis'] = $hinweis;
+  header('Location: admin.php');
+  exit;
 }
 
 /* ── Daten aufbereiten ── */
@@ -626,14 +655,21 @@ Ich freue mich auf eine schöne kreative Zeit mit {$w['dativ']}!
               <form method="post" class="umbuchen">
                 <label for="<?= $rid ?>-neu">Verschieben auf</label>
                 <input type="date" id="<?= $rid ?>-neu" name="neues_datum"
+                       autocomplete="off"
                        min="<?= date('Y-m-d') ?>"
                        max="<?= date('Y-m-d', strtotime('+' . VORLAUF_TAGE . ' days')) ?>"
                        value="<?= $e($a['datum'] ?? '') ?>" required>
                 <button type="submit" name="verschieben" value="<?= $e($a['id'] ?? '') ?>">Verschieben</button>
               </form>
-              <?php if (($a['verschoben_von'] ?? '') !== ''): ?>
-                <span class="umgebucht">verschoben vom
-                  <?= $e(date('d.m.Y', strtotime($a['verschoben_von']))) ?></span>
+              <?php
+              /* Aeltere Eintraege haben noch das einzelne Feld — beide
+                 Schreibweisen anzeigen, damit nichts verloren geht. */
+              $weg = $a['verschoben'] ?? (($a['verschoben_von'] ?? '') !== '' ? [$a['verschoben_von']] : []);
+              if (is_array($weg) && $weg):
+                $stationen = array_map(fn($t) => date('d.m.', strtotime($t)), $weg);
+                $stationen[] = date('d.m.Y', strtotime($a['datum'] ?? 'now')); ?>
+                <span class="umgebucht" title="<?= count($weg) ?>× verschoben">
+                  verschoben: <?= $e(implode(' → ', $stationen)) ?></span>
               <?php endif; ?>
             </td>
           </tr>
