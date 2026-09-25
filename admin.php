@@ -83,8 +83,12 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
         $id  = (string)$_POST['verschieben'];
         $neu = (string)($_POST['neues_datum'] ?? '');
 
-        if (!datum_gueltig($neu)) {
-            $hinweis = 'Das Datum war ungültig oder liegt zu weit weg.';
+        if ($neu === '') {
+            $hinweis = 'Bitte zuerst ein Datum im Feld auswählen, dann auf Verschieben klicken.';
+        } elseif (!datum_gueltig($neu)) {
+            // Die Meldung wird beim Ausgeben maskiert ($e), hier also roh
+            $hinweis = 'Das Datum ' . $neu . ' geht nicht — es muss zwischen heute und '
+                     . date('d.m.Y', strtotime('+' . VORLAUF_TAGE . ' days')) . ' liegen.';
         } elseif (!buchbarer_tag($neu)) {
             $hinweis = 'An diesem Wochentag ist geschlossen — bitte ein anderes Datum wählen.';
         } else {
@@ -269,16 +273,24 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
 
      Das hat zwei Gruende. Erstens fragt der Browser beim
      Aktualisieren sonst "Formular erneut senden?" und fuehrt die
-     Aktion womoeglich ein zweites Mal aus. Zweitens — und das war
-     hier das eigentliche Problem — behalten Browser die zuletzt
-     eingetippten Feldinhalte bei, wenn eine Seite als Antwort auf
-     ein Formular kommt. Im Datumsfeld stand deshalb weiter der
-     alte Wert, und ein zweites Verschieben lief ins Leere.
-     Nach einem echten Neuladen kommen alle Felder frisch vom
-     Server.                                                     */
-  $_SESSION['hinweis'] = $hinweis;
-  header('Location: admin.php');
-  exit;
+     Aktion womoeglich ein zweites Mal aus. Zweitens behalten
+     Browser die zuletzt eingetippten Feldinhalte bei, wenn eine
+     Seite als Antwort auf ein Formular kommt — im Datumsfeld stand
+     dann weiter der alte Wert.
+
+     Die Weiterleitung ist aber nur eine Bequemlichkeit, keine
+     Bedingung. Hat der Server vorher schon irgendetwas
+     ausgegeben — eine Warnung genuegt —, laesst sie sich nicht
+     mehr schicken. Frueher kam dann eine leere Seite, und es sah
+     aus, als ginge gar nichts mehr. Deshalb wird hier geprueft:
+     geht es nicht, wird die Seite einfach normal aufgebaut. Die
+     Aktion ist zu diesem Zeitpunkt laengst ausgefuehrt.        */
+  if (!headers_sent()) {
+      $_SESSION['hinweis'] = $hinweis;
+      header('Location: admin.php');
+      exit;
+  }
+  // sonst: weiter unten normal anzeigen, mit der Meldung von oben
 }
 
 /* ── Daten aufbereiten ── */
@@ -654,11 +666,14 @@ Ich freue mich auf eine schöne kreative Zeit mit {$w['dativ']}!
                        ist und genug Platz hat. */ ?>
               <form method="post" class="umbuchen">
                 <label for="<?= $rid ?>-neu">Verschieben auf</label>
+                <?php /* Bewusst ohne required, min und max: Passt der Wert
+                         nicht dazu, verweigert der Browser das Absenden
+                         wortlos — der Knopf tut dann scheinbar nichts.
+                         Die Pruefung macht ohnehin der Server, und der
+                         sagt auch, was nicht stimmt. */ ?>
                 <input type="date" id="<?= $rid ?>-neu" name="neues_datum"
                        autocomplete="off"
-                       min="<?= date('Y-m-d') ?>"
-                       max="<?= date('Y-m-d', strtotime('+' . VORLAUF_TAGE . ' days')) ?>"
-                       value="<?= $e($a['datum'] ?? '') ?>" required>
+                       value="<?= $e($a['datum'] ?? '') ?>">
                 <button type="submit" name="verschieben" value="<?= $e($a['id'] ?? '') ?>">Verschieben</button>
               </form>
               <?php
