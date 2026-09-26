@@ -231,6 +231,122 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
         $hinweis = 'Anfrage gelöscht.';
     }
 
+    /* ── Anfrage bearbeiten ──
+       Alles ausser Datum und Status laesst sich hier aendern. Das
+       Datum hat mit "Verschieben" eine eigene Bedienung, weil dabei
+       der Platz am Zieltag geprueft werden muss; den Status setzen
+       die Knoepfe daneben.
+
+       Geprueft wird wie beim Formular auf der Website: Name, E-Mail
+       und Angebot muessen stimmen, und die Personenzahl darf den Tag
+       nicht ueberbuchen. Schlaegt eine Pruefung fehl, wird nichts
+       gespeichert — das Eingetippte bleibt aber in der Sitzung
+       liegen und steht nach dem Neuladen wieder im Formular. Sonst
+       waere bei einem Tippfehler in der E-Mail die ganze Eingabe
+       verloren.                                                  */
+    if (isset($_POST['bearbeiten'])) {
+        $id = (string)$_POST['bearbeiten'];
+
+        $f = static function (string $n, int $max): string {
+            $v = str_replace(["\r", "\0"], '', (string)($_POST[$n] ?? ''));
+            return mb_substr(trim($v), 0, $max);
+        };
+
+        $neu = [
+            'personen'    => (int)($_POST['b_personen'] ?? 0),
+            'angebot'     => $f('b_angebot', 60),
+            'name'        => $f('b_name', 100),
+            'email'       => $f('b_email', 150),
+            'telefon'     => $f('b_telefon', 60),
+            'anlass'      => $f('b_anlass', 60),
+            'anlass_text' => $f('b_anlass_text', 80),
+            'wunschzeit'  => $f('b_wunschzeit', 60),
+            'nachricht'   => $f('b_nachricht', 2000),
+        ];
+
+        $problem = '';
+        if (mb_strlen($neu['name']) < 2) {
+            $problem = 'Der Name fehlt oder ist zu kurz.';
+        } elseif ($neu['email'] === '' || !filter_var($neu['email'], FILTER_VALIDATE_EMAIL)) {
+            $problem = 'Die E-Mail-Adresse „' . $neu['email'] . '" sieht nicht richtig aus.';
+        } elseif (!in_array($neu['angebot'], ANGEBOTE, true)) {
+            $problem = 'Bitte ein Angebot auswählen.';
+        } elseif ($neu['anlass'] !== '' && !in_array($neu['anlass'], ANLAESSE, true)) {
+            $problem = 'Diesen Anlass gibt es nicht.';
+        } elseif ($neu['personen'] < 1 || $neu['personen'] > MAX_PER_DAY) {
+            $problem = 'Die Personenzahl muss zwischen 1 und ' . MAX_PER_DAY . ' liegen.';
+        }
+
+        if ($problem !== '') {
+            $hinweis = $problem . ' Es wurde nichts geändert — deine Eingaben stehen weiter im Formular.';
+            $_SESSION['bearb_id']    = $id;
+            $_SESSION['bearb_werte'] = $neu;
+        } else {
+            $ergebnis = mit_sperre(function (array &$d) use ($id, $neu) {
+                $treffer = null;
+                foreach ($d['anfragen'] as $i => $a) {
+                    if (($a['id'] ?? '') === $id) { $treffer = $i; break; }
+                }
+                if ($treffer === null) { return ['ok' => false, 'grund' => 'weg']; }
+
+                $a     = $d['anfragen'][$treffer];
+                $datum = (string)($a['datum'] ?? '');
+
+                /* Mehr Personen als frei sind? Dann waere der Tag
+                   ueberbucht. Die Anfrage selbst zaehlt beim Rechnen
+                   nicht mit, sonst blockierte sie sich selbst.
+                   Bei stornierten Anfragen ist das egal — die
+                   belegen ohnehin keinen Platz. */
+                if (($a['status'] ?? 'offen') !== 'storniert') {
+                    $sonst = (int)($d['manuell'][$datum] ?? 0);
+                    foreach ($d['anfragen'] as $i => $b) {
+                        if ($i === $treffer) { continue; }
+                        if (($b['datum'] ?? '') !== $datum) { continue; }
+                        if (($b['status'] ?? 'offen') === 'storniert') { continue; }
+                        $sonst += (int)($b['personen'] ?? 0);
+                    }
+                    if ($neu['personen'] > MAX_PER_DAY - $sonst) {
+                        return ['ok' => false, 'grund' => 'voll',
+                                'frei' => max(0, MAX_PER_DAY - $sonst)];
+                    }
+                }
+
+                /* Festhalten, was sich geaendert hat — damit spaeter
+                   nachvollziehbar bleibt, was von Hand angepasst wurde
+                   und was so aus dem Formular kam. */
+                $geaendert = [];
+                foreach ($neu as $k => $v) {
+                    $vorher = $a[$k] ?? ($k === 'personen' ? 0 : '');
+                    if ((string)$vorher !== (string)$v) { $geaendert[] = $k; }
+                    $d['anfragen'][$treffer][$k] = $v;
+                }
+                if ($geaendert) {
+                    $verlauf = $a['bearbeitet'] ?? [];
+                    if (!is_array($verlauf)) { $verlauf = []; }
+                    $verlauf[] = ['zeit' => date('Y-m-d H:i:s'), 'felder' => $geaendert];
+                    $d['anfragen'][$treffer]['bearbeitet'] = $verlauf;
+                }
+                return ['ok' => true, 'anzahl' => count($geaendert)];
+            });
+
+            if (!empty($ergebnis['ok'])) {
+                unset($_SESSION['bearb_id'], $_SESSION['bearb_werte']);
+                $hinweis = $ergebnis['anzahl'] === 0
+                    ? 'Es gab nichts zu ändern — es steht schon alles so da.'
+                    : 'Änderungen gespeichert. Denk daran, den Gästen Bescheid zu geben,'
+                      . ' wenn es sie betrifft.';
+            } elseif (($ergebnis['grund'] ?? '') === 'voll') {
+                $hinweis = 'So viele Personen passen an diesem Tag nicht mehr —'
+                         . ' frei sind noch ' . $ergebnis['frei']
+                         . '. Es wurde nichts geändert.';
+                $_SESSION['bearb_id']    = $id;
+                $_SESSION['bearb_werte'] = $neu;
+            } else {
+                $hinweis = 'Die Anfrage wurde nicht gefunden.';
+            }
+        }
+    }
+
     // Plätze von Hand blocken (z.B. telefonische Buchung)
     if (isset($_POST['manuell_datum'])) {
         $datum  = (string)$_POST['manuell_datum'];
@@ -295,6 +411,14 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
 
 /* ── Daten aufbereiten ── */
 $d     = daten_laden_sicher();
+
+/* Hat das Bearbeiten nicht geklappt, liegen die eingetippten Werte
+   noch in der Sitzung. Sie werden gleich wieder ins Formular
+   gesetzt und das Formular dieser Anfrage wird aufgeklappt
+   dargestellt — sonst muesste alles noch einmal getippt werden. */
+$bearb_id    = (string)($_SESSION['bearb_id'] ?? '');
+$bearb_werte = (array)($_SESSION['bearb_werte'] ?? []);
+unset($_SESSION['bearb_id'], $_SESSION['bearb_werte']);
 $heute = date('Y-m-d');
 
 $offene = array_filter($d['anfragen'], fn($a) => ($a['datum'] ?? '') >= $heute);
@@ -542,6 +666,22 @@ Ich freue mich auf eine schöne kreative Zeit mit {$w['dativ']}!
   .mailbox textarea{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;line-height:1.55;resize:vertical}
   .mailaktionen{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.9rem}
   .mailaktionen button{padding:.5rem 1.1rem;font-size:.75rem}
+  /* ── Anfrage bearbeiten ── */
+  .bearbzeile td{background:rgba(122,82,48,.09);padding:0}
+  .bearb{padding:1.2rem}
+  .bearb-gitter{display:grid;gap:.9rem;
+                grid-template-columns:repeat(auto-fit,minmax(180px,1fr))}
+  .bf label{display:block;font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;
+            color:#7a5230;margin:0 0 .25rem}
+  .bf input,.bf select,.bf textarea{width:100%;box-sizing:border-box;padding:.55rem .7rem;
+       background:#fff;border:1px solid rgba(122,82,48,.25);
+       font-family:inherit;font-size:.9rem;color:#291b0f}
+  .bf textarea{line-height:1.5;resize:vertical}
+  .bf-klein{display:block;margin-top:.25rem;font-size:.7rem;color:#a8917a}
+  .bf.weit{grid-column:1/-1}
+  .bearb-hinweis{font-size:.78rem;color:#5e4535;margin:1rem 0 0}
+  .bearb-aktionen{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.9rem}
+  .bearb-aktionen button{padding:.55rem 1.2rem;font-size:.78rem}
   .manuell{background:#ebe2d2;padding:1.2rem;margin-top:2.5rem;border-left:3px solid #7a5230}
   .manuell h2{font-size:1rem;margin:0 0 .5rem;font-weight:600}
   .manuell p{font-size:.83rem;color:#5e4535;margin:0 0 1rem}
@@ -563,6 +703,14 @@ Ich freue mich auf eine schöne kreative Zeit mit {$w['dativ']}!
     .tabelle{overflow-x:visible}
     .tabelle table,.tabelle tr,.tabelle td{display:block;width:auto}
     .tabelle tr.kopf{display:none}
+    /* Muss nach der Regel darueber stehen: "display:block" von dort
+       wuerde sonst das eingebaute Verstecken des Browsers aushebeln,
+       und die aufklappbaren Zeilen staenden dauerhaft offen. */
+    .tabelle tr[hidden],.tabelle td[hidden]{display:none}
+    .tabelle tr.mailzeile,.tabelle tr.bearbzeile{padding:0}
+    .tabelle tr.mailzeile td,.tabelle tr.bearbzeile td{padding:0}
+    .mailbox,.bearb{padding:1.1rem}
+    .bearb-aktionen button{width:100%}
     .tabelle tr{padding:.9rem 1.1rem;border-bottom:1px solid rgba(122,82,48,.15)}
     .tabelle tr:last-child{border-bottom:0}
     .tabelle td{border:0;padding:.3rem 0}
@@ -627,7 +775,19 @@ Ich freue mich auf eine schöne kreative Zeit mit {$w['dativ']}!
             $stor   = $status === 'storniert';
             $best   = $status === 'bestaetigt';
             $vb     = vorlage($a, $stor ? 'storniert' : 'bestaetigt');
-            $rid    = 'm' . preg_replace('/[^a-z0-9]/i', '', (string)($a['id'] ?? '')); ?>
+            $rid    = 'm' . preg_replace('/[^a-z0-9]/i', '', (string)($a['id'] ?? ''));
+
+            /* Stand in dieser Anfrage gerade ein Tippfehler? Dann
+               werden die zurueckgehaltenen Eingaben angezeigt statt
+               der gespeicherten Werte, und das Formular steht offen. */
+            $b_auf = $bearb_id !== '' && $bearb_id === (string)($a['id'] ?? '');
+            $bv    = function (string $k, $std = '') use ($a, $b_auf, $bearb_werte) {
+                $quelle = $b_auf ? $bearb_werte : $a;
+                return $quelle[$k] ?? $std;
+            };
+            /* Wie viele Plaetze waeren an diesem Tag frei, wenn diese
+               Anfrage nicht mitgezaehlt wird? */
+            $frei_ohne = $stor ? $frei : $frei + (int)($a['personen'] ?? 0); ?>
           <tr class="<?= $stor ? 'storniert' : '' ?>">
             <td data-l="Personen"><strong><?= (int)$a['personen'] ?></strong></td>
             <td data-l="Angebot"><span class="ang"><?= $e($a['angebot'] ?? '—') ?></span>
@@ -697,6 +857,7 @@ Ich freue mich auf eine schöne kreative Zeit mit {$w['dativ']}!
               <button type="button" class="mailknopf" onclick="mailAuf('<?= $rid ?>')">
                 <?= $stor ? 'Absage schreiben' : 'Bestätigung schreiben' ?>
               </button>
+              <button type="button" class="mailknopf" onclick="bearbAuf('<?= $rid ?>')">Bearbeiten</button>
 
               <?php /* Umbuchen: Der Server prueft, ob der Zieltag buchbar
                        ist und genug Platz hat. */ ?>
@@ -727,6 +888,15 @@ Ich freue mich auf eine schöne kreative Zeit mit {$w['dativ']}!
                 <span class="umgebucht" title="<?= count($weg) ?>× verschoben: <?= $e(implode(' → ', $alle)) ?>">
                   verschoben: <?= $e($text) ?></span>
               <?php endif; ?>
+              <?php
+              /* Wann wurde zuletzt von Hand etwas geaendert? */
+              $bhist = $a['bearbeitet'] ?? [];
+              if (is_array($bhist) && $bhist):
+                $letzte = end($bhist);
+                $felder = is_array($letzte['felder'] ?? null) ? $letzte['felder'] : []; ?>
+                <span class="umgebucht" title="<?= count($bhist) ?>× bearbeitet, zuletzt: <?= $e(implode(', ', $felder)) ?>">
+                  bearbeitet: <?= $e(date('d.m. H:i', strtotime((string)($letzte['zeit'] ?? 'now')))) ?></span>
+              <?php endif; ?>
             </td>
           </tr>
 
@@ -748,6 +918,113 @@ Ich freue mich auf eine schöne kreative Zeit mit {$w['dativ']}!
                   <button type="button" onclick="mailZu('<?= $rid ?>')">Schließen</button>
                 </div>
               </div>
+            </td>
+          </tr>
+
+          <?php /* ── Anfrage bearbeiten ──
+                   Ein eigenes Formular, absichtlich getrennt von den
+                   Knoepfen oben: Liegt alles in einem Formular,
+                   bestaetigt die Eingabetaste in einem Textfeld die
+                   Anfrage, statt die Aenderung zu speichern.
+
+                   novalidate: Die Pruefung macht der Server. Der
+                   Browser wuerde sonst bei einer Kleinigkeit wortlos
+                   blockieren, und der Knopf saehe aus, als taete er
+                   nichts.                                          */ ?>
+          <tr class="bearbzeile" id="<?= $rid ?>-b"<?= $b_auf ? '' : ' hidden' ?>>
+            <td colspan="6">
+              <form method="post" class="bearb" novalidate>
+                <div class="bearb-gitter">
+
+                  <div class="bf">
+                    <label for="<?= $rid ?>-b-pers">Personen</label>
+                    <input type="number" inputmode="numeric" id="<?= $rid ?>-b-pers"
+                           name="b_personen" value="<?= $e((string)(int)$bv('personen', 0)) ?>">
+                    <span class="bf-klein">an diesem Tag wären <?= (int)$frei_ohne ?> möglich</span>
+                  </div>
+
+                  <div class="bf">
+                    <label for="<?= $rid ?>-b-ang">Angebot</label>
+                    <select id="<?= $rid ?>-b-ang" name="b_angebot">
+                      <?php
+                      $ang_jetzt = (string)$bv('angebot', '');
+                      $ang_liste = ANGEBOTE;
+                      // Steht dort etwas Unbekanntes, geht es nicht verloren
+                      if ($ang_jetzt !== '' && !in_array($ang_jetzt, $ang_liste, true)) {
+                          $ang_liste[] = $ang_jetzt;
+                      }
+                      foreach ($ang_liste as $opt): ?>
+                        <option value="<?= $e($opt) ?>"<?= $opt === $ang_jetzt ? ' selected' : '' ?>><?= $e($opt) ?></option>
+                      <?php endforeach; ?>
+                    </select>
+                  </div>
+
+                  <div class="bf">
+                    <label for="<?= $rid ?>-b-name">Name</label>
+                    <input type="text" id="<?= $rid ?>-b-name" name="b_name"
+                           value="<?= $e((string)$bv('name', '')) ?>">
+                  </div>
+
+                  <div class="bf">
+                    <label for="<?= $rid ?>-b-mail">E-Mail</label>
+                    <input type="email" inputmode="email" autocapitalize="off" spellcheck="false"
+                           id="<?= $rid ?>-b-mail" name="b_email"
+                           value="<?= $e((string)$bv('email', '')) ?>">
+                  </div>
+
+                  <div class="bf">
+                    <label for="<?= $rid ?>-b-tel">Telefon</label>
+                    <input type="tel" inputmode="tel" id="<?= $rid ?>-b-tel" name="b_telefon"
+                           value="<?= $e((string)$bv('telefon', '')) ?>">
+                  </div>
+
+                  <div class="bf">
+                    <label for="<?= $rid ?>-b-anl">Anlass</label>
+                    <select id="<?= $rid ?>-b-anl" name="b_anlass">
+                      <?php
+                      $anl_jetzt = (string)$bv('anlass', '');
+                      $anl_liste = ANLAESSE;
+                      if ($anl_jetzt !== '' && !in_array($anl_jetzt, $anl_liste, true)) {
+                          $anl_liste[] = $anl_jetzt;
+                      } ?>
+                      <option value=""<?= $anl_jetzt === '' ? ' selected' : '' ?>>— keine Angabe —</option>
+                      <?php foreach ($anl_liste as $opt): ?>
+                        <option value="<?= $e($opt) ?>"<?= $opt === $anl_jetzt ? ' selected' : '' ?>><?= $e($opt) ?></option>
+                      <?php endforeach; ?>
+                    </select>
+                  </div>
+
+                  <div class="bf">
+                    <label for="<?= $rid ?>-b-anlt">Ergänzung zum Anlass</label>
+                    <input type="text" id="<?= $rid ?>-b-anlt" name="b_anlass_text"
+                           value="<?= $e((string)$bv('anlass_text', '')) ?>">
+                  </div>
+
+                  <div class="bf">
+                    <label for="<?= $rid ?>-b-zeit">Wunschzeit</label>
+                    <input type="text" id="<?= $rid ?>-b-zeit" name="b_wunschzeit"
+                           value="<?= $e((string)$bv('wunschzeit', '')) ?>">
+                    <span class="bf-klein">nur am Wochenende, sonst gelten die Öffnungszeiten</span>
+                  </div>
+
+                  <div class="bf weit">
+                    <label for="<?= $rid ?>-b-msg">Nachricht</label>
+                    <textarea id="<?= $rid ?>-b-msg" name="b_nachricht" rows="4"><?= $e((string)$bv('nachricht', '')) ?></textarea>
+                  </div>
+
+                </div>
+
+                <p class="bearb-hinweis">
+                  Termin steht auf <strong><?= $e(date('d.m.Y', strtotime((string)($a['datum'] ?? 'now')))) ?></strong>.
+                  Das Datum änderst du mit <em>Verschieben</em>, den Status mit den Knöpfen darüber.
+                </p>
+
+                <div class="bearb-aktionen">
+                  <button type="submit" class="gruen" name="bearbeiten"
+                          value="<?= $e((string)($a['id'] ?? '')) ?>">Änderungen speichern</button>
+                  <button type="button" onclick="bearbZu('<?= $rid ?>')">Abbrechen</button>
+                </div>
+              </form>
             </td>
           </tr>
         <?php endforeach; ?>
@@ -930,6 +1207,23 @@ function mailAuf(id) {
   document.getElementById(id + '-body').focus();
 }
 function mailZu(id) { document.getElementById(id).hidden = true; }
+
+/* Aufklappen des Bearbeiten-Formulars */
+function bearbAuf(id) {
+  const z = document.getElementById(id + '-b');
+  z.hidden = false;
+  z.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  const f = document.getElementById(id + '-b-name');
+  if (f) { f.focus(); }
+}
+function bearbZu(id) { document.getElementById(id + '-b').hidden = true; }
+
+/* Wurde eine Aenderung abgelehnt, steht das Formular schon offen —
+   dann dorthin springen, damit die Meldung nicht ins Leere geht. */
+document.addEventListener('DOMContentLoaded', function () {
+  const offen = document.querySelector('tr.bearbzeile:not([hidden])');
+  if (offen) { offen.scrollIntoView({ block: 'center' }); }
+});
 
 /* Vorlage im Webmail oeffnen.
    Ist WEBMAIL_COMPOSE leer, wird das normale Mailprogramm verwendet. */
