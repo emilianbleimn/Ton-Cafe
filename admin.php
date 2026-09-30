@@ -425,6 +425,9 @@ $offene = array_filter($d['anfragen'], fn($a) => ($a['datum'] ?? '') >= $heute);
 usort($offene, fn($x, $y) => [$x['datum'] ?? '', $x['erstellt'] ?? ''] <=> [$y['datum'] ?? '', $y['erstellt'] ?? '']);
 
 $vergangen = array_filter($d['anfragen'], fn($a) => ($a['datum'] ?? '') < $heute);
+// neueste zuerst — wonach gesucht wird, liegt meistens kurz zurueck
+usort($vergangen, fn($x, $y) => [$y['datum'] ?? '', $y['erstellt'] ?? '']
+                            <=> [$x['datum'] ?? '', $x['erstellt'] ?? '']);
 
 // nach Tagen gruppieren
 $tage = [];
@@ -682,6 +685,31 @@ Ich freue mich auf eine schöne kreative Zeit mit {$w['dativ']}!
   .bearb-hinweis{font-size:.78rem;color:#5e4535;margin:1rem 0 0}
   .bearb-aktionen{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.9rem}
   .bearb-aktionen button{padding:.55rem 1.2rem;font-size:.78rem}
+  /* ── Vergangene Anfragen ── */
+  .archiv{background:#ebe2d2;margin-top:2.5rem;border-left:3px solid #7a5230}
+  .archiv>summary{padding:1.2rem;font-size:1rem;font-weight:600;cursor:pointer;
+                  list-style:none}
+  .archiv>summary::-webkit-details-marker{display:none}
+  .archiv>summary::before{content:'▸ ';color:#7a5230}
+  .archiv[open]>summary::before{content:'▾ '}
+  .archiv-suche{padding:0 1.2rem 1rem}
+  .archiv-suche label{display:block;font-size:.68rem;letter-spacing:.1em;
+                      text-transform:uppercase;color:#7a5230;margin-bottom:.25rem}
+  .archiv-suche input{width:100%;max-width:26rem;box-sizing:border-box;padding:.6rem .7rem;
+       background:#fff;border:1px solid rgba(122,82,48,.25);font-family:inherit;font-size:.95rem}
+  #suche-zahl{display:inline-block;margin-top:.4rem;font-size:.75rem;color:#a8917a}
+  #archivliste{max-height:32rem;overflow-y:auto;padding:0 1.2rem 1.2rem}
+  .av{background:#fff;border-left:3px solid rgba(122,82,48,.3);
+      padding:.7rem .9rem;margin-bottom:.5rem}
+  .av-kopf{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;font-size:.85rem}
+  .av-wt{font-size:.75rem;color:#a8917a}
+  .av-name{font-size:1rem;font-weight:600;margin:.2rem 0 .1rem}
+  .av-zeile{font-size:.8rem;color:#5e4535}
+  .av-kontakt{display:flex;gap:.9rem;flex-wrap:wrap;margin-top:.35rem;font-size:.88rem}
+  .av-ohne{color:#a8917a;font-size:.8rem}
+  .av-msg{margin-top:.4rem;font-size:.8rem;color:#5e4535;white-space:pre-wrap;
+          word-break:break-word}
+  .av-leer{padding:0 1.2rem 1.2rem;color:#a8917a;font-size:.9rem}
   .manuell{background:#ebe2d2;padding:1.2rem;margin-top:2.5rem;border-left:3px solid #7a5230}
   .manuell h2{font-size:1rem;margin:0 0 .5rem;font-weight:600}
   .manuell p{font-size:.83rem;color:#5e4535;margin:0 0 1rem}
@@ -1034,6 +1062,71 @@ Ich freue mich auf eine schöne kreative Zeit mit {$w['dativ']}!
     </div>
   <?php endforeach; ?>
 
+  <?php /* ── VERGANGENE ANFRAGEN ────────────────────────────────
+           Sie blockieren keine Plaetze mehr und stehen deshalb nicht
+           in der Liste oben. Gespeichert sind sie aber weiter — und
+           genau dann wird die Adresse gebraucht, wenn jemand nach
+           dem Termin noch etwas fragt oder ein Stueck abholt.
+           Deshalb hier zum Nachschlagen, mit einem Suchfeld ueber
+           Name, E-Mail, Telefon, Nachricht und Datum.            */ ?>
+  <?php if ($vergangen): ?>
+  <details class="archiv">
+    <summary>Vergangene Anfragen (<?= count($vergangen) ?>) — zum Nachschlagen</summary>
+
+    <div class="archiv-suche">
+      <label for="suche">Suchen</label>
+      <input type="search" id="suche" autocomplete="off" spellcheck="false"
+             placeholder="Name, E-Mail, Telefon oder Datum" oninput="archivFiltern()">
+      <span id="suche-zahl"></span>
+    </div>
+
+    <div id="archivliste">
+      <?php foreach ($vergangen as $a):
+        $ts   = strtotime((string)($a['datum'] ?? 'now'));
+        $st   = $a['status'] ?? 'offen';
+        /* Alles, wonach gesucht werden kann, in einem Attribut —
+           damit die Suche im Browser nur eine Zeichenkette prueft. */
+        $such = mb_strtolower(implode(' ', [
+            (string)($a['name'] ?? ''), (string)($a['email'] ?? ''),
+            (string)($a['telefon'] ?? ''), (string)($a['nachricht'] ?? ''),
+            (string)($a['angebot'] ?? ''), (string)($a['anlass'] ?? ''),
+            (string)($a['anlass_text'] ?? ''),
+            date('d.m.Y', $ts), date('Y-m-d', $ts), $wt_namen[(int)date('w', $ts)],
+        ])); ?>
+        <div class="av" data-such="<?= $e($such) ?>">
+          <div class="av-kopf">
+            <strong><?= $e(date('d.m.Y', $ts)) ?></strong>
+            <span class="av-wt"><?= $e($wt_namen[(int)date('w', $ts)]) ?></span>
+            <span class="st <?= $st === 'storniert' ? 'st-stor' : ($st === 'bestaetigt' ? 'st-best' : 'st-offen') ?>">
+              <?= $st === 'storniert' ? 'storniert' : ($st === 'bestaetigt' ? 'bestätigt' : 'offen') ?>
+            </span>
+          </div>
+          <div class="av-name"><?= $e($a['name'] ?? '') ?></div>
+          <div class="av-zeile">
+            <?= (int)($a['personen'] ?? 0) ?> <?= (int)($a['personen'] ?? 0) === 1 ? 'Person' : 'Personen' ?>
+            · <?= $e($a['angebot'] ?? '—') ?>
+            <?php if (($a['anlass'] ?? '') !== ''): ?> · <?= $e($a['anlass']) ?><?php endif; ?>
+          </div>
+          <div class="av-kontakt">
+            <?php if (($a['email'] ?? '') !== ''): ?>
+              <a href="mailto:<?= $e($a['email']) ?>"><?= $e($a['email']) ?></a>
+            <?php endif; ?>
+            <?php if (($a['telefon'] ?? '') !== ''): ?>
+              <a href="tel:<?= $e($a['telefon']) ?>"><?= $e($a['telefon']) ?></a>
+            <?php else: ?>
+              <span class="av-ohne">keine Telefonnummer angegeben</span>
+            <?php endif; ?>
+          </div>
+          <?php if (($a['nachricht'] ?? '') !== ''): ?>
+            <div class="av-msg"><?= $e($a['nachricht']) ?></div>
+          <?php endif; ?>
+        </div>
+      <?php endforeach; ?>
+    </div>
+    <p class="av-leer" id="archiv-leer" hidden>Dazu ist nichts gespeichert.</p>
+  </details>
+  <?php endif; ?>
+
   <?php
   /* ── BEWERTUNGEN ──────────────────────────────────────────
      Neue zuerst: das sind die, die auf eine Entscheidung warten.
@@ -1217,6 +1310,31 @@ function bearbAuf(id) {
   if (f) { f.focus(); }
 }
 function bearbZu(id) { document.getElementById(id + '-b').hidden = true; }
+
+/* Suche in den vergangenen Anfragen.
+   Es wird nichts nachgeladen — alle Eintraege stehen bereits auf der
+   Seite, gesucht wird nur in der vorbereiteten Zeichenkette. Mehrere
+   Woerter muessen alle vorkommen, die Reihenfolge ist egal. So findet
+   "koch nathalie" denselben Eintrag wie "Nathalie Koch". */
+function archivFiltern() {
+  const eingabe = document.getElementById('suche').value.toLowerCase().trim();
+  const worte   = eingabe.split(/\s+/).filter(Boolean);
+  const zeilen  = document.querySelectorAll('#archivliste .av');
+  let sichtbar  = 0;
+
+  zeilen.forEach(function (z) {
+    const heu = z.dataset.such || '';
+    const passt = worte.every(function (w) { return heu.indexOf(w) !== -1; });
+    z.hidden = !passt;
+    if (passt) { sichtbar++; }
+  });
+
+  const zahl = document.getElementById('suche-zahl');
+  zahl.textContent = eingabe === ''
+    ? ''
+    : (sichtbar === 1 ? '1 Treffer' : sichtbar + ' Treffer');
+  document.getElementById('archiv-leer').hidden = !(eingabe !== '' && sichtbar === 0);
+}
 
 /* Wurde eine Aenderung abgelehnt, steht das Formular schon offen —
    dann dorthin springen, damit die Meldung nicht ins Leere geht. */
