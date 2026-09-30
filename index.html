@@ -1,0 +1,2862 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tonflüstern – Keramikcafé in Erbach</title>
+  <meta name="description" content="Tonflüstern — Keramik bemalen oder Töpfern in entspannter Café-Atmosphäre. Erbach im Odenwald. Jetzt Termin anfragen.">
+
+  <meta property="og:url" content="https://tonfluestern.de">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Tonflüstern – Keramikcafé">
+  <meta property="og:description" content="Keramik bemalen oder Töpfern in entspannter Café-Atmosphäre. Erbach im Odenwald.">
+  <meta property="og:image" content="https://tonfluestern.de/DSC_5393.JPG">
+  <meta property="og:image:alt" content="Tonflüstern Keramikcafé in Erbach">
+  <meta property="og:locale" content="de_DE">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="favicon.ico" sizes="any">
+  <link rel="icon" type="image/png" href="favicon.png" sizes="180x180">
+  <link rel="apple-touch-icon" href="favicon.png">
+
+  <!-- Alle Schriften liegen im Ordner schriften/ auf diesem Server.
+       Es wird keine Schrift von einem fremden Anbieter nachgeladen —
+       bitte auch kuenftig keine einbinden: damit ginge bei jedem
+       Seitenaufruf die IP-Adresse der Besucher an diesen Anbieter. -->
+  <link rel="stylesheet" href="schriften.css">
+  <link rel="stylesheet" href="flatpickr.min.css">
+  <script>
+    /* Kennzeichnet, dass JavaScript laeuft — erst dann wird die
+       Start-Vorschau ueberhaupt sichtbar. */
+    document.documentElement.className += ' js';
+  </script>
+
+  <style>
+    /* ── TOKENS ── */
+    :root {
+      --bg-0: #f4ece0;
+      --bg-1: #ebe2d2;
+      --bg-2: #e1d5c2;
+      --bg-3: #d4c5af;
+      --terra: #a84c2a;
+      --bronze: #7a5230;
+      --cream: #291b0f;
+      --cream-mid: #5e4535;
+      --cream-faint: #a8917a;
+      --logo-green: #263d1e;
+      --on-col: #f4ece0;
+      --fd: 'Fraunces', Georgia, serif;
+      --fs: 'Pinyon Script', cursive;
+      --fb: 'Lato', system-ui, sans-serif;
+    }
+
+    /* ── RESET ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; font-size: 16px; }
+    body { font-family: var(--fb); background: var(--bg-0); color: var(--cream); overflow-x: hidden; line-height: 1.75; }
+    img { display: block; max-width: 100%; height: auto; }
+    a { color: inherit; text-decoration: none; }
+    button { cursor: pointer; border: none; background: none; font-family: inherit; }
+    address { font-style: normal; }
+
+    /* ── START-VORSCHAU ──
+       Bewusst display:none. Erst wenn JavaScript laeuft, wird die
+       Vorschau eingeblendet — ohne JavaScript kann sie die Seite
+       also niemals blockieren. */
+    #vorschau {
+      position: fixed; inset: 0; z-index: 10000;
+      display: none;
+      place-items: center;
+      /* gleicher Farbton wie die Startseite, damit beim Ausblenden
+         kein Farbsprung entsteht */
+      background: #ede8dd;
+      transition: opacity .6s ease, visibility .6s ease;
+    }
+    .js #vorschau { display: grid; }
+    /* Volles Logo, in Groesse und Lage genau wie auf der Startseite —
+       beim Ausblenden bleibt es daher an Ort und Stelle stehen. */
+    #vorschau img {
+      width: clamp(300px,68vmin,820px); height: clamp(300px,68vmin,820px);
+      object-fit: contain;
+      /* Derselbe weiche Rand wie auf der Startseite. Der Bildhintergrund
+         ist einen Hauch heller als die Flaeche; ohne diesen Verlauf
+         zeichnete sich ein Rechteck um das Logo ab. */
+      -webkit-mask-image: radial-gradient(ellipse 72% 72% at center, black 45%, transparent 78%);
+      mask-image: radial-gradient(ellipse 72% 72% at center, black 45%, transparent 78%);
+      animation: vorschauAtmen 2.6s ease-in-out infinite;
+    }
+    /* Schlanke Ladeanzeige. Sie fuellt sich in drei Sekunden auf 92% und
+       springt erst beim tatsaechlichen Ausblenden auf 100% — sie zeigt
+       damit echten Fortschritt und nicht nur eine hübsche Animation. */
+    .v-balken {
+      position: absolute; left: 50%; bottom: 15%;
+      transform: translateX(-50%);
+      width: min(220px, 52vw); height: 3px;
+      background: rgba(122,82,48,.14);
+      border-radius: 2px; overflow: hidden;
+    }
+    .v-balken i {
+      display: block; position: relative; height: 100%; width: 0;
+      background: var(--bronze); opacity: .8; border-radius: 2px;
+      animation: vLaden 3s linear forwards;
+    }
+    /* Feiner Lichtschimmer wandert ueber den gefuellten Teil, damit die
+       Anzeige auch bei langsamem Fortschritt erkennbar lebendig bleibt. */
+    .v-balken i::after {
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(90deg,
+        transparent 0%, rgba(255,255,255,.55) 50%, transparent 100%);
+      animation: vSchimmer 1.6s ease-in-out infinite;
+    }
+    /* Beschriftung darunter — nimmt der Wartezeit das Unklare */
+    .v-text {
+      position: absolute; left: 50%; bottom: 15%;
+      transform: translate(-50%, 2.1rem);
+      font-size: .62rem; letter-spacing: .28em; text-transform: uppercase;
+      color: var(--cream-faint); white-space: nowrap;
+    }
+    #vorschau.weg .v-balken i { width: 100% !important; animation: none; transition: width .35s ease; }
+    #vorschau.weg .v-balken i::after { animation: none; opacity: 0; }
+    @keyframes vLaden   { to { width: 92%; } }
+    @keyframes vSchimmer {
+      0%   { transform: translateX(-100%); }
+      60%, 100% { transform: translateX(100%); }
+    }
+
+    #vorschau.weg { opacity: 0; visibility: hidden; pointer-events: none; }
+    /* Beim Ausblenden das Pulsieren anhalten und auf die exakte Groesse
+       zurueckgehen — so uebergibt das Emblem punktgenau an das Startbild. */
+    #vorschau.weg img { animation: none; transform: scale(1); transition: transform .5s ease; }
+    @keyframes vorschauAtmen {
+      0%, 100% { transform: scale(.985); opacity: .9; }
+      50%      { transform: scale(1);    opacity: 1; }
+    }
+    /* Solange die Vorschau liegt: nicht dahinter scrollen, und die
+       Navigation ausblenden. Fest positionierte Elemente koennen sich
+       je nach Browser ueber die Vorschau legen, obwohl ihre Ebene
+       niedriger liegt — das hier ist eindeutig und blendet die
+       Navigation anschliessend sanft ein. */
+    body.vorschau-an { overflow: hidden; }
+    body.vorschau-an #nav { opacity: 0; visibility: hidden; pointer-events: none; }
+
+    @media (prefers-reduced-motion: reduce) {
+      #vorschau img { animation: none; }
+      #vorschau { transition: none; }
+      .v-balken i { animation-duration: 3s; }
+      .v-balken i::after { animation: none; opacity: 0; }
+    }
+    @media print { #vorschau { display: none !important; } }
+
+    /* ── FILM GRAIN ── */
+    body::after {
+      content: '';
+      position: fixed; inset: 0; z-index: 9999; pointer-events: none; opacity: .035;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='256' height='256'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      background-size: 160px 160px;
+    }
+
+    /* ── SCROLL REVEAL ── */
+    .rv { opacity: 0; transform: translateY(28px); transition: opacity .9s cubic-bezier(.16,1,.3,1), transform .9s cubic-bezier(.16,1,.3,1); }
+    .rv.on { opacity: 1; transform: none; }
+    .rv-d1 { transition-delay: .1s; }
+    .rv-d2 { transition-delay: .22s; }
+    .rv-d3 { transition-delay: .34s; }
+
+    /* ── TYPOGRAPHY ── */
+    .eyebrow { font-family: var(--fb); font-size: .68rem; font-weight: 500; letter-spacing: .26em; text-transform: uppercase; color: var(--bronze); }
+    /* 500 ist bei Fraunces die schwerste vorhandene Stufe. Mehr
+       waere nur vom Browser nachgedunkelt und saehe unsauber aus. */
+    h1,h2,h3,h4 { font-family: var(--fd); font-weight: 500; line-height: 1.08; }
+    .dlg { font-size: clamp(2.2rem,5vw,4.4rem); line-height: 1.05; }
+    .dmd { font-size: clamp(1.8rem,3.5vw,3rem); }
+    .gold-rule { display: block; width: 44px; height: 1px; background: var(--bronze); opacity: .5; margin: 1.2rem 0; }
+
+    /* ── NAV ── */
+    #nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 900;
+      padding: 1.4rem clamp(1.5rem,5vw,5rem);
+      display: flex; align-items: center; justify-content: space-between;
+      transition: background .4s, padding .4s, border-color .4s,
+                  opacity .5s ease, visibility .5s ease;
+      border-bottom: 1px solid transparent;
+    }
+    #nav.sc {
+      background: rgba(244,236,224,.96);
+      backdrop-filter: blur(14px);
+      padding: .9rem clamp(1.5rem,5vw,5rem);
+      border-color: rgba(122,82,48,.2);
+    }
+    .nav-emblem {
+      display: block; width: 42px; height: 42px; flex-shrink: 0;
+      background: url(favicon.png) no-repeat center / contain;
+    }
+    /* Die Seite ist lang geworden — ohne Navigation muesste man
+       sehr weit scrollen. Auf schmalen Geraeten laesst sich die
+       Leiste seitlich schieben, statt zu verschwinden.          */
+    /* Elf Reiter muessen auf einen ueblichen Bildschirm passen.
+       Waere der Streifen breiter als der Platz, waere der letzte
+       abgeschnitten — und niemand merkt, dass dort noch etwas
+       kommt. Darum eng gesetzt; reicht es trotzdem nicht, laesst
+       er sich schieben und ein Verlauf am Rand zeigt das an.   */
+    .nav-streifen { position: relative; flex: 1; min-width: 0; margin: 0 1rem; }
+    .nav-links { display: flex; align-items: center; gap: .95rem; overflow-x: auto;
+                 scrollbar-width: none; -ms-overflow-style: none; }
+    .nav-links::-webkit-scrollbar { display: none; }
+    .nav-streifen::after {
+      content: ''; position: absolute; right: 0; top: 0; bottom: 0; width: 2rem;
+      pointer-events: none; opacity: 0; transition: opacity .3s, background .4s;
+      /* Ganz oben liegt die Leiste durchsichtig ueber dem Hero —
+         dort muss der Verlauf dessen Ton treffen, sonst sieht man
+         einen hellen Streifen. Sobald gescrollt wird, bekommt die
+         Leiste ihren eigenen Grund, und der Verlauf zieht nach. */
+      background: linear-gradient(90deg, rgba(237,232,221,0), #ede8dd);
+    }
+    .nav-streifen.mehr::after { opacity: 1; }
+    #nav.sc .nav-streifen::after {
+      background: linear-gradient(90deg, rgba(244,236,224,0), #f4ece0);
+    }
+    .nav-link {
+      font-size: .66rem; letter-spacing: .09em; text-transform: uppercase;
+      color: var(--cream-mid); white-space: nowrap;
+      border-bottom: 1px solid transparent; padding-bottom: .15rem;
+      transition: color .3s, border-color .3s;
+    }
+    .nav-link:hover { color: var(--bronze); border-color: var(--bronze); }
+    @media (max-width: 900px) {
+      .nav-links { gap: .8rem; }
+      .nav-link { font-size: .62rem; letter-spacing: .07em; }
+    }
+    @media (max-width: 560px) {
+      /* Der Knopf bleibt, die Leiste rutscht darunter */
+      #nav { flex-wrap: wrap; row-gap: .5rem; }
+      .nav-streifen { order: 3; width: 100%; flex: 0 0 100%; margin: 0; }
+      .nav-links { padding-bottom: .2rem; }
+    }
+
+    .nav-book {
+      font-size: .68rem; letter-spacing: .16em; text-transform: uppercase;
+      padding: .55rem 1.4rem;
+      border: 1px solid var(--bronze); color: var(--bronze);
+      transition: background .3s, color .3s;
+    }
+    .nav-book:hover { background: var(--bronze); color: var(--bg-0); }
+
+    /* ── HERO ── */
+    #hero {
+      min-height: 100svh;
+      background: #ede8dd;
+      display: flex; align-items: center; justify-content: center;
+      overflow: hidden;
+    }
+    #hero img {
+      display: block;
+      width: clamp(300px,68vmin,820px); height: clamp(300px,68vmin,820px);
+      object-fit: cover; object-position: center;
+      -webkit-mask-image: radial-gradient(ellipse 72% 72% at center, black 45%, transparent 78%);
+      mask-image: radial-gradient(ellipse 72% 72% at center, black 45%, transparent 78%);
+      animation: logoFloat 7s cubic-bezier(.37,0,.63,1) infinite;
+    }
+    @keyframes logoFloat { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-14px); } }
+    @media (prefers-reduced-motion: reduce) { #hero img { animation: none; } }
+
+    /* ── PHOTOS ── */
+    #photos {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: 340px 260px;
+      gap: 4px;
+    }
+    .ph-cell { overflow: hidden; background: var(--bg-3); }
+    .ph-cell img { width: 100%; height: 100%; object-fit: cover; transition: transform .7s ease; }
+    .ph-cell:hover img { transform: scale(1.04); }
+    .ph-cell--wide { grid-column: span 2; }
+    @media (max-width: 640px) {
+      #photos { grid-template-columns: 1fr; grid-template-rows: auto; }
+      .ph-cell { height: 260px; }
+      .ph-cell--wide { grid-column: span 1; }
+    }
+
+    /* ── INTRO ── */
+    #intro {
+      padding: clamp(5rem,10vw,9rem) clamp(1.5rem,5vw,5rem);
+      background: var(--bg-1);
+    }
+    .intro-inner {
+      max-width: 820px; margin: 0 auto;
+    }
+    .intro-inner .eyebrow { margin-bottom: .6rem; }
+    .intro-inner .dlg { margin: .8rem 0 2rem; }
+    .intro-inner p { font-size: .95rem; color: var(--cream-mid); line-height: 1.95; margin-bottom: 1.4rem; }
+    .intro-inner strong { color: var(--cream); }
+    blockquote {
+      font-family: var(--fd); font-size: clamp(1.2rem,2.4vw,1.8rem); font-style: italic;
+      color: var(--cream); line-height: 1.5;
+      padding-left: 1.6rem; border-left: 2px solid var(--bronze);
+      margin: 2.4rem 0;
+    }
+    .notice-box {
+      margin-top: 2.8rem; padding: 1.4rem 1.8rem;
+      background: rgba(122,82,48,.07);
+      border-left: 3px solid var(--bronze);
+      font-size: .85rem; color: var(--cream-mid); line-height: 1.8;
+    }
+    .notice-box strong { color: var(--bronze); }
+
+    /* ── BOOKING ── */
+    #booking {
+      padding: clamp(5rem,10vw,9rem) clamp(1.5rem,5vw,5rem);
+    }
+    .bk-wrap { max-width: 1100px; margin: 0 auto; }
+    .bk-head { margin-bottom: 3.5rem; }
+    .bk-head .dmd { margin-top: 1rem; }
+    .bk-avail {
+      display: flex; flex-wrap: wrap; gap: 1.2rem; margin-top: 1.8rem;
+      font-size: .82rem;
+    }
+    .bk-avail-item {
+      padding: .8rem 1.4rem;
+      background: var(--bg-1);
+      border-left: 3px solid var(--bronze);
+    }
+    .bk-avail-item strong { display: block; font-family: var(--fd); font-size: 1rem; font-weight: 400; margin-bottom: .15rem; }
+    .bk-avail-item span { color: var(--cream-mid); font-size: .8rem; }
+
+    .info-box {
+      display: flex; gap: .9rem; align-items: flex-start;
+      margin-top: 1.6rem; padding: 1rem 1.4rem;
+      background: rgba(122,82,48,.07); border-left: 3px solid var(--bronze);
+      max-width: 480px;
+    }
+    .info-icon { color: var(--bronze); font-size: .7rem; line-height: 1.9; flex-shrink: 0; }
+    /* nur die Ueberschrift der Box wird als Label gesetzt —
+       Hervorhebungen im Fliesstext bleiben normale Fettschrift */
+    .info-box div > strong:first-child {
+      display: block; font-size: .68rem; letter-spacing: .18em; text-transform: uppercase;
+      color: var(--bronze); margin-bottom: .25rem; font-weight: 500;
+    }
+    .info-box div strong { font-weight: 700; color: var(--cream); }
+    .info-box div { font-size: .88rem; color: var(--cream-mid); line-height: 1.7; }
+
+    .bk-form-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: start;
+    }
+    @media (max-width: 720px) { .bk-form-grid { grid-template-columns: 1fr; } }
+
+    /* flatpickr overrides */
+    .flatpickr-calendar { font-family: var(--fb) !important; background: var(--bg-1) !important; border: 1px solid rgba(122,82,48,.2) !important; box-shadow: 0 8px 32px rgba(41,27,15,.1) !important; border-radius: 0 !important; }
+    .flatpickr-day { border-radius: 0 !important; color: var(--cream) !important; }
+    .flatpickr-day.selected, .flatpickr-day.selected:hover { background: var(--terra) !important; border-color: var(--terra) !important; color: var(--on-col) !important; }
+    .flatpickr-day.flatpickr-disabled { color: rgba(122,82,48,.3) !important; }
+    .flatpickr-months .flatpickr-month { background: var(--bg-2) !important; color: var(--cream) !important; }
+    .flatpickr-current-month span.cur-month { color: var(--cream) !important; }
+    .flatpickr-current-month input.cur-year { color: var(--cream) !important; }
+    .flatpickr-weekday { color: var(--cream-mid) !important; font-weight: 400; }
+    .flatpickr-day:hover { background: var(--bg-3) !important; }
+    .flatpickr-day.today { border-color: rgba(122,82,48,.4) !important; }
+
+    #cal-container { }
+
+    /* day info */
+    #day-info {
+      margin-top: 1.6rem; padding: 1.2rem 1.6rem;
+      background: var(--bg-1); border-left: 3px solid var(--terra);
+    }
+    #day-info.hidden { display: none; }
+    #day-info p.ts-label { font-size: .68rem; letter-spacing: .18em; text-transform: uppercase; color: var(--bronze); margin-bottom: .5rem; }
+    .day-hours { font-family: var(--fd); font-size: 1.5rem; color: var(--cream); line-height: 1.2; }
+    .day-seats { margin-top: .35rem; font-size: .82rem; font-weight: 700; color: var(--bronze); letter-spacing: .02em; }
+    .day-seats.seats-low { color: var(--terra); }
+    .day-sub { margin-top: .6rem; font-size: .82rem; color: var(--cream-mid); line-height: 1.65; }
+
+    /* ausgebucht */
+    #full-note {
+      margin-top: 1.6rem; padding: 1rem 1.4rem;
+      background: rgba(168,76,42,.08); border-left: 3px solid var(--terra);
+      font-size: .85rem; color: var(--cream-mid); line-height: 1.7; display: none;
+    }
+    #full-note.visible { display: block; }
+    #full-note strong { display: block; color: var(--terra); margin-bottom: .2rem; }
+    #full-note.zu { background: var(--bg-1); border-left-color: var(--bronze); }
+    #full-note.zu strong { color: var(--bronze); }
+
+    /* ── Kalender-Marker ──
+       ausgebucht und geschlossen müssen unterscheidbar sein:
+       ausgebucht = rötlich + durchgestrichen, geschlossen = nur blass */
+    .flatpickr-day.day-full {
+      color: rgba(168,76,42,.55) !important;
+      text-decoration: line-through;
+      text-decoration-thickness: 1px;
+    }
+    /* Von Hand zugemacht: ebenfalls durchgestrichen, damit man
+       gleich sieht, dass hier nichts geht — aber in gedecktem
+       Braun statt im warnenden Rot. Ausgebucht ist Pech,
+       geschlossen ist eine Entscheidung.                      */
+    .flatpickr-day.day-zu {
+      color: rgba(94,69,53,.5) !important;
+      text-decoration: line-through;
+      text-decoration-thickness: 1px;
+    }
+    .flatpickr-day.day-limited { position: relative; font-weight: 700; }
+    .flatpickr-day.day-limited::after {
+      content: ''; position: absolute; bottom: 4px; left: 50%; transform: translateX(-50%);
+      width: 4px; height: 4px; border-radius: 50%; background: var(--terra);
+    }
+    .flatpickr-day.selected.day-limited::after { background: var(--on-col); }
+
+
+    #anfrage-note { margin-top: 1.6rem; padding: 1rem 1.4rem; background: var(--bg-1); border-left: 3px solid var(--cream-faint); font-size: .85rem; color: var(--cream-mid); display: none; }
+    #anfrage-note.visible { display: block; }
+
+    /* Wunschzeit — nur am Wochenende sichtbar. Wichtig: solange der
+       Kasten verborgen ist, darf das Feld kein "required" tragen,
+       sonst blockiert der Browser das Absenden mit einer Meldung,
+       die niemand sehen kann. Das schaltet das Skript mit um.   */
+    #anlass-frei { display: none; }
+    #anlass-frei.visible { display: flex; }
+    #wz-feld { display: none; }
+    #wz-feld.visible { display: flex; }
+    .wz-hint { display: block; text-transform: none; letter-spacing: 0;
+               color: var(--cream-faint); font-size: .74rem; margin-top: .15rem; }
+
+    /* ══ GEMEINSAME ABSCHNITTE (Angebote, Preise, Getraenke, Fragen) ══ */
+    .ab { padding: clamp(4rem,9vw,7rem) clamp(1.5rem,6vw,4rem); }
+    .ab--hell { background: var(--bg-1); }
+    .ab-inner { max-width: 1100px; margin: 0 auto; }
+    .ab-kopf { max-width: 680px; margin-bottom: clamp(2.2rem,4vw,3.2rem); }
+    .ab-kopf p { font-size: .95rem; color: var(--cream-mid); line-height: 1.95; margin-top: 1.2rem; }
+    .ab-kopf p + p { margin-top: .9rem; }
+
+    .ab-zwei { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(1.5rem,4vw,3.5rem); align-items: start; }
+    .ab-zwei--bild { align-items: center; }
+    .ab-zwei > figure { margin: 0; }
+    .ab-zwei figure img { width: 100%; height: clamp(260px,40vw,440px); object-fit: cover; display: block; }
+    .ab-gedreht > figure { order: 2; }
+
+    .ab-text h3, .ab-block h3 {
+      font-family: var(--fd); font-weight: 500;
+      font-size: clamp(1.25rem,2.3vw,1.7rem); margin-bottom: .8rem;
+    }
+    .ab-text h4, .ab-block h4 {
+      font-family: var(--fd); font-weight: 500;
+      font-size: 1.02rem; margin: 1.4rem 0 .4rem;
+    }
+    .ab-text p, .ab-block p { font-size: .9rem; color: var(--cream-mid); line-height: 1.9; margin-bottom: .9rem; }
+    .ab-text strong, .ab-block strong { color: var(--cream); }
+
+    .ab-liste { list-style: none; margin: 0 0 1rem; padding: 0; }
+    .ab-liste li { font-size: .9rem; color: var(--cream-mid); line-height: 1.8;
+                   padding-left: 1.1rem; position: relative; margin-bottom: .35rem; }
+    .ab-liste li::before { content: '·'; position: absolute; left: .25rem; color: var(--bronze); font-weight: 700; }
+
+    /* Karten fuer Preise und aehnliche Aufzaehlungen */
+    .ab-karten { display: grid; grid-template-columns: repeat(auto-fit, minmax(270px,1fr)); gap: 1rem; }
+    .ab-karte { background: var(--bg-0); border-left: 3px solid var(--bronze); padding: 1.4rem 1.5rem; }
+    .ab--hell .ab-karte { background: var(--bg-0); }
+    .ab-karte h3 { font-family: var(--fd); font-weight: 500; font-size: 1.05rem; margin-bottom: .3rem; }
+    .ab-karte .preis { display: block; font-family: var(--fd); font-size: 1.5rem;
+                       color: var(--terra); line-height: 1.2; margin: .3rem 0 .6rem; }
+    .ab-karte .preis small { font-size: .78rem; color: var(--cream-faint); font-family: var(--fb); display: block; margin-top: .2rem; }
+    .ab-karte p { font-size: .84rem; color: var(--cream-mid); line-height: 1.75; margin: 0; }
+    .ab-karte .merke { display: inline-block; margin-top: .7rem; font-size: .76rem;
+                       color: var(--bronze); background: var(--bg-2); padding: .25rem .6rem; }
+
+    /* Getraenkekarte */
+    .gk { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px,1fr)); gap: clamp(1.5rem,4vw,3rem); }
+    .gk h3 { font-family: var(--fd); font-weight: 500; font-size: 1.1rem; margin-bottom: .9rem; }
+    .gk-zeile { display: flex; align-items: baseline; gap: .6rem; padding: .45rem 0;
+                border-bottom: 1px solid rgba(122,82,48,.12); font-size: .9rem; }
+    .gk-zeile span:first-child { color: var(--cream); }
+    .gk-punkte { flex: 1; border-bottom: 1px dotted rgba(122,82,48,.3); transform: translateY(-.25rem); }
+    .gk-zeile b { font-weight: 400; color: var(--bronze); white-space: nowrap; }
+    .gk-hinweis { font-size: .84rem; color: var(--cream-faint); margin-top: 1rem; line-height: 1.7; }
+
+    /* Haeufige Fragen */
+    .fq { max-width: 780px; }
+    .fq details { border-bottom: 1px solid rgba(122,82,48,.15); }
+    .fq summary {
+      cursor: pointer; list-style: none; padding: 1.1rem 2rem 1.1rem 0; position: relative;
+      font-family: var(--fd); font-weight: 500; font-size: 1.02rem; color: var(--cream);
+    }
+    .fq summary::-webkit-details-marker { display: none; }
+    .fq summary::after {
+      content: '+'; position: absolute; right: .3rem; top: 50%; transform: translateY(-50%);
+      font-family: var(--fb); font-size: 1.3rem; color: var(--bronze); transition: transform .3s;
+    }
+    .fq details[open] summary::after { content: '–'; }
+    .fq summary:hover { color: var(--bronze); }
+    .fq summary:focus-visible { outline: 2px solid var(--bronze); outline-offset: 3px; }
+    .fq-inhalt { padding: 0 0 1.2rem; }
+    .fq-inhalt p { font-size: .9rem; color: var(--cream-mid); line-height: 1.9; margin-bottom: .8rem; }
+    .fq-inhalt p:last-child { margin-bottom: 0; }
+    .fq-inhalt strong { color: var(--cream); }
+
+    @media (max-width: 760px) {
+      .ab-zwei { grid-template-columns: 1fr; }
+      .ab-gedreht > figure { order: 0; }
+    }
+
+    /* ── ABHOLBEREIT / WHATSAPP-KANAL ── */
+    .qr-block { display: grid; grid-template-columns: auto 1fr; gap: clamp(1.5rem,4vw,3rem);
+                align-items: center; max-width: 820px; }
+    .qr-bild { background: var(--bg-0); padding: .9rem; line-height: 0; }
+    .qr-bild img { width: clamp(150px,22vw,210px); height: auto; display: block; }
+    .qr-text h3 { font-family: var(--fd); font-weight: 500;
+                  font-size: clamp(1.25rem,2.3vw,1.7rem); margin-bottom: .7rem; }
+    .qr-text p { font-size: .9rem; color: var(--cream-mid); line-height: 1.9; margin-bottom: .9rem; }
+    .qr-text strong { color: var(--cream); }
+    .qr-knopf {
+      display: inline-block; margin-top: .3rem;
+      font-size: .7rem; letter-spacing: .16em; text-transform: uppercase;
+      padding: .7rem 1.5rem; border: 1px solid var(--bronze); color: var(--bronze);
+      transition: background .3s, color .3s;
+    }
+    .qr-knopf:hover { background: var(--bronze); color: var(--on-col); }
+    @media (max-width: 620px) {
+      .qr-block { grid-template-columns: 1fr; justify-items: start; }
+    }
+
+    /* ── GALERIE ── */
+    .gal-raster { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px,1fr)); gap: 10px; }
+    .gal-feld {
+      margin: 0; padding: 0; border: none; background: var(--bg-2);
+      cursor: zoom-in; overflow: hidden; position: relative;
+      aspect-ratio: 1 / 1; display: block; width: 100%;
+    }
+    .gal-feld img { width: 100%; height: 100%; object-fit: cover; display: block;
+                    transition: transform .6s ease; }
+    .gal-feld:hover img, .gal-feld:focus-visible img { transform: scale(1.05); }
+    .gal-feld:focus-visible { outline: 2px solid var(--bronze); outline-offset: 3px; }
+    .gal-leer { font-size: .9rem; color: var(--cream-faint); }
+
+    /* Vergroesserte Ansicht */
+    #gal-gross {
+      position: fixed; inset: 0; z-index: 1200; display: none;
+      background: rgba(41,27,15,.9); backdrop-filter: blur(4px);
+      align-items: center; justify-content: center; padding: clamp(1rem,4vw,3rem);
+    }
+    #gal-gross.auf { display: flex; }
+    #gal-gross img { max-width: 100%; max-height: 100%; object-fit: contain; display: block; }
+    .gal-zu, .gal-vor, .gal-zurueck {
+      position: absolute; background: none; border: none; color: var(--bg-0);
+      font-size: 2rem; line-height: 1; cursor: pointer; padding: .6rem .9rem;
+      opacity: .75; transition: opacity .2s;
+    }
+    .gal-zu:hover, .gal-vor:hover, .gal-zurueck:hover { opacity: 1; }
+    .gal-zu { top: .6rem; right: .8rem; font-size: 2.2rem; }
+    .gal-zurueck { left: .2rem; top: 50%; transform: translateY(-50%); }
+    .gal-vor { right: .2rem; top: 50%; transform: translateY(-50%); }
+    .gal-zaehler { position: absolute; bottom: 1rem; left: 50%; transform: translateX(-50%);
+                   font-size: .78rem; letter-spacing: .1em; color: var(--bg-3); }
+    body.gal-offen { overflow: hidden; }
+    @media (max-width: 520px) {
+      .gal-raster { grid-template-columns: repeat(auto-fill, minmax(140px,1fr)); gap: 8px; }
+    }
+
+    /* ── KINDERGEBURTSTAG ── */
+    #kigeb { padding: clamp(4rem,9vw,7rem) clamp(1.5rem,6vw,4rem); background: var(--bg-1); }
+    .kg-inner { max-width: 1100px; margin: 0 auto; }
+    .kg-kopf { max-width: 640px; margin-bottom: clamp(2.5rem,5vw,4rem); }
+    .kg-kopf p { font-size: .95rem; color: var(--cream-mid); line-height: 1.95; margin-top: 1.2rem; }
+
+    /* Die harten Zahlen zuerst — danach sucht man beim Planen. */
+    .kg-fakten { display: flex; flex-wrap: wrap; gap: .6rem; margin-top: 1.8rem; }
+    .kg-fakt {
+      font-size: .78rem; color: var(--bronze);
+      background: var(--bg-0); border-left: 2px solid var(--bronze);
+      padding: .5rem .9rem; line-height: 1.5;
+    }
+    .kg-fakt strong { color: var(--cream); }
+
+    .kg-block { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(1.5rem,4vw,3.5rem);
+                align-items: center; margin-bottom: clamp(3rem,6vw,5rem); }
+    .kg-block:last-of-type { margin-bottom: 0; }
+    .kg-block > figure { margin: 0; }
+    .kg-block img { width: 100%; height: clamp(260px,42vw,460px); object-fit: cover; display: block; }
+    /* Zwei Bilder in einem Block: untereinander, jedes etwas
+       niedriger, damit der Block nicht aus der Reihe faellt. */
+    .kg-bilder { display: grid; gap: 6px; }
+    .kg-bilder img { height: clamp(180px,24vw,280px); }
+    .kg-block--gedreht > figure { order: 2; }
+    .kg-text h3 { font-family: var(--fd); font-weight: 400;
+                  font-size: clamp(1.4rem,2.6vw,2rem); margin-bottom: .4rem; }
+    .kg-text .kg-sub { font-size: .7rem; letter-spacing: .2em; text-transform: uppercase;
+                       color: var(--cream-faint); display: block; margin-bottom: 1rem; }
+    .kg-text p { font-size: .9rem; color: var(--cream-mid); line-height: 1.9; margin-bottom: .9rem; }
+    .kg-text strong { color: var(--cream); }
+    .kg-text ul { list-style: none; margin: 0 0 .9rem; padding: 0; }
+    .kg-text li { font-size: .9rem; color: var(--cream-mid); line-height: 1.8;
+                  padding-left: 1.1rem; position: relative; margin-bottom: .35rem; }
+    .kg-text li::before { content: '·'; position: absolute; left: .25rem; color: var(--bronze); font-weight: 700; }
+
+    .kg-preis { display: inline-block; font-family: var(--fd); font-size: 1.15rem;
+                color: var(--terra); margin: .2rem 0 1rem; }
+
+    .kg-ruf { margin-top: clamp(2.5rem,5vw,4rem); padding-top: 1.8rem;
+              border-top: 1px solid rgba(122,82,48,.15); font-size: .9rem; color: var(--cream-mid); }
+    .kg-verweis { color: var(--bronze); border-bottom: 1px solid var(--bronze); padding-bottom: .1rem; }
+    .kg-verweis:hover { color: var(--terra); border-color: var(--terra); }
+
+    @media (max-width: 760px) {
+      .kg-block { grid-template-columns: 1fr; }
+      .kg-block--gedreht > figure { order: 0; }
+    }
+
+    /* ── REFERENZEN ── */
+    /* Schliesst direkt an die Fragen an — eigener Ton, damit die
+       Abschnitte sich weiter abwechseln. */
+    #refs { padding: clamp(4rem,9vw,7rem) clamp(1.5rem,6vw,4rem); background: var(--bg-1); }
+    .rf-inner { max-width: 1100px; margin: 0 auto; }
+    .rf-kopf { max-width: 640px; margin-bottom: 2.5rem; }
+    .rf-kopf p { font-size: .95rem; color: var(--cream-mid); line-height: 1.95; margin-top: 1.2rem; }
+    .rf-schnitt { display: flex; align-items: baseline; gap: .7rem; margin-top: 1.4rem; flex-wrap: wrap; }
+    .rf-schnitt b { font-family: var(--fd); font-size: 2rem; font-weight: 400; color: var(--cream); }
+    .rf-schnitt .rf-sterne { font-size: 1.1rem; }
+    .rf-schnitt span { font-size: .8rem; color: var(--cream-faint); }
+
+    .rf-sterne { color: #c8a24a; letter-spacing: .12em; white-space: nowrap; }
+
+    .rf-liste { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+                gap: 1rem; margin-bottom: clamp(2.5rem,5vw,4rem); }
+    .rf-karte { background: var(--bg-1); border-left: 3px solid var(--bronze);
+                padding: 1.2rem 1.4rem; }
+    .rf-karte .rf-oben { display: flex; justify-content: space-between; align-items: baseline;
+                         gap: .6rem; margin-bottom: .5rem; flex-wrap: wrap; }
+    .rf-karte strong { font-family: var(--fd); font-weight: 400; font-size: 1rem; }
+    .rf-karte time { font-size: .72rem; color: var(--cream-faint); }
+    .rf-karte p { font-size: .88rem; color: var(--cream-mid); line-height: 1.8;
+                  margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+    .rf-leer { font-size: .9rem; color: var(--cream-faint); margin-bottom: 2.5rem; }
+
+    /* Formular */
+    .rf-form { max-width: 640px; }
+    .rf-form h3 { font-family: var(--fd); font-weight: 400;
+                  font-size: clamp(1.3rem,2.4vw,1.7rem); margin-bottom: .4rem; }
+    .rf-form > p { font-size: .85rem; color: var(--cream-mid); line-height: 1.8; margin-bottom: 1.6rem; }
+
+    /* Sternwahl: die Eingabefelder liegen in umgekehrter Reihenfolge
+       im Dokument, damit sich per CSS alle Sterne links vom gewaehlten
+       mitfaerben lassen. Die Anzeige dreht row-reverse wieder um. */
+    /* Die Sterne stehen in einem .fg-Block, und dessen Regel
+       ".fg label" steht weiter unten im Stylesheet. Bei gleicher
+       Gewichtung gewinnt die spaetere — die Sterne waeren sonst
+       11 px gross, in Grossbuchstaben und in voller Bronzefarbe.
+       Das "#refs" davor wiegt schwerer und stellt das richtig.  */
+    #refs .rf-wahl { display: flex; flex-direction: row-reverse; justify-content: flex-end; gap: .15rem; }
+    #refs .rf-wahl input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+    #refs .rf-wahl label { font-size: 1.7rem; line-height: 1; color: rgba(122,82,48,.22);
+                     letter-spacing: 0; text-transform: none;
+                     cursor: pointer; transition: color .2s; padding: 0 .05rem; }
+    #refs .rf-wahl input:checked ~ label,
+    #refs .rf-wahl label:hover, #refs .rf-wahl label:hover ~ label { color: #c8a24a; }
+    #refs .rf-wahl input:focus-visible + label { outline: 2px solid var(--bronze); outline-offset: 2px; }
+
+    .rf-hinweis { font-size: .78rem; color: var(--cream-faint); line-height: 1.7; margin-top: .8rem; }
+    .rf-meldung { font-size: .88rem; padding: .9rem 1.2rem; margin-top: 1rem; display: none; }
+    .rf-meldung.gut  { display: block; background: var(--bg-2); border-left: 3px solid var(--bronze); color: var(--cream); }
+    .rf-meldung.fehl { display: block; background: rgba(168,76,42,.1); border-left: 3px solid var(--terra); color: var(--terra); }
+
+    /* form fields */
+    .bk-fields { display: flex; flex-direction: column; gap: 1.2rem; }
+    .fg { display: flex; flex-direction: column; gap: .4rem; }
+    .fg label { font-size: .68rem; letter-spacing: .14em; text-transform: uppercase; color: var(--bronze); }
+    .fg input, .fg select, .fg textarea {
+      padding: .75rem 1rem; background: var(--bg-1); border: 1px solid rgba(122,82,48,.2);
+      color: var(--cream); font-family: var(--fb); font-size: .9rem;
+      transition: border-color .3s; border-radius: 0; appearance: none;
+    }
+    .fg input:focus, .fg select:focus, .fg textarea:focus { outline: none; border-color: var(--bronze); }
+    .fg textarea { min-height: 110px; resize: vertical; }
+    .fg select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='7'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%237a5230' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 1rem center; padding-right: 2.5rem; }
+    /* Angebotswahl – zwei Schaltflächen statt Auswahlliste,
+       damit beide Angebote sofort sichtbar sind */
+    .ang-wahl { display: flex; gap: .6rem; flex-wrap: wrap; }
+    .ang-opt { flex: 1 1 150px; cursor: pointer; display: flex; }
+    .ang-opt input {
+      position: absolute; opacity: 0; width: 0; height: 0;
+    }
+    .ang-opt span {
+      flex: 1;
+      display: flex; align-items: center; justify-content: center;
+      text-align: center; line-height: 1.35;
+      min-height: 3rem; padding: .7rem 1rem;
+      background: var(--bg-1);
+      border: 1px solid rgba(122,82,48,.2);
+      color: var(--cream-mid);
+      font-size: .74rem; font-weight: 500;
+      letter-spacing: .14em; text-transform: uppercase;
+      transition: background .25s, border-color .25s, color .25s;
+    }
+    .ang-opt:hover span { border-color: var(--bronze); color: var(--cream); }
+    .ang-opt input:checked + span {
+      background: var(--terra); border-color: var(--terra); color: var(--on-col);
+    }
+    .ang-opt input:focus-visible + span {
+      outline: 2px solid var(--bronze); outline-offset: 2px;
+    }
+
+    .fr { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    @media (max-width: 500px) { .fr { grid-template-columns: 1fr; } }
+    .form-legal { font-size: .74rem; color: var(--cream-faint); line-height: 1.6; }
+    .form-legal a { border-bottom: 1px solid rgba(168,145,122,.4); }
+    .sub-btn {
+      display: inline-block; padding: .9rem 2.2rem;
+      background: var(--terra); color: var(--on-col);
+      font-family: var(--fb); font-size: .7rem; font-weight: 500;
+      letter-spacing: .2em; text-transform: uppercase;
+      transition: background .3s, transform .3s; border: none;
+    }
+    .sub-btn:hover { background: #9d4830; transform: translateY(-2px); }
+    .conf { display: none; text-align: center; padding: 3rem 1rem; }
+    .conf.show { display: block; }
+    .conf-check { font-size: 2.5rem; color: var(--bronze); margin-bottom: 1rem; }
+    .conf h3 { font-family: var(--fd); font-size: 1.8rem; margin-bottom: .6rem; }
+    .conf p { color: var(--cream-mid); }
+
+    /* ── FOOTER ── */
+    footer {
+      padding: 2.5rem clamp(1.5rem,5vw,5rem);
+      background: var(--bg-2);
+      border-top: 1px solid rgba(122,82,48,.15);
+      display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;
+    }
+    .ft-links { list-style: none; display: flex; gap: 1.5rem; }
+    .ft-links a { font-size: .72rem; letter-spacing: .14em; text-transform: uppercase; color: var(--cream-mid); border-bottom: 1px solid transparent; transition: border-color .3s; }
+    .ft-links a:hover { border-color: var(--cream-mid); }
+    .ft-copy { font-size: .72rem; color: var(--cream-faint); }
+    .ft-kontakt {
+      display: flex; flex-wrap: wrap; align-items: center; gap: .5rem 1.4rem;
+      font-size: .8rem; color: var(--cream-mid);
+    }
+    .ft-kontakt a { border-bottom: 1px solid rgba(122,82,48,.28); transition: border-color .3s; }
+    .ft-kontakt a:hover { border-color: var(--bronze); color: var(--cream); }
+
+    /* ── LEGAL MODALS ── */
+    .lm {
+      display: none; position: fixed; inset: 0; z-index: 1000;
+      background: rgba(41,27,15,.55); backdrop-filter: blur(6px);
+      overflow-y: auto; padding: 3rem 1rem;
+    }
+    .lm.open { display: block; }
+    /* Ohne JavaScript oeffnet die Adresse selbst das Fenster —
+       Impressum und Datenschutz bleiben so immer erreichbar. */
+    html:not(.js) .lm:target { display: block; }
+    .lm-inner {
+      max-width: 700px; margin: auto; background: var(--bg-0);
+      padding: 3rem clamp(1.5rem,5vw,3.5rem); position: relative;
+    }
+    .lm-close {
+      position: absolute; top: 1.2rem; right: 1.5rem;
+      font-size: 1.5rem; color: var(--cream-faint); transition: color .3s;
+    }
+    .lm-close:hover { color: var(--cream); }
+    a.lm-close { text-decoration: none; line-height: 1; }
+    .lm-inner h2 { font-family: var(--fd); font-size: 2rem; margin-bottom: 2rem; }
+    .lm-inner h3 { font-family: var(--fd); font-size: 1.1rem; margin: 1.6rem 0 .5rem; font-weight: 400; }
+    .lm-inner p  { font-size: .88rem; color: var(--cream-mid); line-height: 1.8; margin-bottom: .8rem; }
+    .ph { background: rgba(168,76,42,.12); color: var(--terra); padding: .1em .3em; }
+  </style>
+</head>
+<body>
+
+<!-- Start-Vorschau mit dem Logo -->
+<div id="vorschau" aria-hidden="true">
+  <img src="logosplash.png" alt="" width="560" height="560"
+       onerror="document.getElementById('vorschau').dataset.bildFehlt='1'">
+  <div class="v-balken" aria-hidden="true"><i></i></div>
+  <div class="v-text" aria-hidden="true">wird geladen</div>
+</div>
+<script>
+/* Start-Vorschau: liegt mindestens 3 Sekunden, verschwindet aber erst,
+   wenn die Seite geladen ist. Der Notausstieg loest sie spaetestens nach
+   6 Sekunden auf — die Seite bleibt also nie dauerhaft verdeckt.
+   Steht bewusst direkt hinter der Vorschau, damit die Zeit ab dem
+   frueheste moeglichen Moment laeuft. */
+(function () {
+  var v = document.getElementById('vorschau');
+  if (!v) return;
+
+  var MINDESTENS = 3000;
+  var NOTAUS     = 6000;
+
+  // Fehlt das Logo, hat die Vorschau keinen Zweck — dann sofort weg,
+  // statt drei Sekunden lang eine leere Flaeche zu zeigen.
+  var bild = v.querySelector('img');
+  if (bild) {
+    bild.addEventListener('error', function () { MINDESTENS = 0; weg(); });
+    if (bild.complete && bild.naturalWidth === 0) { MINDESTENS = 0; }
+  }
+  var start = Date.now();
+  var erledigt = false;
+
+  document.body.classList.add('vorschau-an');
+
+  function weg() {
+    if (erledigt) return;
+    erledigt = true;
+    var rest = Math.max(0, MINDESTENS - (Date.now() - start));
+    setTimeout(function () {
+      v.classList.add('weg');
+      document.body.classList.remove('vorschau-an');
+      setTimeout(function () { if (v.parentNode) v.parentNode.removeChild(v); }, 700);
+    }, rest);
+  }
+
+  if (document.readyState === 'complete') weg();
+  else window.addEventListener('load', weg);
+  setTimeout(weg, NOTAUS);
+})();
+</script>
+
+<!-- ── NAV ── -->
+<nav id="nav" role="navigation" aria-label="Hauptnavigation">
+  <a href="#hero" class="nav-emblem" aria-label="Zurück zur Startseite"></a>
+  <div class="nav-streifen" id="nav-streifen"><div class="nav-links" id="nav-links">
+    <a class="nav-link" href="#bemalen">Bemalen</a>
+    <a class="nav-link" href="#toepfern">Töpfern</a>
+    <a class="nav-link" href="#galerie">Galerie</a>
+    <a class="nav-link" href="#feste">Feiern</a>
+    <a class="nav-link" href="#kigeb">Kindergeburtstag</a>
+    <a class="nav-link" href="#preise">Preise</a>
+    <a class="nav-link" href="#getraenke">Getränke</a>
+    <a class="nav-link" href="#gutscheine">Gutscheine</a>
+    <a class="nav-link" href="#abholen">Abholung</a>
+    <a class="nav-link" href="#fragen">Fragen</a>
+    <a class="nav-link" href="#refs">Gästebuch</a>
+  </div></div>
+  <a class="nav-book" href="#booking">Termin anfragen</a>
+</nav>
+
+<!-- ── HERO ── -->
+<section id="hero" aria-label="Tonflüstern Startseite">
+  <img src="grafik.png" alt="Tonflüstern Logo">
+</section>
+
+<!-- ── PHOTOS ── -->
+<section id="photos" aria-label="Einblicke ins Tonflüstern">
+  <div class="ph-cell ph-cell--wide">
+    <img src="DSC_5393.JPG" alt="Tonflüstern Ladenfront in Erbach" loading="lazy">
+  </div>
+  <div class="ph-cell">
+    <img src="DSC_5408.JPG" alt="Keramikschale und Werkzeuge im Atelier" loading="lazy">
+  </div>
+  <div class="ph-cell">
+    <img src="DSC_5419.JPG" alt="Atelier mit Arbeitsplätzen und Regalen" loading="lazy">
+  </div>
+</section>
+
+<!-- ── INTRO ── -->
+<section id="intro" aria-labelledby="intro-h">
+  <div class="intro-inner">
+
+    <div class="rv">
+      <span class="eyebrow">Home</span>
+      <span class="gold-rule"></span>
+      <h2 id="intro-h" class="dlg">Herzlich willkommen in meinem<br><em>kleinen, gemütlichen Traum.</em></h2>
+    </div>
+
+    <blockquote class="rv rv-d1">
+      „Wo Ton und Kaffee aufeinandertreffen."
+    </blockquote>
+
+    <p class="rv rv-d1">
+      Das <strong>„Tonflüstern"</strong> ist ein besonderer Raum der kreativen Entspannung und Begegnung.
+      Hier kannst du dich entspannt ausprobieren: Ob mit verschiedenen Farben und Maltechniken auf Keramik oder beim Gestalten mit Ton.
+      Die gemütliche, helle und liebevoll gestaltete Atmosphäre lädt dich dazu ein, bei schöner Musik und leckeren Heißgetränken im Moment anzukommen und deine kreative Seite zu genießen.
+    </p>
+
+    <p class="rv rv-d2">
+      Ob du Keramikrohlinge bemalst oder deine ganz eigenen Ideen aus Ton umsetzt – du bist allein, zu zweit oder in der Gruppe herzlich willkommen.
+      Ob Geburtstag, Junggesellenabschied, Babyparty, Teamevent, Schulklassenausflug, Weihnachten, Ostern, Muttertag, Valentinstag oder einfach ein besonderer Abend zu zweit:
+      Du hast auch die Möglichkeit, den Raum für eine geschlossene Gesellschaft zu mieten. Schreibe mir einfach dein Anliegen – ich tue alles Mögliche, um deinen Anlass unvergesslich zu machen.
+    </p>
+
+    <p class="rv rv-d2">
+      Die Anlässe und Möglichkeiten, dir selbst oder anderen im <strong>„Tonflüstern"</strong> eine Freude zu bereiten, sind vielfältig.
+      Sehr gerne stelle ich dir auch einen Gutschein aus, mit dem du flexible Kreativmomente verschenken kannst.
+      Komm einfach während der Öffnungszeiten vorbei oder schreibe mir über
+      <a href="mailto:keramikcafe@tonfluestern.de" style="color:var(--bronze);border-bottom:1px solid rgba(122,82,48,.3);">keramikcafe@tonfluestern.de</a>
+    </p>
+
+    <p class="rv rv-d3" style="font-family:var(--fd);font-size:clamp(1rem,1.6vw,1.2rem);font-style:italic;color:var(--cream);">
+      Ich freue mich darauf, dich bald im „Tonflüstern" begrüßen zu dürfen!
+    </p>
+
+    <div class="notice-box rv rv-d3">
+      <strong>Bitte hab Nachsicht mit mir</strong> — die Homepage befindet sich noch in Bearbeitung.
+      Ich gebe mir Mühe, so schnell es mir gelingt alle wichtigen Infos und genaue Beschreibungen zum „Tonflüstern" zu ergänzen.
+      Falls du Fragen hast, melde dich gerne bei mir. Danke für dein Verständnis!
+    </div>
+
+  </div>
+</section>
+
+<!-- ── KERAMIK BEMALEN ── -->
+<section id="bemalen" class="ab" aria-labelledby="bm-h">
+  <div class="ab-inner">
+
+    <div class="ab-kopf rv">
+      <span class="eyebrow">Angebot</span>
+      <span class="gold-rule"></span>
+      <h2 id="bm-h" class="dmd">Keramik bemalen<br><em>deine kreative Auszeit</em></h2>
+      <p>
+        Mit Farbe und Pinsel entsteht aus einem schlichten Keramikrohling etwas ganz
+        Persönliches. Beim ruhigen Gestalten darf der Alltag für einen Moment in den
+        Hintergrund treten. Du kannst dir Zeit nehmen, deiner Kreativität folgen und
+        ein individuelles Erinnerungsstück erschaffen, das deine eigene Handschrift
+        trägt.
+      </p>
+      <p>
+        Beim Keramikbemalen suchst du dir vor Ort einen Rohling aus dem vorhandenen
+        Sortiment aus. Anschließend gestaltest du ihn mit Farben, Mustern, Schriften
+        oder eigenen Motiven ganz nach deinen Vorstellungen.
+      </p>
+      <p>
+        Vorkenntnisse sind nicht erforderlich. Wenn du bei der Gestaltung, der
+        Farbauswahl oder einer bestimmten Technik Unterstützung benötigst, erkläre
+        ich es dir selbstverständlich.
+      </p>
+    </div>
+
+    <div class="ab-zwei ab-zwei--bild rv rv-d1">
+      <figure>
+        <img src="kbfarben.jpg" alt="Regal mit Keramikfarben und Pinseln" loading="lazy" width="1066" height="1600">
+      </figure>
+      <div class="ab-text">
+        <h3>So funktioniert das Keramikbemalen</h3>
+        <p>
+          Zu Beginn wählst du einen Keramikrohling aus. Zur Auswahl stehen
+          unterschiedliche Formen und Preisklassen, beispielsweise Tassen, Becher,
+          Teller, Schalen, Vasen oder kleine Dekorationsstücke.
+        </p>
+        <p>
+          Danach kannst du deinen Rohling mit den vorhandenen Farben und
+          Gestaltungsmaterialien individuell bemalen. Für das kreative Gestalten
+          stehen dir etwa drei Stunden zur Verfügung.
+        </p>
+        <p>
+          Nach dem Bemalen bleibt deine Keramik bei Tonflüstern. Sobald die Farben
+          vollständig getrocknet sind, überziehe ich das Werkstück mit einer
+          transparenten Glanzglasur und brenne es anschließend im Keramikofen. Durch die
+          Glanzglasur und den Brand erhalten die Farben ihre endgültige Wirkung und
+          die Oberfläche ihren schönen Glanz.
+        </p>
+        <p>
+          Sobald deine Keramik fertig und vollständig abgekühlt ist, kannst du sie
+          abholen. Die Information zur Abholung gebe ich über den
+          WhatsApp-Kanal
+          <a href="https://whatsapp.com/channel/0029VbDPij847Xe5BQyTPg2H" target="_blank" rel="noopener noreferrer" class="kg-verweis">„Tonflüstern: Keramik abholbereit“</a>.
+        </p>
+      </div>
+    </div>
+
+    <div class="ab-zwei rv rv-d1" style="margin-top:clamp(2.5rem,5vw,4rem);">
+      <div class="ab-block">
+        <h3>Preise</h3>
+        <p>
+          Die Preise der Keramikrohlinge liegen aktuell zwischen 5 € und 33 €. Der
+          jeweilige Preis ist direkt am Regal ausgezeichnet.
+        </p>
+        <p>
+          Du bezahlst nur den ausgewählten Keramikrohling. Im Regalpreis sind bereits
+          enthalten:
+        </p>
+        <ul class="ab-liste">
+          <li>Farben und Gestaltungsmaterialien</li>
+          <li>Nutzung des Zubehörs</li>
+          <li>transparente Glanzglasur</li>
+          <li>Brennkosten</li>
+          <li>Nutzung des Arbeitsplatzes</li>
+        </ul>
+        <p>
+          Es entstehen keine zusätzlichen Kosten für das Bemalen, Glasieren oder
+          Brennen.
+        </p>
+        <p>
+          Getränke werden separat berechnet. Wasser steht kostenlos zur Verfügung.
+        </p>
+      </div>
+      <div class="ab-block">
+        <h3>Keramikbemalen für Gruppen und Teamevents</h3>
+        <p>
+          Keramikbemalen eignet sich auch für Geburtstage, Teamevents oder eine
+          gemeinsame kreative Auszeit mit Familie und Freunden.
+        </p>
+        <p>
+          Jede Person kann sich vor Ort einen eigenen Keramikrohling aussuchen und
+          diesen individuell gestalten. Wenn für eine Gruppe ein ähnlicher
+          Preisrahmen gewünscht ist, stelle ich vorab eine kleinere Auswahl aus drei
+          verschiedenen Keramikrohlingen in einer vergleichbaren Preisklasse
+          zusammen.
+        </p>
+
+        <h3 style="margin-top:1.8rem;">Gut zu wissen</h3>
+        <p>
+          Keramikbemalen ist für Anfängerinnen und Anfänger geeignet. Künstlerische
+          Erfahrung ist nicht notwendig – im Mittelpunkt stehen die Freude am
+          Gestalten, die gemeinsame Zeit und das persönliche Ergebnis.
+        </p>
+        <p>
+          Bitte kommt zur angegebenen Anfangszeit, damit genügend Zeit zum kreativen
+          Gestalten bleibt.
+        </p>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ── TÖPFERN ── -->
+<section id="toepfern" class="ab ab--hell" aria-labelledby="tp-h">
+  <div class="ab-inner">
+
+    <div class="ab-kopf rv">
+      <span class="eyebrow">Angebot</span>
+      <span class="gold-rule"></span>
+      <h2 id="tp-h" class="dmd">Töpfern<br><em>mit den Händen gestalten</em></h2>
+      <p>
+        Aus einem Stück Ton entsteht etwas ganz Eigenes. Ich zeige dir den
+        Grundaufbau Schritt für Schritt, anschließend gestaltest du dein
+        Werkstück mit Mustern, Stempeln und eigenen Ideen. Auch hier gilt:
+        <strong>Vorkenntnisse brauchst du keine.</strong>
+      </p>
+    </div>
+
+    <div class="ab-zwei ab-zwei--bild ab-gedreht rv rv-d1">
+      <figure>
+        <img src="kbtonarbeiten.jpg" alt="Selbst geformte Schalen, Tassen und Schilder aus Ton" loading="lazy" width="1066" height="1600">
+      </figure>
+      <div class="ab-text">
+        <h3>Der Töpferkurs</h3>
+        <p>
+          Der Kurs läuft über <strong>zwei Termine</strong>. Am ersten Termin
+          formst du dein Werkstück. Danach trocknet es und wird ein erstes Mal
+          gebrannt. Am zweiten Termin bemalst du es selbst — anschließend kommt
+          die transparente Glanzglasur darüber und es geht ein zweites Mal in
+          den Ofen.
+        </p>
+        <p>
+          <strong>30 € pro Person und Termin</strong>, zusammen also 60 €.
+          Darin enthalten sind Ton, Werkzeuge, Farben, die Glanzglasur, beide
+          Brände und die Nutzung des Arbeitsplatzes.
+        </p>
+        <h4>In der Gruppe an einem Termin</h4>
+        <p>
+          Für Gruppen geht es auch an einem einzigen Termin: Am Ende sucht sich
+          jede Person eine Glasurfarbe aus, das Glasieren übernehme ich.
+          <strong>35 € pro Person</strong>, höchstens zehn Personen, ein zweiter
+          Termin ist dann nicht nötig.
+        </p>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ── GALERIE ── -->
+<section id="galerie" class="ab" aria-labelledby="ga-h">
+  <div class="ab-inner">
+    <div class="ab-kopf rv">
+      <span class="eyebrow">Galerie</span>
+      <span class="gold-rule"></span>
+      <h2 id="ga-h" class="dmd">Was hier<br><em>entsteht</em></h2>
+      <p>
+        Ein paar Stücke, die bei Tonflüstern bemalt und getöpfert wurden —
+        von ruhig bis übermütig, jedes ein Einzelstück. Tipp auf ein Bild,
+        um es größer zu sehen.
+      </p>
+    </div>
+
+    <div id="gal-raster" class="gal-raster rv rv-d1"></div>
+    <p id="gal-leer" class="gal-leer" hidden>Die Galerie füllt sich gerade.</p>
+  </div>
+</section>
+
+<div id="gal-gross" role="dialog" aria-modal="true" aria-label="Bild in groß" hidden>
+  <button type="button" class="gal-zu" aria-label="Schließen">&times;</button>
+  <button type="button" class="gal-zurueck" aria-label="Vorheriges Bild">&lsaquo;</button>
+  <img id="gal-grossbild" src="" alt="">
+  <button type="button" class="gal-vor" aria-label="Nächstes Bild">&rsaquo;</button>
+  <span class="gal-zaehler" id="gal-zaehler"></span>
+</div>
+
+<!-- ── FESTE UND ANLÄSSE ── -->
+<section id="feste" class="ab ab--hell" aria-labelledby="fe-h">
+  <div class="ab-inner">
+
+    <div class="ab-kopf rv">
+      <span class="eyebrow">Feiern</span>
+      <span class="gold-rule"></span>
+      <h2 id="fe-h" class="dmd">Gemeinsam<br><em>kreativ feiern</em></h2>
+      <p>
+        Bei Tonflüstern dürft ihr euch Zeit füreinander nehmen, zur Ruhe kommen und
+        euren besonderen Anlass in einer entspannten Atmosphäre genießen. Der helle,
+        liebevoll gestaltete Raum verbindet warme Natur- und Erdtöne mit sanfter
+        Musik und ist bewusst ruhig gehalten, damit äußere Reize für eine Weile in
+        den Hintergrund treten können.
+      </p>
+      <p>
+        Bei einem Getränk, schönen Gesprächen und kreativem Gestalten entsteht eine
+        gemeinsame Auszeit, in der jede Person etwas ganz Persönliches mit den
+        eigenen Händen gestalten kann.
+      </p>
+    </div>
+
+    <div class="ab-zwei ab-zwei--bild rv rv-d1">
+      <figure>
+        <img src="kbtische.jpg" alt="Gedeckte Tische im Cafébereich" loading="lazy" width="1066" height="1600">
+      </figure>
+      <div class="ab-text">
+        <h3>Das Angebot eignet sich unter anderem für:</h3>
+        <ul class="ab-liste">
+          <li>Kindergeburtstage</li>
+          <li>Geburtstage für Erwachsene</li>
+          <li>Teamevents und Betriebsausflüge</li>
+          <li>Junggesellinnen- und Junggesellenabschiede</li>
+          <li>Babypartys</li>
+          <li>Frauenabende oder kreative Männerrunden</li>
+          <li>Familien- und Freundestreffen</li>
+          <li>Weihnachtsfeiern</li>
+          <li>Jubiläen und andere besondere Anlässe</li>
+        </ul>
+        <p>
+          Alle ausführlichen Informationen rund um Kindergeburtstage bei Tonflüstern
+          findet ihr im <a href="#kigeb" class="kg-verweis">separaten Bereich
+          „Kindergeburtstag“</a>.
+        </p>
+        <p>
+          Für eure gemeinsame Kreativzeit stehen euch bis zu drei Stunden zur
+          Verfügung.
+        </p>
+      </div>
+    </div>
+
+    <div class="ab-zwei rv rv-d1" style="margin-top:clamp(2.5rem,5vw,4rem);">
+      <div class="ab-block">
+        <h3>Keramik gemeinsam bemalen</h3>
+        <p>
+          Beim Keramikbemalen sucht sich jede Person einen Keramikrohling aus und
+          gestaltet ihn mit Farben, Mustern, Schriften oder eigenen Motiven ganz
+          individuell.
+        </p>
+        <p>
+          Wenn für die Gruppe ein ähnlicher Preisrahmen gewünscht ist, stelle ich
+          vorab drei unterschiedliche Keramikrohlinge aus einer vergleichbaren
+          Preisklasse zur Auswahl zusammen. Am Veranstaltungstag entscheidet sich
+          jede Person für einen dieser Rohlinge.
+        </p>
+        <p>
+          So bleibt die Auswahl abwechslungsreich und die Kosten für die Gruppe sind
+          trotzdem gut planbar.
+        </p>
+        <p>
+          Nach dem Bemalen bleiben die Werkstücke bei Tonflüstern. Ich überziehe sie
+          mit einer transparenten Glanzglasur und brenne sie anschließend. Sobald die
+          fertige Keramik abgeholt werden kann, gebe ich Bescheid über den
+          WhatsApp-Kanal
+          <a href="https://whatsapp.com/channel/0029VbDPij847Xe5BQyTPg2H" target="_blank" rel="noopener noreferrer" class="kg-verweis">„Tonflüstern: Keramik abholbereit“</a>.
+        </p>
+      </div>
+
+      <div class="ab-block">
+        <h3>Gemeinsam töpfern</h3>
+        <p>
+          Auch Töpfern ist als Gruppenveranstaltung möglich. Beim gemeinsamen
+          Workshop erkläre ich den Grundaufbau Schritt für Schritt. Anschließend
+          kann jede Person ihr Werkstück mit Mustern, Stempeln, Verzierungen und
+          eigenen Ideen individuell gestalten.
+        </p>
+        <p>Für die weitere Gestaltung stehen zwei Möglichkeiten zur Auswahl:</p>
+
+        <h4>Töpfern mit einem Termin</h4>
+        <p>
+          Am Ende des Workshops sucht sich jede Person eine Glasurfarbe aus. Nach dem
+          Trocknen brenne ich die Werkstücke zum ersten Mal, glasiere sie und brenne
+          sie anschließend ein zweites Mal. Ein weiterer Termin ist
+          für die Gruppe nicht erforderlich.
+        </p>
+
+        <h4>Töpfern mit einem späteren Bemaltermin</h4>
+        <p>
+          Wer sein getöpfertes Werkstück selbst ausführlich bemalen möchte, kann nach
+          dem ersten Brand einen zweiten Termin vereinbaren. Die Gruppe kann dafür
+          noch einmal gemeinsam kommen. Falls nicht alle Personen an einem weiteren
+          Gruppentermin teilnehmen können, besteht nach Absprache auch die
+          Möglichkeit, das eigene Werkstück zu einem individuell vereinbarten Termin
+          zu bemalen.
+        </p>
+        <p>Der zusätzliche Bemaltermin wird separat gebucht und berechnet.</p>
+        <p>Beim Töpfern können Gruppen mit maximal zehn Personen teilnehmen.</p>
+      </div>
+    </div>
+
+    <div class="ab-zwei rv rv-d1" style="margin-top:clamp(2.5rem,5vw,4rem);">
+      <div class="ab-block">
+        <h3>Snacks und Getränke</h3>
+        <p>
+          Eigene Snacks, kleine Häppchen sowie trockene Kuchen oder Muffins dürfen
+          gerne mitgebracht werden. Bitte verzichtet auf leicht verderbliche Speisen
+          und Sahnetorten.
+        </p>
+        <p>
+          Auch eigene Fruchtsäfte sowie Sekt oder Wein zum gemeinsamen Anstoßen
+          dürfen mitgebracht werden.
+        </p>
+        <p>
+          Warme Getränke wie Kaffee, Cappuccino, Latte macchiato oder Tee kannst du
+          bei mir bestellen. Wasser steht kostenlos zur Verfügung.
+        </p>
+        <p>
+          Gläser, kleine Teller und Schälchen für eure mitgebrachten Speisen und
+          Getränke stelle ich bereit.
+        </p>
+      </div>
+      <div class="ab-block">
+        <h3>Dekoration</h3>
+        <p>
+          Auf Wunsch bereite ich den Tisch passend zum Anlass liebevoll vor und
+          dekoriere ihn. Wünsche zur Gestaltung und Dekoration stimmen wir vorab
+          gemeinsam ab.
+        </p>
+        <p>
+          So entsteht ein persönlicher Rahmen für euren besonderen Anlass – mit
+          gemeinsamer Zeit, kreativen Momenten und selbst gestalteten
+          Erinnerungsstücken.
+        </p>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ── FOTO BREITE: Uebergang zum Kindergeburtstag ── -->
+<div style="height:340px;overflow:hidden;background:var(--bg-3);">
+  <img src="kbschalen.jpg" alt="Gestapelte Schalen und Tassen im Regal" loading="lazy"
+       style="width:100%;height:100%;object-fit:cover;object-position:center;">
+</div>
+
+<!-- ── KINDERGEBURTSTAG ── -->
+<section id="kigeb" aria-labelledby="kg-h">
+  <div class="kg-inner">
+
+    <div class="kg-kopf rv">
+      <span class="eyebrow">Feiern</span>
+      <span class="gold-rule"></span>
+      <h2 id="kg-h" class="dmd">Kindergeburtstag<br><em>bei Tonflüstern</em></h2>
+      <p>
+        Gemeinsam kreativ sein, Keramik bemalen und dabei einen besonderen Geburtstag
+        erleben: Bei Tonflüstern können Kinder ab ihrem 7. Geburtstag ihrer Fantasie
+        freien Lauf lassen und ihren eigenen Keramikrohling ganz individuell
+        gestalten. So entsteht gleichzeitig eine persönliche und bleibende Erinnerung
+        an diesen besonderen Tag.
+      </p>
+      <div class="kg-fakten">
+        <span class="kg-fakt">ab dem <strong>7. Geburtstag</strong></span>
+        <span class="kg-fakt">ab zehn Personen <strong>30 % Rabatt</strong></span>
+        <span class="kg-fakt">Töpfern <strong>23 € pro Kind</strong></span>
+        <span class="kg-fakt">Töpfern bis zu <strong>drei Stunden</strong></span>
+      </div>
+    </div>
+
+    <!-- Keramik bemalen -->
+    <div class="kg-block rv">
+      <figure>
+        <img src="kbfarben.jpg" alt="Regal mit Keramikfarben und Pinseln" loading="lazy" width="1066" height="1600">
+      </figure>
+      <div class="kg-text">
+        <h3>Kindergeburtstag – Keramik bemalen</h3>
+        <p>
+          Damit die Kinder während der Feier gut begleitet und unterstützt werden
+          können, wäre es schön, wenn eine erwachsene Begleitperson mit dabei ist.
+          Natürlich darf die Begleitperson auf Wunsch auch selbst einen
+          Keramikrohling bemalen. Diesen berechne ich regulär.
+        </p>
+        <p>
+          Bei Gruppen ab zehn Personen erhält die gesamte Gruppe 30 % Rabatt.
+        </p>
+        <p>
+          Vor dem Geburtstag besteht die Möglichkeit, bei Tonflüstern vorbeizukommen
+          und sich einen Überblick über die Keramikauswahl zu verschaffen. Dabei
+          dürft ihr drei Keramikrohlinge aus einer ähnlichen Preiskategorie
+          auswählen, die den Kindern am Geburtstag zur Auswahl stehen. Alternativ kann
+          sich jedes Kind seinen Keramikrohling auch individuell vor Ort aussuchen.
+        </p>
+      </div>
+    </div>
+
+    <!-- Töpfern -->
+    <div class="kg-block kg-block--gedreht rv">
+      <figure>
+        <img src="kbtonarbeiten.jpg" alt="Selbst geformte Schalen, Tassen und Schilder aus Ton" loading="lazy" width="1066" height="1600">
+      </figure>
+      <div class="kg-text">
+        <h3>Kindergeburtstag – Töpfern</h3>
+        <p>
+          Gemeinsam mit den Händen kreativ sein und aus einem Stück Ton etwas ganz
+          Eigenes entstehen lassen: Beim Töpfern können Kinder ab ihrem 7. Geburtstag
+          den Ton selbst formen und ihr Werkstück mit vielen kleinen Details
+          individuell gestalten. So entsteht eine ganz persönliche Erinnerung an
+          einen besonderen Geburtstag.
+        </p>
+        <p>
+          Für die Geburtstagsfeier stehen insgesamt bis zu drei Stunden zur
+          Verfügung. Das Geburtstagskind entscheidet vorab, welches Werkstück die
+          Gruppe gemeinsam töpfert – entweder ein Schälchen oder eine Tasse.
+        </p>
+        <p>
+          Ich zeige den Kindern Schritt für Schritt den Grundaufbau des ausgewählten
+          Werkstücks. Anschließend darf jedes Kind sein Werk ganz nach den eigenen
+          Vorstellungen verzieren und gestalten.
+        </p>
+        <p>
+          Zum Abschluss sucht sich jedes Kind eine Glasurfarbe aus. Nach dem
+          vollständigen Trocknen werden die Werkstücke von mir glasiert und gebrannt.
+        </p>
+        <span class="kg-preis">Das Töpfern kostet insgesamt 23 € pro Kind.</span>
+        <p>
+          Sobald alle Werkstücke fertig sind, informiere ich darüber im
+          WhatsApp-Kanal
+          <a href="https://whatsapp.com/channel/0029VbDPij847Xe5BQyTPg2H" target="_blank" rel="noopener noreferrer" class="kg-verweis">„Tonflüstern – Keramik abholbereit“</a>.
+          Die Werkstücke können anschließend gesammelt von einer zuständigen
+          erwachsenen Person abgeholt und privat an die Kinder verteilt werden.
+        </p>
+      </div>
+    </div>
+
+    <!-- Tisch und Verpflegung -->
+    <div class="kg-block rv">
+      <figure class="kg-bilder">
+        <img src="kbtheke.jpg" alt="Theke mit Kaffeemaschine im Cafébereich" loading="lazy" width="1600" height="1066">
+        <img src="kbtische.jpg" alt="Gedeckte Tische im Cafébereich" loading="lazy" width="1066" height="1600">
+      </figure>
+      <div class="kg-text">
+        <h3>Tisch &amp; Verpflegung</h3>
+        <p>
+          Für die Geburtstagsfeier wird der Tisch von mir liebevoll dekoriert.
+          Süßigkeiten, kleine Snacks und verschiedene Knabbereien dürfen gerne
+          mitgebracht werden. Am besten eignen sich trockene Speisen wie Muffins,
+          trockener Kuchen, Kekse oder Salzstangen. Passende Schälchen zum Befüllen
+          sowie Gläser stelle ich zur Verfügung.
+        </p>
+        <p>
+          Auch eigene Süßgetränke dürfen mitgebracht werden. Wasser steht bei
+          Tonflüstern kostenfrei zur Verfügung.
+        </p>
+      </div>
+    </div>
+
+    <!-- Einladung -->
+    <div class="kg-block kg-block--gedreht rv">
+      <figure>
+        <img src="kbfenster.jpg" alt="Schaufenster von Tonflüstern in der Hauptstraße" loading="lazy" width="1066" height="1600">
+      </figure>
+      <div class="kg-text">
+        <h3>Lust auf eine Feier bei Tonflüstern?</h3>
+        <span class="kg-sub">So kommt ihr zu einem Termin</span>
+        <p>
+          Schick mir einfach eine <a href="#booking" class="kg-verweis">Anfrage</a>
+          und wähle als Anlass <strong>„Kindergeburtstag“</strong>. Schreib mir gerne
+          dazu, wie alt die Kinder sind und ob ihr bemalen oder töpfern möchtet —
+          dann melde ich mich innerhalb von 24 Stunden bei euch.
+        </p>
+        <p>
+          Lieber persönlich? Ruf an unter
+          <a href="tel:+4915229221996" class="kg-verweis">+49 152 29221996</a>
+          oder komm einfach in der Hauptstraße 43 vorbei.
+        </p>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ── PREISE ── -->
+<section id="preise" class="ab" aria-labelledby="pr-h">
+  <div class="ab-inner">
+    <div class="ab-kopf rv">
+      <span class="eyebrow">Preise</span>
+      <span class="gold-rule"></span>
+      <h2 id="pr-h" class="dmd">Preise<br><em>im Überblick</em></h2>
+    </div>
+
+    <div class="ab-karten rv rv-d1">
+      <div class="ab-karte">
+        <h3>Keramik bemalen</h3>
+        <span class="preis">Keramikrohlinge: 5 € bis 33 €</span>
+        <p>
+          Der Preis des ausgewählten Rohlings beinhaltet Farben, Zubehör,
+          transparente Glanzglasur, Brennen und Platznutzung.
+        </p>
+      </div>
+
+      <div class="ab-karte">
+        <h3>Keramik bemalen in der Gruppe</h3>
+        <span class="preis">5 € bis 33 € pro Person<small>je nach ausgewähltem Rohling</small></span>
+        <p>
+          Auf Wunsch stelle ich vorab drei Rohlinge aus einer ähnlichen Preisklasse
+          zur Auswahl zusammen. Geeignet für Geburtstage, Freundesgruppen
+          und Teamevents.
+        </p>
+      </div>
+
+      <div class="ab-karte">
+        <h3>Töpferkurs – zwei Termine</h3>
+        <span class="preis">30 € pro Person und Termin<small>Gesamtpreis: 60 € pro Person</small></span>
+        <p>
+          Inklusive Ton, Werkzeuge, Farben, transparente Glanzglasur, zwei Brände und
+          Platznutzung.
+        </p>
+      </div>
+
+      <div class="ab-karte">
+        <h3>Töpfern in der Gruppe – ein Termin</h3>
+        <span class="preis">35 € pro Person<small>Maximal 10 Personen</small></span>
+        <p>
+          Inklusive Ton, Werkzeuge, Anleitung, Glasur durch Tonflüstern und zwei
+          Brände. Ein zweiter Termin ist nicht erforderlich.
+        </p>
+      </div>
+
+      <div class="ab-karte">
+        <h3>Kindergeburtstag – Keramik bemalen</h3>
+        <span class="preis">5 € bis 33 € pro Kind<small>je nach ausgewähltem Rohling</small></span>
+        <p>
+          Ab einer Gruppe von 10 Personen gibt es 30 % Rabatt auf die ausgewählten
+          Keramikrohlinge.
+        </p>
+        <p style="margin-top:.6rem;">
+          Farben, Zubehör, transparente Glanzglasur, Brennen und Platznutzung sind im
+          Preis enthalten.
+        </p>
+      </div>
+
+      <div class="ab-karte">
+        <h3>Kindergeburtstag – Töpfern</h3>
+        <span class="preis">23 € pro Kind für einen Termin<small>Maximal 10 Kinder</small></span>
+        <p>
+          Inklusive Ton, Werkzeuge, Anleitung, Glasur durch Tonflüstern sowie Schrüh-
+          und Glasurbrand.
+        </p>
+      </div>
+    </div>
+
+    <p class="rv rv-d2" style="margin-top:1.8rem;font-size:.9rem;color:var(--cream-mid);line-height:1.9;">
+      Getränke werden bei allen Angeboten separat berechnet. Wasser steht kostenlos
+      zur Verfügung.
+    </p>
+    <p class="rv rv-d2" style="font-size:.9rem;color:var(--cream-mid);line-height:1.9;">
+      Ausführliche Beschreibungen und Informationen zum jeweiligen Ablauf findest du
+      in den einzelnen Angebotsbereichen.
+    </p>
+  </div>
+</section>
+
+<!-- ── GETRÄNKE ── -->
+<section id="getraenke" class="ab ab--hell" aria-labelledby="gt-h">
+  <div class="ab-inner">
+    <div class="ab-kopf rv">
+      <span class="eyebrow">Café</span>
+      <span class="gold-rule"></span>
+      <h2 id="gt-h" class="dmd">Getränke<br><em>bei Tonflüstern</em></h2>
+      <p>
+        Eine kreative Auszeit darf gerne von einem warmen Getränk begleitet werden.
+        Während du malst, gestaltest oder töpferst, kannst du dir in ruhiger
+        Atmosphäre eine kleine Pause gönnen und dein Lieblingsgetränk genießen.
+      </p>
+    </div>
+
+    <div class="ab-zwei ab-zwei--bild rv rv-d1">
+      <figure>
+        <img src="kbtheke.jpg" alt="Theke mit Kaffeemaschine im Cafébereich" loading="lazy" width="1600" height="1066">
+      </figure>
+      <div class="gk">
+        <div>
+          <h3>Kaffee und warme Getränke</h3>
+          <div class="gk-zeile"><span>Kaffee</span><i class="gk-punkte"></i><b>3,00 €</b></div>
+          <div class="gk-zeile"><span>Cappuccino</span><i class="gk-punkte"></i><b>3,50 €</b></div>
+          <div class="gk-zeile"><span>Espresso</span><i class="gk-punkte"></i><b>2,00 €</b></div>
+          <div class="gk-zeile"><span>Latte macchiato</span><i class="gk-punkte"></i><b>4,00 €</b></div>
+          <div class="gk-zeile"><span>Americano</span><i class="gk-punkte"></i><b>2,50 €</b></div>
+          <div class="gk-zeile"><span>Tee</span><i class="gk-punkte"></i><b>2,00 €</b></div>
+
+          <h3 style="margin-top:1.8rem;">Milchvarianten</h3>
+          <p style="font-size:.9rem;color:var(--cream-mid);line-height:1.9;margin-bottom:.5rem;">
+            Alle Kaffeegetränke mit Milch sind wahlweise erhältlich mit:
+          </p>
+          <ul class="ab-liste">
+            <li>Kuhmilch</li>
+            <li>Hafermilch</li>
+          </ul>
+
+          <h3 style="margin-top:1.8rem;">Kleine Begleitung</h3>
+          <div class="gk-zeile"><span>Naschteller</span><i class="gk-punkte"></i><b>4,00 €</b></div>
+
+          <p class="gk-hinweis">
+            Wasser steht kostenlos zur Verfügung und kann jederzeit nachgefüllt
+            werden.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── GUTSCHEINE ── -->
+<section id="gutscheine" class="ab" aria-labelledby="gs-h">
+  <div class="ab-inner">
+    <div class="ab-zwei ab-zwei--bild ab-gedreht rv">
+      <figure>
+        <img src="kbauslage.jpg" alt="Schaufensterauslage mit Keramik zum Bemalen" loading="lazy" width="1600" height="1066">
+      </figure>
+      <div class="ab-text">
+        <span class="eyebrow">Verschenken</span>
+        <span class="gold-rule"></span>
+        <h2 id="gs-h" class="dmd" style="margin-bottom:1.2rem;">Gutscheine<br><em>kreative Zeit verschenken</em></h2>
+        <p>
+          Kreativität verbindet Menschen. Sie schafft Raum für gemeinsame Zeit,
+          schöne Gespräche und Erinnerungen, die bleiben. Mit einem Gutschein von
+          Tonflüstern verschenkst du deshalb nicht nur ein kreatives Erlebnis,
+          sondern auch einen besonderen Moment zum Abschalten, Gestalten und
+          Wohlfühlen.
+        </p>
+        <p>
+          Der Gutschein eignet sich auch wunderbar, um dem eigenen Partner oder der
+          Partnerin eine Freude zu machen – als Einladung zu einer gemeinsamen
+          kreativen Auszeit, bei der Nähe und bewusste Zeit miteinander im
+          Mittelpunkt stehen.
+        </p>
+        <p>
+          Die Gutscheine gestalte ich liebevoll und stimme sie mit ihren natürlichen
+          Farben und feinen Details auf die besondere Atmosphäre von Tonflüstern
+          ab. Sie eignen sich für Geburtstage, Weihnachten, einen Jahrestag,
+          besondere Anlässe oder einfach als kleine Aufmerksamkeit für einen lieben
+          Menschen.
+        </p>
+        <p>
+          Gutscheine kannst du während der regulären Öffnungszeiten persönlich bei
+          Tonflüstern abholen.
+        </p>
+        <p>
+          Sollten die Öffnungszeiten für dich nicht passen, kannst du dich gerne
+          persönlich melden. Nach Absprache vereinbaren wir einen individuellen
+          Termin zur Abholung.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── KERAMIK ABHOLBEREIT ── -->
+<section id="abholen" class="ab ab--hell" aria-labelledby="qr-h">
+  <div class="ab-inner">
+    <div class="ab-kopf rv" style="margin-bottom:2rem;">
+      <span class="eyebrow">Abholung</span>
+      <span class="gold-rule"></span>
+      <h2 id="qr-h" class="dmd">Wenn deine Keramik<br><em>fertig ist</em></h2>
+    </div>
+
+    <div class="qr-block rv rv-d1">
+      <div class="qr-bild">
+        <img src="qrkanal.png" alt="QR-Code zum WhatsApp-Kanal „Tonflüstern: Keramik abholbereit“"
+             loading="lazy" width="564" height="564">
+      </div>
+      <div class="qr-text">
+        <h3>Tonflüstern: Keramik abholbereit</h3>
+        <p>
+          Sobald deine Keramik gebrannt und abgekühlt ist, stelle ich ein Bild
+          davon in meinen WhatsApp-Kanal. Entdeckst du dein Werkstück, kannst du
+          es während der Öffnungszeiten abholen.
+        </p>
+        <p>
+          Scann den Code mit der Handykamera oder tipp auf den Knopf. Die
+          Fertigstellung dauert in der Regel <strong>zwei bis drei Wochen</strong>.
+        </p>
+        <a class="qr-knopf" href="https://whatsapp.com/channel/0029VbDPij847Xe5BQyTPg2H"
+           target="_blank" rel="noopener noreferrer">Zum Kanal</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── HÄUFIGE FRAGEN ── -->
+<section id="fragen" class="ab" aria-labelledby="fq-h">
+  <div class="ab-inner">
+    <div class="ab-kopf rv">
+      <span class="eyebrow">Gut zu wissen</span>
+      <span class="gold-rule"></span>
+      <h2 id="fq-h" class="dmd">Häufige<br><em>Fragen</em></h2>
+      <p>
+        Damit du deinen Besuch bei Tonflüstern entspannt genießen kannst, findest du
+        hier Antworten auf häufig gestellte Fragen rund um Kleidung, Materialien,
+        Abholung und den kreativen Ablauf.
+      </p>
+    </div>
+
+    <div class="fq rv rv-d1">
+      <details>
+        <summary>Welche Kleidung eignet sich zum Malen und Töpfern?</summary>
+        <div class="fq-inhalt">
+          <p>
+            Die verwendeten Farben sind wasserlöslich und lassen sich in der Regel
+            gut auswaschen, besonders wenn sie noch nicht vollständig eingetrocknet
+            sind. Trotzdem empfiehlt es sich, Kleidung zu tragen, bei der ein kleiner
+            Farbfleck nicht schlimm wäre.
+          </p>
+          <p>
+            Auf Wunsch stehen bei Tonflüstern Malkittel zur Verfügung. Sprich mich zu
+            Beginn deines Termins einfach darauf an.
+          </p>
+        </div>
+      </details>
+
+      <details>
+        <summary>Ist die fertige Keramik lebensmittelecht?</summary>
+        <div class="fq-inhalt">
+          <p>
+            Die bei Tonflüstern verwendeten Keramikrohlinge, Farben und Glasuren sind
+            für den Kontakt mit Lebensmitteln geeignet. Nach dem fachgerechten
+            Glasieren und Brennen kannst du Tassen, Teller, Schalen und andere
+            Gebrauchsgegenstände entsprechend verwenden.
+          </p>
+        </div>
+      </details>
+
+      <details>
+        <summary>Darf die Keramik in die Spülmaschine?</summary>
+        <div class="fq-inhalt">
+          <p>
+            Die fertig glasierte und gebrannte Keramik ist spülmaschinengeeignet.
+            Damit dein handgestaltetes Einzelstück möglichst lange schön bleibt,
+            empfiehlt sich dennoch ein schonendes Spülprogramm oder die Reinigung von
+            Hand.
+          </p>
+        </div>
+      </details>
+
+      <details>
+        <summary>Wann kann ich meine Keramik abholen?</summary>
+        <div class="fq-inhalt">
+          <p>
+            Die Fertigstellung dauert in der Regel etwa zwei bis drei Wochen. Da
+            Trocknung, Glasieren, Ofenbelegung und Brennvorgang unterschiedlich viel
+            Zeit benötigen können, verspreche ich keinen festen Abholtag.
+          </p>
+          <p>
+            Über den <a href="#abholen" class="kg-verweis">QR-Code auf der
+            Homepage</a> gelangst du zum WhatsApp-Kanal
+            <a href="https://whatsapp.com/channel/0029VbDPij847Xe5BQyTPg2H" target="_blank" rel="noopener noreferrer" class="kg-verweis">„Tonflüstern: Keramik abholbereit“</a>.
+            Dort veröffentliche ich Bilder der fertig gebrannten Werkstücke.
+            Sobald du dein eigenes Werkstück auf einem Bild entdeckst, kannst du es
+            während der angegebenen Öffnungszeiten abholen.
+          </p>
+        </div>
+      </details>
+
+      <details>
+        <summary>Benötige ich Vorkenntnisse?</summary>
+        <div class="fq-inhalt">
+          <p>
+            Nein, Vorkenntnisse sind nicht erforderlich. Bei Tonflüstern darfst du
+            dich ausprobieren, etwas Neues entdecken und deine kreative Zeit ohne
+            Leistungsdruck genießen.
+          </p>
+          <p>
+            Wenn du regelmäßig kommst und bestimmte Techniken intensiver
+            kennenlernen möchtest, können wir uns gerne darüber austauschen.
+            Gemeinsam kann geschaut werden, was du lernen oder weiterentwickeln
+            möchtest und wie ich dich dabei begleiten kann.
+          </p>
+        </div>
+      </details>
+
+      <details>
+        <summary>Kann beim Brennen etwas beschädigt werden?</summary>
+        <div class="fq-inhalt">
+          <p>
+            Keramik durchläuft beim Brennen sehr hohe Temperaturen. Trotz sorgfältiger
+            Trocknung, fachgerechter Vorbereitung und vorsichtiger Ofenführung kann es
+            in seltenen Fällen zu Rissen, Abplatzungen oder anderen Veränderungen
+            kommen. Ursachen können beispielsweise Spannungen im Material,
+            eingeschlossene Feuchtigkeit, unterschiedliche Wandstärken oder Reaktionen
+            während des Aufheizens und Abkühlens sein.
+          </p>
+          <p>
+            Nicht alle Vorgänge im Brennofen lassen sich vollständig beeinflussen.
+            Sollte dein Werkstück beim Brennen beschädigt werden, darfst du kostenlos
+            einen vergleichbaren Keramikrohling auswählen und erneut gestalten.
+          </p>
+        </div>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- ── REFERENZEN ── -->
+<section id="refs" aria-labelledby="rf-h">
+  <div class="rf-inner">
+
+    <div class="rf-kopf rv">
+      <span class="eyebrow">Gästebuch</span>
+      <span class="gold-rule"></span>
+      <h2 id="rf-h" class="dmd">Eure<br><em>Worte</em></h2>
+      <p>
+        Jeder Besuch bei Tonflüstern hinterlässt seine ganz eigenen Eindrücke und
+        Erinnerungen. Vielleicht war es ein ruhiger Moment nur für dich, eine
+        besondere gemeinsame Zeit oder einfach die Freude daran, etwas mit den
+        eigenen Händen zu gestalten.
+      </p>
+      <p>
+        Wenn du möchtest, darfst du hier deine Gedanken, Erfahrungen oder ein paar
+        persönliche Worte hinterlassen. Was hat dir besonders gefallen? Wie hast du
+        die Zeit bei Tonflüstern empfunden? Und was nimmst du aus deinem kreativen
+        Moment mit?
+      </p>
+      <p>
+        Deine Rückmeldung bedeutet mir viel. Sie hilft mir dabei, Tonflüstern mit
+        Achtsamkeit weiterzuentwickeln, und schenkt anderen Menschen einen kleinen
+        Einblick in die Atmosphäre und die Erfahrungen vor Ort.
+      </p>
+      <p>
+        Danke, dass du dir die Zeit nimmst, deine Worte zu teilen.
+      </p>
+      <div id="rf-schnitt" class="rf-schnitt" hidden>
+        <b id="rf-wert"></b>
+        <span class="rf-sterne" id="rf-bild"></span>
+        <span id="rf-anzahl"></span>
+      </div>
+    </div>
+
+    <div id="rf-liste" class="rf-liste rv rv-d1"></div>
+    <p id="rf-leer" class="rf-leer" hidden>
+      Hier ist noch nichts — magst du die erste Bewertung schreiben?
+    </p>
+
+    <div class="rf-form rv rv-d1" id="rf-formbereich">
+      <h3>Wie hat es dir gefallen?</h3>
+      <p>
+        Über ein paar Zeilen freue ich mich sehr. Deine Bewertung erscheint
+        nach einer kurzen Prüfung hier auf der Seite.
+      </p>
+
+      <form id="rf-form" novalidate>
+        <div style="position:absolute;left:-9999px;" aria-hidden="true">
+          <label>Website<input type="text" name="website" tabindex="-1" autocomplete="off"></label>
+        </div>
+
+        <div class="bk-fields">
+          <div class="fr">
+            <div class="fg">
+              <label for="rf-name">Dein Name *</label>
+              <input type="text" id="rf-name" name="name" required maxlength="60"
+                     placeholder="Vorname genügt" autocomplete="name">
+            </div>
+            <div class="fg">
+              <label id="rf-sternlabel">Deine Bewertung *</label>
+              <div class="rf-wahl" role="radiogroup" aria-labelledby="rf-sternlabel">
+                <input type="radio" id="rf-s5" name="sterne" value="5" required><label for="rf-s5" title="5 von 5 Sternen">★</label>
+                <input type="radio" id="rf-s4" name="sterne" value="4"><label for="rf-s4" title="4 von 5 Sternen">★</label>
+                <input type="radio" id="rf-s3" name="sterne" value="3"><label for="rf-s3" title="3 von 5 Sternen">★</label>
+                <input type="radio" id="rf-s2" name="sterne" value="2"><label for="rf-s2" title="2 von 5 Sternen">★</label>
+                <input type="radio" id="rf-s1" name="sterne" value="1"><label for="rf-s1" title="1 von 5 Sternen">★</label>
+              </div>
+            </div>
+          </div>
+
+          <div class="fg">
+            <label for="rf-text">Deine Erfahrung *</label>
+            <textarea id="rf-text" name="text" required maxlength="800"
+                      placeholder="Was hat dir gefallen? Was nimmst du mit?"></textarea>
+          </div>
+
+          <div>
+            <button type="submit" class="sub-btn" id="rf-sub">Bewertung senden</button>
+          </div>
+        </div>
+      </form>
+
+      <p id="rf-meldung" class="rf-meldung" role="status"></p>
+
+      <p class="rf-hinweis">
+        Dein Name und dein Text erscheinen nach der Prüfung öffentlich auf dieser
+        Seite — schreib also gerne nur den Vornamen. Ich lese jede Bewertung vor
+        der Veröffentlichung, prüfe aber nicht nach, ob jede Person tatsächlich
+        bei mir war. Mehr dazu in der
+        <a href="#datenschutz">Datenschutzerklärung</a>.
+      </p>
+    </div>
+
+  </div>
+</section>
+
+<!-- ── FOTO BREITE: Uebergang zum Anfrageformular ── -->
+<div style="height:400px;overflow:hidden;background:var(--bg-3);">
+  <img src="kbauslage.jpg" alt="Schaufensterauslage mit Keramik zum Bemalen" loading="lazy"
+       style="width:100%;height:100%;object-fit:cover;object-position:center;">
+</div>
+
+
+<!-- ── BOOKING ── -->
+<section id="booking" aria-labelledby="bk-h">
+  <div class="bk-wrap">
+
+    <div class="bk-head rv">
+      <span class="eyebrow">Termin anfragen</span>
+      <span class="gold-rule"></span>
+      <h2 id="bk-h" class="dmd">Keramik bemalen oder<br>Töpfern <em>anfragen</em></h2>
+      <p style="margin-top:.8rem;color:var(--cream-mid);font-size:.9rem;max-width:560px;">
+        Der Kurs läuft über den ganzen Tag — du kommst einfach während der Öffnungszeiten vorbei und bleibst so lange du magst.
+        Wähle deinen Wunschtag und schicke mir deine Anfrage; ich melde mich innerhalb von 24 Stunden.
+      </p>
+      <div class="bk-avail">
+        <div class="bk-avail-item">
+          <strong>Mittwoch &amp; Donnerstag</strong>
+          <span>15:00 – 18:00 Uhr</span>
+        </div>
+        <div class="bk-avail-item">
+          <strong>Freitag</strong>
+          <span>15:00 – 20:00 Uhr</span>
+        </div>
+        <div class="bk-avail-item">
+          <strong>Samstag &amp; Sonntag</strong>
+          <span>Auf Anfrage · am besten ab 11 Uhr im Studio</span>
+        </div>
+      </div>
+
+      <div class="info-box">
+        <span class="info-icon" aria-hidden="true">◆</span>
+        <div>
+          <strong>Wichtig zu wissen</strong>
+          Bezahlen kannst du <strong>bar oder mit Karte</strong>.
+        </div>
+      </div>
+    </div>
+
+    <div class="bk-form-grid rv rv-d1">
+
+      <!-- Kalender + Zeitslots -->
+      <div>
+        <p class="eyebrow" style="margin-bottom:.8rem;">Wunschtermin wählen</p>
+        <div id="cal-container"></div>
+
+        <div id="day-info" class="hidden">
+          <p class="ts-label">Öffnungszeiten an diesem Tag</p>
+          <p class="day-hours" id="day-hours">—</p>
+          <p class="day-seats" id="day-seats"></p>
+          <p class="day-sub">Der Kurs läuft über die gesamte Öffnungszeit. Komm einfach vorbei wann es dir passt.</p>
+        </div>
+
+        <div id="anfrage-note">
+          Samstag und Sonntag sind <strong>auf Anfrage</strong> — schreib mir einfach deinen Wunsch in die Nachricht,
+          ich versuche alles möglich zu machen. Am besten passt es, wenn du
+          <strong>ab 11 Uhr ins Studio kommst</strong> — anfragen kannst du natürlich jederzeit.
+        </div>
+
+        <div id="full-note">
+          <strong id="fn-titel"></strong>
+          <span id="fn-text"></span>
+        </div>
+
+      </div>
+
+      <!-- Formularfelder -->
+      <div>
+        <form id="bk-form" action="buchung.php" method="POST" novalidate>
+
+          <input type="hidden" id="f-date"  name="wunschtermin" value="">
+          <input type="hidden" id="f-time"  name="uhrzeit" value="">
+          <input type="hidden" id="f-seats" name="plaetze_frei" value="">
+
+          <!-- Spamschutz: für Menschen unsichtbar, Bots füllen es aus -->
+          <div style="position:absolute;left:-9999px;" aria-hidden="true">
+            <label>Website<input type="text" name="website" tabindex="-1" autocomplete="off"></label>
+          </div>
+
+          <div class="bk-fields">
+            <div class="fg">
+              <label id="ang-label">Was möchtest du machen? *</label>
+              <div class="ang-wahl" role="radiogroup" aria-labelledby="ang-label">
+                <label class="ang-opt">
+                  <input type="radio" name="angebot" value="Keramik bemalen" required>
+                  <span>Keramik bemalen</span>
+                </label>
+                <label class="ang-opt">
+                  <input type="radio" name="angebot" value="Töpfern" required>
+                  <span>Töpfern</span>
+                </label>
+              </div>
+            </div>
+            <div class="fr">
+              <div class="fg">
+                <label for="bk-anlass">Anlass *</label>
+                <select id="bk-anlass" name="anlass" required>
+                  <option value="">Bitte wählen …</option>
+                  <option>Einfach so</option>
+                  <option>Geburtstag</option>
+                  <option>Kindergeburtstag</option>
+                  <option>Junggesellenabschied</option>
+                  <option>Babyparty</option>
+                  <option>Frauenabend</option>
+                  <option>Team-Event</option>
+                  <option>Schulklasse oder Kindergruppe</option>
+                  <option>Familienfeier</option>
+                  <option>Geschlossene Gesellschaft</option>
+                  <option>Geschenk selbst gestalten</option>
+                  <option>Sonstiges</option>
+                </select>
+              </div>
+              <div class="fg" id="anlass-frei">
+                <label for="bk-anlass-text">Worum geht es? *</label>
+                <input type="text" id="bk-anlass-text" name="anlass_text"
+                       placeholder="z. B. Taufe, Jubiläum, Abschied" maxlength="80" autocomplete="off">
+              </div>
+            </div>
+
+            <div class="fr">
+              <div class="fg">
+                <label for="bk-name">Name *</label>
+                <input type="text" id="bk-name" name="name" required placeholder="Dein Name" autocomplete="name">
+              </div>
+              <div class="fg">
+                <label for="bk-email">E-Mail *</label>
+                <input type="email" id="bk-email" name="email" required placeholder="deine@email.de" autocomplete="email">
+              </div>
+            </div>
+            <div class="fr">
+              <div class="fg">
+                <label for="bk-phone">Telefon (optional)</label>
+                <input type="tel" id="bk-phone" name="telefon" placeholder="+49 …" autocomplete="tel">
+              </div>
+              <div class="fg">
+                <label for="bk-pers">Personenanzahl * <span style="text-transform:none;letter-spacing:0;color:var(--cream-faint);">(max. 18)</span></label>
+                <input type="number" id="bk-pers" name="personen" required
+                       min="1" max="18" step="1" value="1" placeholder="1">
+              </div>
+            </div>
+            <div class="fg" id="wz-feld">
+              <label for="bk-wunschzeit">Wunschzeit *
+                <span class="wz-hint">Am Wochenende gibt es keine festen Zeiten. Ab wann möchtest du kommen? Am besten passt es ab 11 Uhr.</span>
+              </label>
+              <input type="text" id="bk-wunschzeit" name="wunschzeit"
+                     placeholder="z. B. ab 11 Uhr" maxlength="60" autocomplete="off">
+            </div>
+
+            <div class="fg">
+              <label for="bk-msg">Nachricht / Wunschtermin</label>
+              <textarea id="bk-msg" name="nachricht" placeholder="Besondere Wünsche, alternative Termine, Fragen …"></textarea>
+            </div>
+            <p class="form-legal">
+              Mit dem Absenden stimmst du der Verarbeitung deiner Daten zur Bearbeitung deiner Anfrage zu.
+              Details in der <a href="#datenschutz">Datenschutzerklärung</a>.
+            </p>
+            <div>
+              <button type="submit" class="sub-btn" id="bk-sub">Anfrage senden</button>
+            </div>
+          </div>
+        </form>
+
+        <div class="conf" id="bk-conf" role="alert">
+          <div class="conf-check">✓</div>
+          <h3>Danke!</h3>
+          <p>Deine Anfrage ist bei mir eingegangen.<br>Ich melde mich innerhalb von 24 Stunden. Ich freue mich auf dich!</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ── FOOTER ── -->
+<footer>
+  <div class="ft-kontakt">
+    <a href="tel:+4915229221996">+49 152 29221996</a>
+    <a href="mailto:keramikcafe@tonfluestern.de">keramikcafe@tonfluestern.de</a>
+    <span>Hauptstraße 43, 64711 Erbach</span>
+  </div>
+  <ul class="ft-links">
+    <li><a href="#impressum">Impressum</a></li>
+    <li><a href="#datenschutz">Datenschutz</a></li>
+  </ul>
+  <p class="ft-copy">© 2026 Tonflüstern. Alle Rechte vorbehalten.</p>
+</footer>
+
+<!-- ── IMPRESSUM MODAL ── -->
+<div class="lm" id="impressum" role="dialog" aria-modal="true" aria-label="Impressum">
+  <div class="lm-inner">
+    <a class="lm-close" href="#" role="button" aria-label="Schließen">&times;</a>
+    <h2>Impressum</h2>
+
+    <h3>Angaben gemäß § 5 DDG</h3>
+    <p>
+      Tonflüstern – Keramikcafé<br>
+      Inhaberin: Tatjana Bleim-Muntanion<br>
+      Hauptstraße 43<br>
+      64711 Erbach<br>
+      Deutschland
+    </p>
+
+    <h3>Kontakt</h3>
+    <p>
+      Telefon: <a href="tel:+4915229221996">+49 152 29221996</a><br>
+      E-Mail: <a href="mailto:keramikcafe@tonfluestern.de">keramikcafe@tonfluestern.de</a>
+    </p>
+
+    <h3>Umsatzsteuer-Identifikationsnummer</h3>
+    <p>Umsatzsteuer-Identifikationsnummer gemäß § 27a UStG:<br>
+      DE463215071</p>
+
+    <h3>Verbraucherstreitbeilegung</h3>
+    <p>Ich bin nicht bereit und nicht verpflichtet, an Streitbeilegungsverfahren vor einer Verbraucherschlichtungsstelle teilzunehmen.</p>
+  </div>
+</div>
+
+<!-- ── DATENSCHUTZ MODAL ── -->
+<div class="lm" id="datenschutz" role="dialog" aria-modal="true" aria-label="Datenschutzerklärung">
+  <div class="lm-inner">
+    <a class="lm-close" href="#" role="button" aria-label="Schließen">&times;</a>
+    <h2>Datenschutzerklärung</h2>
+
+    <h3>1. Verantwortlicher</h3>
+    <p>
+      Tonflüstern – Keramikcafé<br>
+      Inhaberin: Tatjana Bleim-Muntanion<br>
+      Hauptstraße 43, 64711 Erbach<br>
+      Telefon: <a href="tel:+4915229221996">+49 152 29221996</a><br>
+      E-Mail: <a href="mailto:keramikcafe@tonfluestern.de">keramikcafe@tonfluestern.de</a>
+    </p>
+
+    <h3>2. Terminanfragen über das Buchungsformular</h3>
+    <p>
+      Wenn du eine Terminanfrage abschickst, verarbeite ich folgende Angaben:
+      gewünschtes Angebot, Wunschtermin, Personenanzahl, Name, E-Mail-Adresse,
+      Telefonnummer (sofern angegeben) und deine Nachricht. Zusätzlich speichere ich
+      Zeitpunkt und IP-Adresse der Anfrage, um Missbrauch des Formulars zu erkennen.
+    </p>
+    <p>
+      Diese Angaben werden <strong>auf meinem Webspace beim Hosting-Anbieter</strong>
+      gespeichert und zusätzlich per E-Mail an mich übermittelt. Das Postfach
+      keramikcafe@tonfluestern.de gehört zum selben Hosting-Paket — es ist also
+      derselbe Anbieter, den Punkt 6 nennt. Ein weiterer E-Mail-Dienst ist nicht
+      beteiligt.</p>
+    <p>
+      Eine Weitergabe an unbefugte Dritte findet nicht statt. Soweit Dienstleister
+      dabei personenbezogene Daten verarbeiten, geschieht das ausschließlich in
+      meinem Auftrag und nach meinen Weisungen (siehe Punkt 6). Die Übertragung
+      erfolgt verschlüsselt (TLS).
+    </p>
+    <p>
+      Rechtsgrundlage ist Art. 6 Abs. 1 lit. b DSGVO (Anbahnung und Durchführung eines
+      Vertrags), für die IP-Adresse Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse an
+      der Abwehr von Missbrauch).
+    </p>
+
+    <h3>3. Bewertungen</h3>
+    <p>
+      Wenn du eine Bewertung abschickst, verarbeite ich den von dir angegebenen
+      Namen, die Sternzahl und deinen Text. Zusätzlich speichere ich Zeitpunkt und
+      IP-Adresse, um Missbrauch des Formulars zu erkennen.
+    </p>
+    <p>
+      <strong>Name, Sternzahl und Text werden auf dieser Website veröffentlicht</strong>,
+      sobald ich die Bewertung geprüft habe. Zeitpunkt und IP-Adresse werden nicht
+      veröffentlicht. Gib deshalb bitte nur einen Namen an, mit dem du öffentlich
+      genannt werden möchtest — der Vorname genügt.
+    </p>
+    <p>
+      Rechtsgrundlage ist Art. 6 Abs. 1 lit. a DSGVO (Einwilligung, die du mit dem
+      Absenden erteilst), für die IP-Adresse Art. 6 Abs. 1 lit. f DSGVO (berechtigtes
+      Interesse an der Abwehr von Missbrauch). Du kannst deine Einwilligung jederzeit
+      widerrufen und die Löschung deiner Bewertung verlangen — eine kurze Nachricht
+      an <a href="mailto:keramikcafe@tonfluestern.de">keramikcafe@tonfluestern.de</a>
+      genügt.
+    </p>
+
+    <h3>4. Speicherdauer</h3>
+    <p>
+      Anfragen bleiben gespeichert, solange sie für die Terminabwicklung benötigt werden,
+      und werden danach gelöscht. Bestehen steuerliche oder handelsrechtliche
+      Aufbewahrungspflichten, speichere ich die betroffenen Angaben bis zu deren Ablauf.
+      Du kannst unter den gesetzlichen Voraussetzungen die Löschung deiner Daten verlangen
+      (siehe Punkt 7). Gesetzliche Aufbewahrungspflichten bleiben davon unberührt.
+    </p>
+
+    <h3>5. Cookies und eingebundene Inhalte</h3>
+    <p>
+      Diese Website setzt für Besucherinnen und Besucher <strong>keine Cookies</strong> —
+      weder zu Werbe- noch zu Analysezwecken. Es werden auch keine Tracking-Dienste,
+      Zählpixel oder sozialen Netzwerke eingebunden.
+    </p>
+    <p>
+      Alle Bestandteile der Seite — Schriften, Bilder und Programmbibliotheken —
+      werden <strong>ausschließlich von meinem eigenen Server geladen</strong>.
+      Beim Aufruf der Seite werden daher keine Daten an Dritte übertragen.
+    </p>
+    <p>
+      Das gilt auch für die Bezahlung: Auf dieser Website gibt es keinen
+      Bezahlvorgang und keine Schaltfläche eines Zahlungsdienstes. Bezahlt
+      wird erst vor Ort im Café — bar oder mit Karte. Über die Website
+      fließen dabei keine Zahlungsdaten an Dritte.
+    </p>
+    <p>
+      Lediglich beim Aufruf der internen Übersichtsseite für den Betrieb wird ein
+      technisch notwendiges Sitzungs-Cookie gesetzt. Für Besucher der Website
+      entsteht dabei kein Cookie.
+    </p>
+
+    <h3>6. Hosting und Server-Protokolle</h3>
+    <p>
+      Diese Website und das zugehörige E-Mail-Postfach werden gehostet bei der
+      <strong>Hetzner Online GmbH</strong>, Industriestr. 25, 91710 Gunzenhausen,
+      Deutschland. Soweit Hetzner dabei personenbezogene Daten in meinem Auftrag
+      verarbeitet, geschieht das im Rahmen eines Vertrags über die
+      Auftragsverarbeitung nach Art. 28 DSGVO.
+    </p>
+    <p>
+      Beim Aufruf der Website erfasst der Server automatisch Angaben, die dein Browser
+      übermittelt, und speichert sie in sogenannten Server-Protokolldateien:
+      IP-Adresse, Datum und Uhrzeit des Zugriffs, die aufgerufene Seite, die zuvor
+      besuchte Seite, Browser und Betriebssystem sowie die übertragene Datenmenge.
+      Diese Angaben werden nicht mit anderen Daten zusammengeführt und dienen allein
+      dem sicheren und störungsfreien Betrieb der Website. Sie werden für einen
+      begrenzten Zeitraum gespeichert und danach automatisch gelöscht oder
+      anonymisiert; die genaue Dauer richtet sich nach der Einstellung des
+      Hosting-Systems.
+    </p>
+    <p>Rechtsgrundlage: Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse am sicheren Betrieb).</p>
+
+    <h3>7. Deine Rechte</h3>
+    <p>
+      Du hast das Recht auf Auskunft (Art. 15 DSGVO), Berichtigung (Art. 16),
+      Löschung (Art. 17), Einschränkung der Verarbeitung (Art. 18),
+      Datenübertragbarkeit (Art. 20) sowie Widerspruch gegen die Verarbeitung (Art. 21).
+      Wende dich dafür einfach an
+      <a href="mailto:keramikcafe@tonfluestern.de">keramikcafe@tonfluestern.de</a>
+      oder <a href="tel:+4915229221996">+49 152 29221996</a>.
+    </p>
+    <p>
+      Außerdem hast du das Recht, dich bei einer Datenschutz-Aufsichtsbehörde zu
+      beschweren. Zuständig ist der Hessische Beauftragte für Datenschutz und
+      Informationsfreiheit, Wilhelmstraße 7, 65185 Wiesbaden.
+    </p>
+
+    <p style="margin-top:2rem;padding-top:1rem;border-top:1px solid rgba(41,27,15,.06);font-size:.74rem;color:var(--cream-faint);">
+      Stand: September 2026
+    </p>
+  </div>
+</div>
+
+<script src="flatpickr.min.js"></script>
+<script>
+/* Deutsche Beschriftung direkt eingebaut — so kann keine fehlende
+   oder falsch benannte Zusatzdatei den Kalender englisch machen. */
+window.flatpickrDE = {
+  weekdays: {
+    shorthand: ['So','Mo','Di','Mi','Do','Fr','Sa'],
+    longhand:  ['Sonntag','Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag']
+  },
+  months: {
+    shorthand: ['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'],
+    longhand:  ['Januar','Februar','März','April','Mai','Juni','Juli',
+                'August','September','Oktober','November','Dezember']
+  },
+  firstDayOfWeek: 1,
+  weekAbbreviation: 'KW',
+  rangeSeparator: ' bis ',
+  scrollTitle: 'Zum Ändern scrollen',
+  toggleTitle: 'Zum Umschalten klicken',
+  time_24hr: true,
+  ordinal: function () { return '.'; }
+};
+</script>
+<script>
+/* Impressum und Datenschutz haben eine eigene Adresse und muessen
+   direkt aufrufbar bleiben — auch von aussen. Die Liste steht hier
+   ganz oben, weil schon die Scroll-Behandlung sie kennen muss.    */
+var RECHTSTEXTE = ['impressum', 'datenschutz'];
+function istRechtstext(hash) {
+  return RECHTSTEXTE.indexOf(String(hash).replace(/^#/, '')) !== -1;
+}
+
+/* ── SCROLL RESTORATION ── */
+if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+/* Die Seite soll oben beginnen, damit die Vorschau nicht uebersprungen
+   wird. Eine Adresse wie #booking wird darum verworfen — die der
+   Rechtstexte aber nicht, sonst waeren sie nicht mehr verlinkbar. */
+if (window.location.hash && !istRechtstext(window.location.hash)) {
+  history.replaceState(null, '', window.location.pathname);
+}
+if (!istRechtstext(window.location.hash)) window.scrollTo(0, 0);
+
+/* ── LOAD: reveal above-fold + scroll-to-top ── */
+window.addEventListener('load', () => {
+  if (!istRechtstext(window.location.hash)) window.scrollTo(0, 0);
+  requestAnimationFrame(() => {
+    document.querySelectorAll('.rv').forEach(el => {
+      if (el.getBoundingClientRect().top < window.innerHeight) el.classList.add('on');
+    });
+  });
+});
+
+/* Zeigt den Verlauf am rechten Rand nur, wenn der Streifen
+   tatsaechlich breiter ist als der Platz — und blendet ihn aus,
+   sobald man ganz nach rechts geschoben hat. */
+(function () {
+  const streifen = document.getElementById('nav-streifen');
+  const links    = document.getElementById('nav-links');
+  if (!streifen || !links) return;
+  function pruefen() {
+    const mehr = links.scrollWidth - links.clientWidth - links.scrollLeft > 4;
+    streifen.classList.toggle('mehr', mehr);
+  }
+  links.addEventListener('scroll', pruefen, { passive: true });
+  window.addEventListener('resize', pruefen, { passive: true });
+  pruefen();
+})();
+
+/* ── NAV SCROLL ── */
+const nav = document.getElementById('nav');
+window.addEventListener('scroll', () => nav.classList.toggle('sc', scrollY > 60), { passive: true });
+
+/* ── SCROLL REVEAL ── */
+const obs = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('on'); obs.unobserve(e.target); } });
+}, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
+document.querySelectorAll('.rv').forEach(el => obs.observe(el));
+
+/* ══════════════════════════════════════════════════════════
+   BELEGUNG
+   ══════════════════════════════════════════════════════════
+   Kommt live vom Server (belegung.php). Sobald jemand eine
+   Anfrage abschickt, zählt der Server die Plätze hoch — die
+   Website muss dafür nicht angefasst werden.
+══════════════════════════════════════════════════════════ */
+let BOOKED = {};
+let HANDEINTRAG = {};      // Tage, die der Betrieb selbst zugemacht hat
+let ANZEIGEART  = {};      // und wie sie dort heissen sollen
+const MAX_PER_DAY = 18;
+
+// Wochentage: 0=So, 1=Mo, 2=Di, 3=Mi, 4=Do, 5=Fr, 6=Sa
+const OPEN_HOURS = {
+  3: '15:00 – 18:00 Uhr',   // Mittwoch
+  4: '15:00 – 18:00 Uhr',   // Donnerstag
+  5: '15:00 – 20:00 Uhr'    // Freitag
+};
+const REQUEST_DAYS = [6, 0];            // Samstag, Sonntag – auf Anfrage
+const CLOSED_DAYS  = [1, 2];            // Montag, Dienstag – geschlossen
+
+const dayInfo  = document.getElementById('day-info');
+const dayHours = document.getElementById('day-hours');
+const daySeats = document.getElementById('day-seats');
+const anfNote  = document.getElementById('anfrage-note');
+const fullNote = document.getElementById('full-note');
+const fDate    = document.getElementById('f-date');
+const fTime    = document.getElementById('f-time');
+const fSeats   = document.getElementById('f-seats');
+const persIn   = document.getElementById('bk-pers');
+const anlassIn   = document.getElementById('bk-anlass');
+const anlassFrei = document.getElementById('anlass-frei');
+const anlassText = document.getElementById('bk-anlass-text');
+
+/* "Sonstiges" allein sagt nichts — dann wird kurz nachgefragt.
+   Das "required" wandert mit, wie bei der Wunschzeit: ein
+   verborgenes Pflichtfeld wuerde das Absenden blockieren, ohne
+   dass jemand sieht, woran es liegt. */
+function anlassFreitext() {
+  if (!anlassIn || !anlassFrei || !anlassText) return;
+  const noetig = anlassIn.value === 'Sonstiges';
+  anlassFrei.classList.toggle('visible', noetig);
+  if (noetig) {
+    anlassText.setAttribute('required', '');
+  } else {
+    anlassText.removeAttribute('required');
+    anlassText.value = '';
+  }
+}
+if (anlassIn) anlassIn.addEventListener('change', anlassFreitext);
+anlassFreitext();
+
+const wzFeld   = document.getElementById('wz-feld');
+const wzIn     = document.getElementById('bk-wunschzeit');
+
+/* Wunschzeit ein- und ausblenden. Das "required" wandert mit:
+   ein verborgenes Pflichtfeld laesst sich nicht ausfuellen, der
+   Browser wuerde das Absenden aber trotzdem verweigern — und die
+   Fehlermeldung zeigt er an einer unsichtbaren Stelle an. */
+function wunschzeitZeigen(an) {
+  if (!wzFeld || !wzIn) return;
+  wzFeld.classList.toggle('visible', an);
+  if (an) {
+    wzIn.setAttribute('required', '');
+  } else {
+    wzIn.removeAttribute('required');
+    wzIn.value = '';
+    wzIn.setCustomValidity('');
+  }
+}
+
+/* Datum -> 'JJJJ-MM-TT' */
+const dkey = d =>
+  `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+
+/* Freie Plätze an einem Tag */
+const freeSeats = d => MAX_PER_DAY - (BOOKED[dkey(d)] || 0);
+
+/* Ein Tag kann aus zwei Gruenden keinen Platz mehr haben: Gaeste
+   haben ihn ausgebucht, oder der Betrieb hat ihn von Hand zu
+   gemacht — etwa fuer eine geschlossene Gesellschaft oder einen
+   freien Tag. Fuer Besucher ist das ein Unterschied: "ausgebucht"
+   klingt nach Pech, "geschlossen" nach einer Entscheidung. Und
+   wenn gar nicht geoeffnet ist, waere "ausgebucht" schlicht
+   falsch. Darum wird hier getrennt.                            */
+function zugemacht(d) {
+  const art = ANZEIGEART[dkey(d)];
+  // Ausdrueckliche Festlegung aus der Uebersicht hat Vorrang.
+  if (art === 'zu')   return true;
+  if (art === 'voll') return false;
+  // Sonst wie bisher: ganz von Hand geblockt heisst geschlossen.
+  return (HANDEINTRAG[dkey(d)] || 0) >= MAX_PER_DAY;
+}
+
+/* Erklaert, warum an einem Tag nichts geht.
+   Der Kasten stand vorher leer im Dokument und wurde nie
+   gezeigt: flatpickr sperrt volle Tage, und ein gesperrter Tag
+   loest kein Auswahl-Ereignis aus. Wer auf einen
+   durchgestrichenen Tag tippte, bekam also gar keine Antwort.
+   Jetzt haengt an diesen Tagen ein eigener Klick.            */
+function vollHinweis(datum) {
+  const titel  = document.getElementById('fn-titel');
+  const text   = document.getElementById('fn-text');
+  const kasten = document.getElementById('full-note');
+  if (!titel || !text || !kasten) return;
+
+  const ruhetag = CLOSED_DAYS.includes(datum.getDay());
+  const zu      = !ruhetag && zugemacht(datum);
+
+  if (ruhetag) {
+    titel.textContent = 'An diesem Wochentag ist geschlossen';
+    text.textContent  = 'Geöffnet ist Mittwoch bis Freitag, '
+                      + 'Samstag und Sonntag auf Anfrage.';
+  } else if (zu) {
+    titel.textContent = 'An diesem Tag ist geschlossen';
+    text.textContent  = 'Bitte wähle einen anderen Tag im Kalender.';
+  } else {
+    titel.textContent = 'Dieser Tag ist schon ausgebucht';
+    text.textContent  = 'Bitte wähle einen anderen Tag im Kalender. '
+                      + 'Die freien Plätze siehst du direkt an den Tagen.';
+  }
+
+  kasten.classList.toggle('zu', ruhetag || zu);
+  kasten.classList.add('visible');
+  anfNote.classList.remove('visible');
+  dayInfo.classList.add('hidden');
+  wunschzeitZeigen(false);
+  fDate.value = ''; fTime.value = ''; fSeats.value = '';
+}
+
+/* Kann an diesem Tag ueberhaupt gebucht werden?
+   Mi/Do/Fr mit festen Zeiten, Sa/So auf Anfrage.        */
+const buchbar = d => Boolean(OPEN_HOURS[d.getDay()]) || REQUEST_DAYS.includes(d.getDay());
+
+/* Ausgebucht gilt fuer JEDEN buchbaren Tag — auch fuer
+   Samstag und Sonntag, wenn die Plaetze von Hand belegt sind. */
+const isFull = d => buchbar(d) && freeSeats(d) <= 0;
+
+// Deutsche Beschriftung setzen; schlaegt das fehl, bleibt der Kalender
+// benutzbar und zeigt lediglich englische Monatsnamen
+try { flatpickr.localize(window.flatpickrDE); } catch (e) {}
+
+function initKalender() {
+if (kalenderInstanz) kalenderInstanz.destroy();
+kalenderInstanz = flatpickr('#cal-container', {
+  inline: true,
+  minDate: 'today',
+  // Vorgelesenes Datum auf Deutsch. Ohne das liest der Screenreader
+  // die englische Reihenfolge vor ("September 19, 2026"). Der
+  // Wochentag steht bewusst mit davor — er entscheidet hier ueber
+  // die Oeffnungszeiten.
+  ariaDateFormat: 'l, j. F Y',
+  // kein locale-Name noetig: die deutsche Beschriftung ist oben per
+  // flatpickr.localize() als Standard gesetzt
+  disable: [
+    date => CLOSED_DAYS.includes(date.getDay()) || isFull(date)
+  ],
+  onDayCreate(dObj, dStr, fp, dayElem) {
+    const date = dayElem.dateObj;
+    const d    = date.getDay();
+
+    // Ausgebucht zuerst pruefen, sonst wuerden Sa/So immer als
+    // "Auf Anfrage" durchgehen, auch wenn sie voll belegt sind
+    if (CLOSED_DAYS.includes(d)) {
+      dayElem.title = 'Geschlossen';
+    } else if (isFull(date)) {
+      const zu = zugemacht(date);
+      dayElem.title = zu ? 'Geschlossen' : 'Ausgebucht';
+      dayElem.classList.add(zu ? 'day-zu' : 'day-full');
+    } else if (REQUEST_DAYS.includes(d)) {
+      const free = freeSeats(date);
+      dayElem.title = free < MAX_PER_DAY
+        ? `Auf Anfrage · noch ${free} ${free === 1 ? 'Platz' : 'Plätze'} frei`
+        : 'Auf Anfrage';
+      if (free < MAX_PER_DAY) dayElem.classList.add('day-limited');
+    } else {
+      const free = freeSeats(date);
+      dayElem.title = `${OPEN_HOURS[d]} · noch ${free} ${free === 1 ? 'Platz' : 'Plätze'} frei`;
+      if (free < MAX_PER_DAY) dayElem.classList.add('day-limited');
+    }
+
+    /* Was der Tag bedeutet, gehoert auch ins vorgelesene Etikett.
+       Der title allein reicht nicht: sobald ein aria-label gesetzt
+       ist, ueberlesen die meisten Screenreader ihn. Ohne diese
+       Ergaenzung hoert ein blinder Gast nur das Datum und erfaehrt
+       nicht, ob der Tag geschlossen, ausgebucht oder auf Anfrage
+       ist. */
+    if (dayElem.title) {
+      const datum = dayElem.getAttribute('aria-label') || '';
+      dayElem.setAttribute('aria-label', datum + ' – ' + dayElem.title);
+    }
+
+    /* Gesperrte Tage sagen jetzt, warum sie gesperrt sind.
+       Ohne das passiert beim Tippen schlicht nichts.        */
+    if (dayElem.classList.contains('flatpickr-disabled')) {
+      dayElem.style.pointerEvents = 'auto';
+      dayElem.addEventListener('click', ev => {
+        ev.preventDefault();
+        ev.stopPropagation();
+        vollHinweis(date);
+      });
+    }
+  },
+  onChange(selectedDates, dateStr) {
+    if (!selectedDates.length) return;
+    const date = selectedDates[0];
+    const d    = date.getDay();
+    fDate.value = dateStr;
+
+    dayInfo.classList.add('hidden');
+    anfNote.classList.remove('visible');
+    fullNote.classList.remove('visible');
+    wunschzeitZeigen(false);
+
+    if (OPEN_HOURS[d]) {
+      const free = freeSeats(date);
+
+      if (free <= 0) {                      // Sicherheitsnetz
+        vollHinweis(date);
+        fTime.value = '';
+        fSeats.value = '';
+        return;
+      }
+
+      dayHours.textContent = OPEN_HOURS[d];
+      daySeats.textContent =
+        free === MAX_PER_DAY
+          ? `${MAX_PER_DAY} Plätze frei`
+          : `Noch ${free} von ${MAX_PER_DAY} ${free === 1 ? 'Platz' : 'Plätzen'} frei`;
+      daySeats.classList.toggle('seats-low', free <= 5);
+
+      fTime.value  = OPEN_HOURS[d];
+      fSeats.value = `${free} von ${MAX_PER_DAY} frei`;
+
+      // Personenanzahl auf die freien Plätze begrenzen
+      persIn.max = free;
+      if (Number(persIn.value) > free) persIn.value = free;
+
+      dayInfo.classList.remove('hidden');
+
+    } else {                                 // Samstag / Sonntag
+      const free = freeSeats(date);
+
+      if (free <= 0) {
+        vollHinweis(date);
+        fTime.value = ''; fSeats.value = '';
+        return;
+      }
+
+      fTime.value  = 'Auf Anfrage';
+      fSeats.value = `${free} von ${MAX_PER_DAY} frei`;
+      persIn.max   = free;
+      if (Number(persIn.value) > free) persIn.value = free;
+      anfNote.classList.add('visible');
+      wunschzeitZeigen(true);
+    }
+  }
+});
+}
+
+/* Aktuelle Belegung vom Server holen.
+   Ist der Server nicht erreichbar, startet der Kalender
+   trotzdem — dann sind alle Tage als frei sichtbar und
+   der Server weist eine Überbuchung beim Absenden ab.    */
+let kalenderInstanz = null;
+
+function belegungLaden() {
+  return fetch('belegung.php?v=' + Date.now(), { cache: 'no-store' })
+    .then(r => r.ok ? r.json() : null)
+    .then(j => {
+      if (j && j.belegt) BOOKED = j.belegt;
+      if (j && j.manuell) HANDEINTRAG = j.manuell;
+      if (j && j.art) ANZEIGEART = j.art;
+    })
+    .catch(() => { /* offline oder Server-Problem */ });
+}
+
+belegungLaden().finally(() => initKalender());
+
+/* ── FORM SUBMIT ── */
+const bkForm = document.getElementById('bk-form');
+const bkConf = document.getElementById('bk-conf');
+const bkSub  = document.getElementById('bk-sub');
+
+bkForm.addEventListener('submit', async e => {
+  e.preventDefault();
+
+  // Plätze prüfen
+  const wunsch = Number(persIn.value);
+  const limit  = Number(persIn.max) || MAX_PER_DAY;
+  if (wunsch < 1 || wunsch > limit) {
+    alert(limit < MAX_PER_DAY
+      ? `An diesem Tag sind nur noch ${limit} ${limit === 1 ? 'Platz' : 'Plätze'} frei.`
+      : `Es können maximal ${MAX_PER_DAY} Personen pro Tag teilnehmen.`);
+    persIn.focus();
+    return;
+  }
+
+  if (!bkForm.querySelector('input[name="angebot"]:checked')) {
+    alert('Bitte wähle aus, ob du Keramik bemalen oder töpfern möchtest.');
+    document.querySelector('.ang-wahl').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    return;
+  }
+
+  if (!fDate.value) {
+    alert('Bitte wähle zuerst einen Termin im Kalender.');
+    document.getElementById('cal-container').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    return;
+  }
+
+  bkSub.disabled = true;
+  bkSub.textContent = 'Wird gesendet …';
+
+  const zuruecksetzen = () => {
+    bkSub.disabled = false;
+    bkSub.textContent = 'Anfrage senden';
+  };
+
+  try {
+    const res = await fetch(bkForm.action, {
+      method: 'POST',
+      body: new FormData(bkForm),
+      headers: { Accept: 'application/json' }
+    });
+
+    let j = null;
+    try { j = await res.json(); } catch { /* keine JSON-Antwort */ }
+
+    if (res.ok && j && j.ok) {
+      // Belegung neu holen und Kalender neu zeichnen, sonst zeigt die
+      // linke Spalte weiter die alte Platzzahl an
+      await belegungLaden();
+      initKalender();
+      dayInfo.classList.add('hidden');
+      anfNote.classList.remove('visible');
+      fullNote.classList.remove('visible');
+      wunschzeitZeigen(false);
+      if (anlassIn) anlassIn.value = '';
+      anlassFreitext();
+      fDate.value = ''; fTime.value = ''; fSeats.value = '';
+      persIn.max = MAX_PER_DAY;
+
+      bkForm.style.display = 'none';
+      bkConf.classList.add('show');
+      bkConf.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+
+    // Tag wurde zwischenzeitlich voll -> Kalender neu laden
+    zuruecksetzen();
+    alert((j && j.fehler)
+      ? j.fehler
+      : 'Etwas ist schiefgelaufen. Bitte versuche es nochmal oder schreib mir direkt eine E-Mail.');
+
+    if (res.status === 409) {
+      await belegungLaden();
+      initKalender();
+      dayInfo.classList.add('hidden');
+      fDate.value = '';
+    }
+
+  } catch {
+    zuruecksetzen();
+    alert('Keine Verbindung. Bitte prüfe dein Internet und versuche es nochmal.');
+  }
+});
+
+/* ── GALERIE ── */
+(function () {
+  const raster = document.getElementById('gal-raster');
+  const leer   = document.getElementById('gal-leer');
+  const gross  = document.getElementById('gal-gross');
+  if (!raster || !gross) return;
+
+  const grossBild = document.getElementById('gal-grossbild');
+  const zaehler   = document.getElementById('gal-zaehler');
+  let bilder = [];
+  let bei = 0;
+
+  /* Die Bilder kommen aus dem Ordner galerie/ — kommt eines
+     dazu, muss an dieser Seite nichts geaendert werden.   */
+  async function laden() {
+    let d;
+    try {
+      const r = await fetch('galerie.php', { cache: 'no-store' });
+      d = await r.json();
+    } catch (e) {
+      leer.hidden = false;
+      return;
+    }
+    bilder = (d && d.bilder) || [];
+    if (!bilder.length) { leer.hidden = false; return; }
+
+    const teile = document.createDocumentFragment();
+    bilder.forEach((b, i) => {
+      const knopf = document.createElement('button');
+      knopf.type = 'button';
+      knopf.className = 'gal-feld';
+      knopf.setAttribute('aria-label', 'Bild ' + (i + 1) + ' von ' + bilder.length + ' vergrößern');
+
+      const img = document.createElement('img');
+      img.src = 'galeriebild.php?b=600&d=' + encodeURIComponent(b.datei);
+      img.alt = 'Selbst gestaltete Keramik aus dem Tonflüstern';
+      img.loading = 'lazy';
+      img.decoding = 'async';
+      if (b.breite && b.hoehe) { img.width = b.breite; img.height = b.hoehe; }
+
+      knopf.appendChild(img);
+      knopf.addEventListener('click', () => oeffnen(i));
+      teile.appendChild(knopf);
+    });
+    raster.replaceChildren(teile);
+  }
+
+  function zeigen(i) {
+    bei = (i + bilder.length) % bilder.length;
+    const b = bilder[bei];
+    grossBild.src = 'galeriebild.php?b=1400&d=' + encodeURIComponent(b.datei);
+    grossBild.alt = 'Selbst gestaltete Keramik, Bild ' + (bei + 1) + ' von ' + bilder.length;
+    zaehler.textContent = (bei + 1) + ' / ' + bilder.length;
+  }
+
+  function oeffnen(i) {
+    zeigen(i);
+    gross.hidden = false;
+    gross.classList.add('auf');
+    document.body.classList.add('gal-offen');
+    gross.querySelector('.gal-zu').focus();
+  }
+
+  function schliessen() {
+    gross.classList.remove('auf');
+    gross.hidden = true;
+    document.body.classList.remove('gal-offen');
+    grossBild.src = '';
+  }
+
+  gross.querySelector('.gal-zu').addEventListener('click', schliessen);
+  gross.querySelector('.gal-vor').addEventListener('click', () => zeigen(bei + 1));
+  gross.querySelector('.gal-zurueck').addEventListener('click', () => zeigen(bei - 1));
+  // Klick auf den Hintergrund schliesst, Klick aufs Bild nicht
+  gross.addEventListener('click', e => { if (e.target === gross) schliessen(); });
+
+  document.addEventListener('keydown', e => {
+    if (!gross.classList.contains('auf')) return;
+    if (e.key === 'Escape')     schliessen();
+    if (e.key === 'ArrowRight') zeigen(bei + 1);
+    if (e.key === 'ArrowLeft')  zeigen(bei - 1);
+  });
+
+  laden();
+})();
+
+/* ── REFERENZEN ── */
+(function () {
+  const liste   = document.getElementById('rf-liste');
+  const leer    = document.getElementById('rf-leer');
+  const form    = document.getElementById('rf-form');
+  const bereich = document.getElementById('rf-formbereich');
+  const meldung = document.getElementById('rf-meldung');
+  const knopf   = document.getElementById('rf-sub');
+  if (!liste || !form) return;
+
+  const sterne = n => '★'.repeat(n) + '☆'.repeat(5 - n);
+
+  /* Der Text kommt von fremden Leuten. Er wird deshalb als Text
+     gesetzt, nie als HTML — sonst koennte jemand Schadcode in die
+     Seite schreiben, der bei allen Besuchern mitlaeuft. */
+  function karte(b) {
+    const el = document.createElement('article');
+    el.className = 'rf-karte';
+
+    const oben = document.createElement('div');
+    oben.className = 'rf-oben';
+
+    const name = document.createElement('strong');
+    name.textContent = b.name;
+
+    const zeit = document.createElement('time');
+    if (b.datum) {
+      zeit.dateTime = b.datum;
+      const t = b.datum.split('-');
+      zeit.textContent = t.length === 3 ? `${t[2]}.${t[1]}.${t[0]}` : b.datum;
+    }
+    oben.append(name, zeit);
+
+    const st = document.createElement('div');
+    st.className = 'rf-sterne';
+    st.textContent = sterne(b.sterne);
+    st.setAttribute('aria-label', b.sterne + ' von 5 Sternen');
+
+    const p = document.createElement('p');
+    p.textContent = b.text;
+
+    el.append(oben, st, p);
+    return el;
+  }
+
+  async function laden() {
+    try {
+      const r = await fetch('bewertungen.php', { cache: 'no-store' });
+      const d = await r.json();
+
+      liste.replaceChildren();
+      (d.liste || []).forEach(b => liste.appendChild(karte(b)));
+      leer.hidden = (d.anzahl || 0) > 0;
+
+      const kasten = document.getElementById('rf-schnitt');
+      if (d.anzahl > 0 && d.schnitt) {
+        document.getElementById('rf-wert').textContent   = String(d.schnitt).replace('.', ',');
+        /* Abgerundet, nicht gerundet: aus 4,7 werden vier volle
+           Sterne, nicht fuenf. Die genaue Zahl steht daneben —
+           eine Anzeige, die besser aussieht als der Schnitt, will
+           man bei Bewertungen nicht haben. */
+        document.getElementById('rf-bild').textContent   = sterne(Math.floor(d.schnitt));
+        document.getElementById('rf-anzahl').textContent =
+          'aus ' + d.anzahl + (d.anzahl === 1 ? ' Bewertung' : ' Bewertungen');
+        kasten.hidden = false;
+      } else {
+        kasten.hidden = true;
+      }
+
+      // Abgeschaltet? Dann nur noch lesen, nicht schreiben.
+      if (d.an === false && bereich) bereich.hidden = true;
+    } catch (e) {
+      // Kein Netz oder Server weg: die Seite bleibt benutzbar,
+      // der Abschnitt zeigt dann einfach nichts an.
+      leer.hidden = false;
+    }
+  }
+
+  function sagen(text, gut) {
+    meldung.textContent = text;
+    meldung.className = 'rf-meldung ' + (gut ? 'gut' : 'fehl');
+  }
+
+  form.addEventListener('submit', async e => {
+    e.preventDefault();
+    if (!form.reportValidity()) return;
+
+    knopf.disabled = true;
+    const alt = knopf.textContent;
+    knopf.textContent = 'Wird gesendet …';
+
+    try {
+      const r = await fetch('bewertung.php', { method: 'POST', body: new FormData(form) });
+      const d = await r.json();
+      if (d.ok) {
+        form.reset();
+        sagen('Danke dir! Deine Bewertung ist angekommen und erscheint, '
+            + 'sobald ich sie gelesen habe.', true);
+      } else {
+        sagen(d.fehler || 'Das hat nicht geklappt.', false);
+      }
+    } catch (err) {
+      sagen('Keine Verbindung. Bitte prüfe dein Internet und versuch es nochmal.', false);
+    } finally {
+      knopf.disabled = false;
+      knopf.textContent = alt;
+    }
+  });
+
+  laden();
+})();
+
+/* ── IMPRESSUM UND DATENSCHUTZ ──
+   Beide haben eine eigene Adresse: tonfluestern.de/#impressum und
+   tonfluestern.de/#datenschutz. Der Link laesst sich damit weitergeben
+   und aufrufen — auch von aussen, etwa aus einem Branchenverzeichnis.
+   Ist JavaScript abgeschaltet, oeffnet die Adresse das Fenster ueber
+   CSS (:target). Die Rechtstexte sind also immer erreichbar.
+   Die Liste RECHTSTEXTE steht weiter oben bei der Scroll-Behandlung. */
+
+function openModal(id) {
+  var m = document.getElementById(id);
+  if (!m) return;
+  m.classList.add('open');
+  document.body.style.overflow = 'hidden';
+  var schliessen = m.querySelector('.lm-close');
+  if (schliessen) schliessen.focus();
+}
+
+function closeModal(id) {
+  var m = document.getElementById(id);
+  if (!m || !m.classList.contains('open')) return;   // war gar nicht offen
+  m.classList.remove('open');
+  document.body.style.overflow = '';
+  // Adresse wieder aufraeumen, ohne die Seite zu bewegen
+  if (location.hash.slice(1) === id) {
+    history.replaceState(null, '', location.pathname + location.search);
+  }
+}
+
+function alleSchliessen() {
+  RECHTSTEXTE.forEach(closeModal);
+}
+
+/* Klick auf einen Link zu einem Rechtstext */
+document.addEventListener('click', function (e) {
+  var a = e.target.closest ? e.target.closest('a[href]') : null;
+  if (!a) return;
+  var ziel = a.getAttribute('href');
+
+  if (ziel && RECHTSTEXTE.indexOf(ziel.slice(1)) !== -1) {
+    e.preventDefault();
+    history.replaceState(null, '', ziel);
+    openModal(ziel.slice(1));
+    return;
+  }
+  // Schliesskreuz
+  if (a.classList.contains('lm-close')) {
+    e.preventDefault();
+    alleSchliessen();
+  }
+});
+
+/* Klick auf den Hintergrund schliesst */
+document.querySelectorAll('.lm').forEach(function (m) {
+  m.addEventListener('click', function (e) { if (e.target === m) closeModal(m.id); });
+});
+
+/* Escape schliesst */
+document.addEventListener('keydown', function (e) {
+  if (e.key === 'Escape') alleSchliessen();
+});
+
+/* Direkt aufgerufene Adresse oeffnet das passende Fenster */
+function ausAdresseOeffnen() {
+  var id = location.hash.slice(1);
+  if (RECHTSTEXTE.indexOf(id) !== -1) openModal(id);
+}
+window.addEventListener('hashchange', function () {
+  var id = location.hash.slice(1);
+  RECHTSTEXTE.forEach(function (r) { if (r !== id) closeModal(r); });
+  ausAdresseOeffnen();
+});
+ausAdresseOeffnen();
+</script>
+</body>
+</html>
