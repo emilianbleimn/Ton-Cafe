@@ -267,8 +267,11 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
         $problem = '';
         if (mb_strlen($neu['name']) < 2) {
             $problem = 'Der Name fehlt oder ist zu kurz.';
-        } elseif ($neu['email'] === '' || !filter_var($neu['email'], FILTER_VALIDATE_EMAIL)) {
-            $problem = 'Die E-Mail-Adresse „' . $neu['email'] . '" sieht nicht richtig aus.';
+        } elseif ($neu['email'] !== '' && !filter_var($neu['email'], FILTER_VALIDATE_EMAIL)) {
+            /* Leer ist erlaubt: Buchungen vom Telefon haben oft nur
+               eine Rufnummer. Steht aber etwas drin, muss es passen. */
+            $problem = 'Die E-Mail-Adresse „' . $neu['email'] . '" sieht nicht richtig aus.'
+                     . ' Du kannst das Feld auch leer lassen.';
         } elseif (!in_array($neu['angebot'], ANGEBOTE, true)) {
             $problem = 'Bitte ein Angebot auswählen.';
         } elseif ($neu['anlass'] !== '' && !in_array($neu['anlass'], ANLAESSE, true)) {
@@ -347,6 +350,111 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
         }
     }
 
+    /* ── Buchung von Hand eintragen ──
+       Fuer alles, was nicht ueber die Website kam: am Telefon, per
+       E-Mail oder direkt im Laden. Der Eintrag landet in derselben
+       Liste wie die Anfragen von der Website und laesst sich danach
+       genauso bearbeiten, verschieben und stornieren. Er zaehlt
+       auch bei den freien Plaetzen mit — sonst liesse sich ein Tag
+       doppelt vergeben.
+
+       Eine E-Mail-Adresse ist hier nicht Pflicht: Wer am Telefon
+       bucht, gibt oft nur eine Nummer.                          */
+    if (isset($_POST['hand_buchen'])) {
+        $f = static function (string $n, int $max): string {
+            $v = str_replace(["\r", "\0"], '', (string)($_POST[$n] ?? ''));
+            return mb_substr(trim($v), 0, $max);
+        };
+
+        $h = [
+            'datum'       => $f('h_datum', 10),
+            'personen'    => (int)($_POST['h_personen'] ?? 0),
+            'angebot'     => $f('h_angebot', 60),
+            'name'        => $f('h_name', 100),
+            'email'       => $f('h_email', 150),
+            'telefon'     => $f('h_telefon', 60),
+            'anlass'      => $f('h_anlass', 60),
+            'anlass_text' => $f('h_anlass_text', 80),
+            'wunschzeit'  => $f('h_wunschzeit', 60),
+            'nachricht'   => $f('h_nachricht', 2000),
+            'status'      => $f('h_status', 20) === 'offen' ? 'offen' : 'bestaetigt',
+        ];
+
+        $problem = '';
+        if ($h['datum'] === '' || !datum_gueltig($h['datum'])) {
+            $problem = 'Bitte ein Datum zwischen heute und '
+                     . date('d.m.Y', strtotime('+' . VORLAUF_TAGE . ' days')) . ' wählen.';
+        } elseif (!buchbarer_tag($h['datum'])) {
+            $problem = 'An diesem Wochentag ist geschlossen — bitte ein anderes Datum wählen.';
+        } elseif (mb_strlen($h['name']) < 2) {
+            $problem = 'Bitte einen Namen eintragen.';
+        } elseif ($h['email'] !== '' && !filter_var($h['email'], FILTER_VALIDATE_EMAIL)) {
+            $problem = 'Die E-Mail-Adresse „' . $h['email'] . '" sieht nicht richtig aus.'
+                     . ' Du kannst das Feld auch leer lassen.';
+        } elseif (!in_array($h['angebot'], ANGEBOTE, true)) {
+            $problem = 'Bitte ein Angebot auswählen.';
+        } elseif ($h['anlass'] !== '' && !in_array($h['anlass'], ANLAESSE, true)) {
+            $problem = 'Diesen Anlass gibt es nicht.';
+        } elseif ($h['personen'] < 1 || $h['personen'] > MAX_PER_DAY) {
+            $problem = 'Die Personenzahl muss zwischen 1 und ' . MAX_PER_DAY . ' liegen.';
+        }
+
+        if ($problem !== '') {
+            $hinweis = $problem . ' Es wurde nichts eingetragen —'
+                     . ' deine Eingaben stehen weiter im Formular.';
+            $_SESSION['hand_werte'] = $h;
+        } else {
+            $ergebnis = mit_sperre(function (array &$d) use ($h) {
+                // Platz am Tag pruefen, damit nichts doppelt vergeben wird
+                $belegt_tag = (int)($d['manuell'][$h['datum']] ?? 0);
+                foreach ($d['anfragen'] as $b) {
+                    if (($b['datum'] ?? '') !== $h['datum']) { continue; }
+                    if (($b['status'] ?? 'offen') === 'storniert') { continue; }
+                    $belegt_tag += (int)($b['personen'] ?? 0);
+                }
+                $frei_tag = MAX_PER_DAY - $belegt_tag;
+                if ($h['personen'] > $frei_tag) {
+                    return ['ok' => false, 'frei' => max(0, $frei_tag)];
+                }
+
+                $wt = (int)date('w', strtotime($h['datum']));
+                $d['anfragen'][] = [
+                    'id'          => bin2hex(random_bytes(8)),
+                    'datum'       => $h['datum'],
+                    'angebot'     => $h['angebot'],
+                    'personen'    => $h['personen'],
+                    'name'        => $h['name'],
+                    'email'       => $h['email'],
+                    'telefon'     => $h['telefon'],
+                    'nachricht'   => $h['nachricht'],
+                    'zeit'        => OPEN_HOURS[$wt] ?? 'Auf Anfrage',
+                    'wunschzeit'  => $h['wunschzeit'],
+                    'anlass'      => $h['anlass'],
+                    'anlass_text' => $h['anlass_text'],
+                    'status'      => $h['status'],
+                    'erstellt'    => date('Y-m-d H:i:s'),
+                    // Woher der Eintrag stammt — in der Liste als Merkmal sichtbar
+                    'quelle'      => 'hand',
+                ];
+                return ['ok' => true, 'frei' => $frei_tag - $h['personen']];
+            });
+
+            if (!empty($ergebnis['ok'])) {
+                unset($_SESSION['hand_werte']);
+                $hinweis = 'Buchung eingetragen: ' . $h['name'] . ', '
+                         . $h['personen'] . ' '
+                         . ($h['personen'] === 1 ? 'Person' : 'Personen') . ' am '
+                         . date('d.m.Y', strtotime($h['datum']))
+                         . '. An dem Tag sind noch ' . $ergebnis['frei'] . ' Plätze frei.';
+            } else {
+                $hinweis = 'Das passt nicht mehr — am '
+                         . date('d.m.Y', strtotime($h['datum'])) . ' sind nur noch '
+                         . $ergebnis['frei'] . ' Plätze frei. Es wurde nichts eingetragen.';
+                $_SESSION['hand_werte'] = $h;
+            }
+        }
+    }
+
     // Plätze von Hand blocken (z.B. telefonische Buchung)
     if (isset($_POST['manuell_datum'])) {
         $datum  = (string)$_POST['manuell_datum'];
@@ -419,6 +527,13 @@ $d     = daten_laden_sicher();
 $bearb_id    = (string)($_SESSION['bearb_id'] ?? '');
 $bearb_werte = (array)($_SESSION['bearb_werte'] ?? []);
 unset($_SESSION['bearb_id'], $_SESSION['bearb_werte']);
+
+/* Dasselbe fuer das Formular "Buchung von Hand": Bei einem Fehler
+   bleiben die Eingaben erhalten und das Formular steht offen. */
+$hand_werte = (array)($_SESSION['hand_werte'] ?? []);
+unset($_SESSION['hand_werte']);
+$hand_auf   = $hand_werte !== [];
+$hw = function (string $k, $std = '') use ($hand_werte) { return $hand_werte[$k] ?? $std; };
 $heute = date('Y-m-d');
 
 $offene = array_filter($d['anfragen'], fn($a) => ($a['datum'] ?? '') >= $heute);
@@ -710,6 +825,37 @@ Ich freue mich auf eine schöne kreative Zeit mit {$w['dativ']}!
   .av-msg{margin-top:.4rem;font-size:.8rem;color:#5e4535;white-space:pre-wrap;
           word-break:break-word}
   .av-leer{padding:0 1.2rem 1.2rem;color:#a8917a;font-size:.9rem}
+  /* ── Suchleiste ──
+     Bleibt beim Scrollen oben stehen: Wer weit unten in der Liste
+     ist, soll von dort aus suchen koennen, ohne erst hochzurollen. */
+  .suchleiste{position:sticky;top:0;z-index:6;background:#f4ece0;
+              padding:.9rem 0 1rem;margin-bottom:1.2rem;
+              border-bottom:1px solid rgba(122,82,48,.15)}
+  .suchleiste label{display:block;font-size:.68rem;letter-spacing:.1em;
+                    text-transform:uppercase;color:#7a5230;margin-bottom:.3rem}
+  .suchleiste input{width:100%;max-width:30rem;box-sizing:border-box;
+       padding:.7rem .8rem;background:#fff;border:1px solid rgba(122,82,48,.3);
+       font-family:inherit;font-size:1rem;color:#291b0f}
+  .suchleiste button{margin-left:.5rem;padding:.5rem 1rem;font-size:.75rem}
+  #top-zahl{display:block;margin-top:.4rem;font-size:.78rem;color:#7a5230}
+  .keintreffer{color:#a8917a;font-size:.95rem;padding:2rem 0;text-align:center}
+
+  /* ── Buchung von Hand ── */
+  .handform{background:#ebe2d2;border-left:3px solid #7a5230;margin-bottom:1.8rem}
+  .handform>summary{padding:.9rem 1.2rem;font-size:.95rem;font-weight:600;
+                    cursor:pointer;list-style:none}
+  .handform>summary::-webkit-details-marker{display:none}
+  .handform>summary::before{content:'＋ ';color:#7a5230}
+  .handform[open]>summary::before{content:'－ '}
+  .hf-text{font-size:.83rem;color:#5e4535;margin:0 1.2rem .4rem;line-height:1.6}
+  .bf-opt{text-transform:none;letter-spacing:0;color:#a8917a;font-size:.72rem}
+  .st-hand{color:#7a5230;border-color:rgba(122,82,48,.35);background:#f0e7d8}
+  .archiv-text{padding:0 1.2rem 1rem;font-size:.8rem;color:#a8917a;margin:0}
+  /* Die Liste der geblockten Tage hat feste Spalten, die sich nicht
+     umbrechen lassen. Sie rollt deshalb in sich, statt die ganze
+     Seite breiter zu machen. */
+  .rolltabelle{overflow-x:auto;-webkit-overflow-scrolling:touch}
+
   .manuell{background:#ebe2d2;padding:1.2rem;margin-top:2.5rem;border-left:3px solid #7a5230}
   .manuell h2{font-size:1rem;margin:0 0 .5rem;font-weight:600}
   .manuell p{font-size:.83rem;color:#5e4535;margin:0 0 1rem}
@@ -755,6 +901,9 @@ Ich freue mich auf eine schöne kreative Zeit mit {$w['dativ']}!
                 min-width:0;padding:.5rem .4rem}
     .umbuchen button{width:100%;margin-top:.4rem;padding:.55rem .6rem}
     button{min-height:2.4rem}
+    .suchleiste{padding:.7rem 0 .8rem}
+    .suchleiste button{margin:.4rem 0 0;width:100%}
+    .hf-text{margin:0 1rem .4rem}
   }
 </style>
 </head>
@@ -770,9 +919,119 @@ Ich freue mich auf eine schöne kreative Zeit mit {$w['dativ']}!
     <div class="hinweis"><?= $e($hinweis) ?></div>
   <?php endif; ?>
 
+  <?php /* ── Suche ──
+           Durchsucht beides auf einmal: die kommenden Tage oben und
+           die vergangenen Anfragen unten. Es wird nichts nachgeladen,
+           alles steht schon auf der Seite.                        */ ?>
+  <div class="suchleiste">
+    <label for="top-suche">Anfrage suchen</label>
+    <input type="search" id="top-suche" autocomplete="off" spellcheck="false"
+           placeholder="Name, E-Mail, Telefon, Datum &hellip;" oninput="allesFiltern()">
+    <button type="button" id="such-weg" onclick="sucheLeeren()" hidden>Zurücksetzen</button>
+    <span id="top-zahl"></span>
+  </div>
+
+  <?php /* ── Buchung von Hand ──
+           Fuer alles, was am Telefon, per E-Mail oder im Laden
+           vereinbart wurde. Zugeklappt, damit die Liste oben
+           uebersichtlich bleibt.                                  */ ?>
+  <details class="handform"<?= $hand_auf ? ' open' : '' ?>>
+    <summary>Buchung von Hand eintragen</summary>
+    <p class="hf-text">
+      Für alles, was nicht über die Website kam — telefonisch, per E-Mail oder
+      direkt im Laden. Der Eintrag erscheint danach ganz normal in der Liste oben
+      und belegt dort auch Plätze. Eine E-Mail-Adresse ist nicht nötig.
+    </p>
+    <form method="post" class="bearb" novalidate>
+      <div class="bearb-gitter">
+
+        <div class="bf">
+          <label for="h-datum">Datum</label>
+          <input type="date" id="h-datum" name="h_datum" autocomplete="off"
+                 value="<?= $e((string)$hw('datum', '')) ?>">
+        </div>
+
+        <div class="bf">
+          <label for="h-pers">Personen</label>
+          <input type="number" inputmode="numeric" id="h-pers" name="h_personen"
+                 value="<?= $e((string)($hw('personen', '') === '' ? '' : (int)$hw('personen'))) ?>">
+        </div>
+
+        <div class="bf">
+          <label for="h-ang">Angebot</label>
+          <select id="h-ang" name="h_angebot">
+            <?php foreach (ANGEBOTE as $opt): ?>
+              <option value="<?= $e($opt) ?>"<?= $opt === (string)$hw('angebot', '') ? ' selected' : '' ?>><?= $e($opt) ?></option>
+            <?php endforeach; ?>
+          </select>
+        </div>
+
+        <div class="bf">
+          <label for="h-name">Name</label>
+          <input type="text" id="h-name" name="h_name"
+                 value="<?= $e((string)$hw('name', '')) ?>">
+        </div>
+
+        <div class="bf">
+          <label for="h-mail">E-Mail <span class="bf-opt">(kann leer bleiben)</span></label>
+          <input type="email" inputmode="email" autocapitalize="off" spellcheck="false"
+                 id="h-mail" name="h_email" value="<?= $e((string)$hw('email', '')) ?>">
+        </div>
+
+        <div class="bf">
+          <label for="h-tel">Telefon</label>
+          <input type="tel" inputmode="tel" id="h-tel" name="h_telefon"
+                 value="<?= $e((string)$hw('telefon', '')) ?>">
+        </div>
+
+        <div class="bf">
+          <label for="h-anl">Anlass</label>
+          <select id="h-anl" name="h_anlass">
+            <option value=""<?= (string)$hw('anlass', '') === '' ? ' selected' : '' ?>>— keine Angabe —</option>
+            <?php foreach (ANLAESSE as $opt): ?>
+              <option value="<?= $e($opt) ?>"<?= $opt === (string)$hw('anlass', '') ? ' selected' : '' ?>><?= $e($opt) ?></option>
+            <?php endforeach; ?>
+          </select>
+        </div>
+
+        <div class="bf">
+          <label for="h-anlt">Ergänzung zum Anlass</label>
+          <input type="text" id="h-anlt" name="h_anlass_text"
+                 value="<?= $e((string)$hw('anlass_text', '')) ?>">
+        </div>
+
+        <div class="bf">
+          <label for="h-zeit">Wunschzeit</label>
+          <input type="text" id="h-zeit" name="h_wunschzeit"
+                 value="<?= $e((string)$hw('wunschzeit', '')) ?>">
+          <span class="bf-klein">nur am Wochenende nötig</span>
+        </div>
+
+        <div class="bf">
+          <label for="h-status">Status</label>
+          <select id="h-status" name="h_status">
+            <option value="bestaetigt"<?= (string)$hw('status', 'bestaetigt') !== 'offen' ? ' selected' : '' ?>>bestätigt</option>
+            <option value="offen"<?= (string)$hw('status', '') === 'offen' ? ' selected' : '' ?>>offen</option>
+          </select>
+          <span class="bf-klein">„bestätigt“ = fest vereinbart</span>
+        </div>
+
+        <div class="bf weit">
+          <label for="h-msg">Notiz</label>
+          <textarea id="h-msg" name="h_nachricht" rows="3"><?= $e((string)$hw('nachricht', '')) ?></textarea>
+        </div>
+
+      </div>
+      <div class="bearb-aktionen">
+        <button type="submit" class="gruen" name="hand_buchen" value="1">Buchung eintragen</button>
+      </div>
+    </form>
+  </details>
+
   <?php if (!$tage): ?>
     <p class="leer">Noch keine Anfragen für kommende Tage.</p>
   <?php endif; ?>
+  <p class="keintreffer" id="keintreffer" hidden>Zu dieser Suche gibt es keine Anfrage.</p>
 
   <?php foreach ($tage as $datum => $liste):
       $ts    = strtotime($datum);
@@ -782,7 +1041,7 @@ Ich freue mich auf eine schöne kreative Zeit mit {$w['dativ']}!
       $voll  = $frei === 0;
       $manu  = (int)($d['manuell'][$datum] ?? 0);
   ?>
-    <div class="tag <?= $voll ? 'voll' : '' ?>">
+    <div class="tag <?= $voll ? 'voll' : '' ?>" data-tag="<?= $e($datum) ?>">
       <div class="tag-kopf">
         <strong><?= $e($wt_namen[$wt]) ?>, <?= date('d.m.Y', $ts) ?></strong>
         <span class="zaehler <?= $voll ? 'voll' : '' ?>">
@@ -815,8 +1074,21 @@ Ich freue mich auf eine schöne kreative Zeit mit {$w['dativ']}!
             };
             /* Wie viele Plaetze waeren an diesem Tag frei, wenn diese
                Anfrage nicht mitgezaehlt wird? */
-            $frei_ohne = $stor ? $frei : $frei + (int)($a['personen'] ?? 0); ?>
-          <tr class="<?= $stor ? 'storniert' : '' ?>">
+            $frei_ohne = $stor ? $frei : $frei + (int)($a['personen'] ?? 0);
+
+            /* Alles, wonach gesucht werden kann, in einem Attribut —
+               die Suche im Browser prueft dann nur eine Zeichenkette. */
+            $such = mb_strtolower(implode(' ', [
+                (string)($a['name'] ?? ''), (string)($a['email'] ?? ''),
+                (string)($a['telefon'] ?? ''), (string)($a['nachricht'] ?? ''),
+                (string)($a['angebot'] ?? ''), (string)($a['anlass'] ?? ''),
+                (string)($a['anlass_text'] ?? ''), (string)($a['wunschzeit'] ?? ''),
+                date('d.m.Y', $ts), date('Y-m-d', $ts), $wt_namen[$wt],
+                ($a['quelle'] ?? '') === 'hand' ? 'von hand' : '',
+                $stor ? 'storniert' : ($best ? 'bestätigt' : 'offen'),
+            ])); ?>
+          <tr class="arow <?= $stor ? 'storniert' : '' ?>"
+              data-such="<?= $e($such) ?>" data-rid="<?= $rid ?>">
             <td data-l="Personen"><strong><?= (int)$a['personen'] ?></strong></td>
             <td data-l="Angebot"><span class="ang"><?= $e($a['angebot'] ?? '—') ?></span>
               <?php /* Am Wochenende gibt es keine feste Zeit — dann steht
@@ -839,6 +1111,11 @@ Ich freue mich auf eine schöne kreative Zeit mit {$w['dativ']}!
               <span class="st <?= $stor ? 'st-stor' : ($best ? 'st-best' : 'st-offen') ?>">
                 <?= $stor ? 'storniert' : ($best ? 'bestätigt' : 'offen') ?>
               </span>
+              <?php /* Woher die Buchung kam — von Hand eingetragene
+                       haben keine Mails und keine IP. */
+              if (($a['quelle'] ?? '') === 'hand'): ?>
+                <span class="st st-hand" title="nicht über die Website gebucht">von Hand</span>
+              <?php endif; ?>
               <span style="font-size:.72rem;color:#a8917a">
                 <?= $e(date('d.m. H:i', strtotime($a['erstellt'] ?? 'now'))) ?>
               </span>
@@ -863,9 +1140,16 @@ Ich freue mich auf eine schöne kreative Zeit mit {$w['dativ']}!
                 <?php endif; ?>
             </td>
             <td data-l="Kontakt">
-              <a href="mailto:<?= $e($a['email'] ?? '') ?>"><?= $e($a['email'] ?? '') ?></a>
+              <?php /* Von Hand eingetragene Buchungen haben nicht immer
+                       eine Adresse — dann hier auch keinen leeren Link. */
+              if (($a['email'] ?? '') !== ''): ?>
+                <a href="mailto:<?= $e($a['email']) ?>"><?= $e($a['email']) ?></a>
+              <?php endif; ?>
               <?php if (($a['telefon'] ?? '') !== ''): ?>
-                <br><a href="tel:<?= $e($a['telefon']) ?>"><?= $e($a['telefon']) ?></a>
+                <?= ($a['email'] ?? '') !== '' ? '<br>' : '' ?><a href="tel:<?= $e($a['telefon']) ?>"><?= $e($a['telefon']) ?></a>
+              <?php endif; ?>
+              <?php if (($a['email'] ?? '') === '' && ($a['telefon'] ?? '') === ''): ?>
+                <span style="color:#a8917a">keine Kontaktangabe</span>
               <?php endif; ?>
             </td>
             <td class="msg" data-l="Nachricht"><?= $e($a['nachricht'] ?? '') ?: '—' ?></td>
@@ -1073,12 +1357,7 @@ Ich freue mich auf eine schöne kreative Zeit mit {$w['dativ']}!
   <details class="archiv">
     <summary>Vergangene Anfragen (<?= count($vergangen) ?>) — zum Nachschlagen</summary>
 
-    <div class="archiv-suche">
-      <label for="suche">Suchen</label>
-      <input type="search" id="suche" autocomplete="off" spellcheck="false"
-             placeholder="Name, E-Mail, Telefon oder Datum" oninput="archivFiltern()">
-      <span id="suche-zahl"></span>
-    </div>
+    <p class="archiv-text">Die Suche oben auf der Seite findet diese Anfragen mit.</p>
 
     <div id="archivliste">
       <?php foreach ($vergangen as $a):
@@ -1225,6 +1504,7 @@ Ich freue mich auf eine schöne kreative Zeit mit {$w['dativ']}!
       <h3 style="font-size:.8rem;letter-spacing:.14em;text-transform:uppercase;color:#7a5230;margin:1.6rem 0 .6rem;">
         Aktuell geblockt (<?= count($offen) ?>)
       </h3>
+      <div class="rolltabelle">
       <table style="width:100%;border-collapse:collapse;font-size:.85rem;">
         <?php foreach ($offen as $datum => $anzahl):
           $art = $d['manuell_art'][$datum] ?? '';
@@ -1266,6 +1546,7 @@ Ich freue mich auf eine schöne kreative Zeit mit {$w['dativ']}!
           </tr>
         <?php endforeach; ?>
       </table>
+      </div>
     <?php endif; ?>
   </div>
 
@@ -1311,30 +1592,104 @@ function bearbAuf(id) {
 }
 function bearbZu(id) { document.getElementById(id + '-b').hidden = true; }
 
-/* Suche in den vergangenen Anfragen.
-   Es wird nichts nachgeladen — alle Eintraege stehen bereits auf der
-   Seite, gesucht wird nur in der vorbereiteten Zeichenkette. Mehrere
-   Woerter muessen alle vorkommen, die Reihenfolge ist egal. So findet
-   "koch nathalie" denselben Eintrag wie "Nathalie Koch". */
-function archivFiltern() {
-  const eingabe = document.getElementById('suche').value.toLowerCase().trim();
-  const worte   = eingabe.split(/\s+/).filter(Boolean);
-  const zeilen  = document.querySelectorAll('#archivliste .av');
-  let sichtbar  = 0;
+/* ── Suche ueber die ganze Seite ──
+   Durchsucht die kommenden Tage oben und die vergangenen Anfragen
+   unten in einem Durchgang. Es wird nichts nachgeladen: Jede Zeile
+   bringt ihren Suchtext in data-such mit, geprueft wird nur diese
+   Zeichenkette. Mehrere Woerter muessen alle vorkommen, die
+   Reihenfolge ist egal und Gross- und Kleinschreibung auch — so
+   findet "koch nathalie" dasselbe wie "Nathalie Koch". */
 
-  zeilen.forEach(function (z) {
-    const heu = z.dataset.such || '';
-    const passt = worte.every(function (w) { return heu.indexOf(w) !== -1; });
-    z.hidden = !passt;
-    if (passt) { sichtbar++; }
+// Hat die Suche das Archiv aufgeklappt? Dann wird es danach wieder zugemacht.
+let archivVonSuche = false;
+
+function allesFiltern() {
+  const feld    = document.getElementById('top-suche');
+  const eingabe = feld.value.toLowerCase().trim();
+  const worte   = eingabe.split(/\s+/).filter(Boolean);
+  const passt   = (el) => {
+    const heu = el.dataset.such || '';
+    return worte.every((w) => heu.indexOf(w) !== -1);
+  };
+
+  /* ── kommende Tage ── */
+  let treffer = 0;
+  document.querySelectorAll('.tag').forEach(function (tag) {
+    let sichtbarImTag = 0;
+    tag.querySelectorAll('tr.arow').forEach(function (zeile) {
+      const ja = worte.length === 0 || passt(zeile);
+      zeile.hidden = !ja;
+      if (ja) { sichtbarImTag++; }
+
+      /* Die aufklappbaren Zeilen gehoeren zur selben Anfrage. Beim
+         Ausblenden muessen sie mit weg — beim Einblenden bleiben sie
+         aber zu, sonst springen sie ungefragt auf. */
+      if (!ja) {
+        const rid = zeile.dataset.rid;
+        ['', '-b'].forEach(function (zusatz) {
+          const z = document.getElementById(rid + zusatz);
+          if (z) { z.hidden = true; }
+        });
+      }
+    });
+    // Ein Tag ohne Treffer verschwindet ganz, sonst bleibt eine leere Hülle stehen
+    tag.hidden = worte.length > 0 && sichtbarImTag === 0;
+    treffer += sichtbarImTag;
   });
 
-  const zahl = document.getElementById('suche-zahl');
-  zahl.textContent = eingabe === ''
-    ? ''
-    : (sichtbar === 1 ? '1 Treffer' : sichtbar + ' Treffer');
-  document.getElementById('archiv-leer').hidden = !(eingabe !== '' && sichtbar === 0);
+  /* ── vergangene Anfragen ── */
+  let alt = 0;
+  const liste = document.getElementById('archivliste');
+  if (liste) {
+    liste.querySelectorAll('.av').forEach(function (eintrag) {
+      const ja = worte.length === 0 || passt(eintrag);
+      eintrag.hidden = !ja;
+      if (ja) { alt++; }
+    });
+    const kasten = document.querySelector('details.archiv');
+    if (kasten) {
+      if (worte.length > 0 && alt > 0 && !kasten.open) {
+        kasten.open = true; archivVonSuche = true;         // Treffer sollen zu sehen sein
+      } else if (worte.length === 0 && archivVonSuche) {
+        kasten.open = false; archivVonSuche = false;       // so lassen, wie es vorher war
+      }
+      kasten.hidden = worte.length > 0 && alt === 0;
+    }
+    const leer = document.getElementById('archiv-leer');
+    if (leer) { leer.hidden = true; }
+  }
+
+  /* ── Rueckmeldung ── */
+  const zahl = document.getElementById('top-zahl');
+  const weg  = document.getElementById('such-weg');
+  const kein = document.getElementById('keintreffer');
+  weg.hidden = eingabe === '';
+  if (eingabe === '') {
+    zahl.textContent = '';
+    if (kein) { kein.hidden = true; }
+  } else {
+    const gesamt = treffer + alt;
+    zahl.textContent = gesamt === 0
+      ? 'kein Treffer'
+      : (gesamt === 1 ? '1 Treffer' : gesamt + ' Treffer')
+        + (alt > 0 ? ' · davon ' + alt + ' vergangen' : '');
+    if (kein) { kein.hidden = gesamt > 0; }
+  }
 }
+
+function sucheLeeren() {
+  const feld = document.getElementById('top-suche');
+  feld.value = '';
+  allesFiltern();
+  feld.focus();
+}
+
+// Mit Escape die Suche verwerfen
+document.addEventListener('keydown', function (e) {
+  if (e.key === 'Escape' && document.activeElement === document.getElementById('top-suche')) {
+    sucheLeeren();
+  }
+});
 
 /* Wurde eine Aenderung abgelehnt, steht das Formular schon offen —
    dann dorthin springen, damit die Meldung nicht ins Leere geht. */
