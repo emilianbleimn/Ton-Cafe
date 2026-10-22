@@ -2364,9 +2364,16 @@ function vollHinweis(datum) {
    Mi/Do/Fr mit festen Zeiten, Sa/So auf Anfrage.        */
 const buchbar = d => Boolean(OPEN_HOURS[d.getDay()]) || REQUEST_DAYS.includes(d.getDay());
 
-/* Ausgebucht gilt fuer JEDEN buchbaren Tag — auch fuer
-   Samstag und Sonntag, wenn die Plaetze von Hand belegt sind. */
-const isFull = d => buchbar(d) && freeSeats(d) <= 0;
+/* Am Wochenende gibt es keine feste Platzzahl: Samstag und Sonntag
+   laufen auf Anfrage, jeder Termin wird einzeln abgesprochen. Ein
+   Wochenendtag faellt deshalb nur dann aus, wenn er in der
+   Uebersicht ausdruecklich ganz zugemacht wurde — nicht, weil
+   rechnerisch achtzehn Plaetze zusammengekommen sind.
+   Mittwoch bis Freitag gilt die Platzzahl wie bisher.          */
+const handVoll = d => (HANDEINTRAG[dkey(d)] || 0) >= MAX_PER_DAY;
+const isFull = d => buchbar(d) && (
+  REQUEST_DAYS.includes(d.getDay()) ? handVoll(d) : freeSeats(d) <= 0
+);
 
 // Deutsche Beschriftung setzen; schlaegt das fehl, bleibt der Kalender
 // benutzbar und zeigt lediglich englische Monatsnamen
@@ -2400,11 +2407,8 @@ kalenderInstanz = flatpickr('#cal-container', {
       dayElem.title = zu ? 'Geschlossen' : 'Ausgebucht';
       dayElem.classList.add(zu ? 'day-zu' : 'day-full');
     } else if (REQUEST_DAYS.includes(d)) {
-      const free = freeSeats(date);
-      dayElem.title = free < MAX_PER_DAY
-        ? `Auf Anfrage · noch ${free} ${free === 1 ? 'Platz' : 'Plätze'} frei`
-        : 'Auf Anfrage';
-      if (free < MAX_PER_DAY) dayElem.classList.add('day-limited');
+      // Keine Platzzahl — am Wochenende wird jeder Termin einzeln abgesprochen
+      dayElem.title = 'Auf Anfrage';
     } else {
       const free = freeSeats(date);
       dayElem.title = `${OPEN_HOURS[d]} · noch ${free} ${free === 1 ? 'Platz' : 'Plätze'} frei`;
@@ -2471,18 +2475,18 @@ kalenderInstanz = flatpickr('#cal-container', {
       dayInfo.classList.remove('hidden');
 
     } else {                                 // Samstag / Sonntag
-      const free = freeSeats(date);
-
-      if (free <= 0) {
+      /* Auf Anfrage: keine Platzzahl, keine Begrenzung. Wie viele
+         Personen kommen, steht weiterhin im Formular — nur eben
+         ohne Rechnung gegen ein Tageslimit. */
+      if (handVoll(date)) {                  // Sicherheitsnetz
         vollHinweis(date);
         fTime.value = ''; fSeats.value = '';
         return;
       }
 
       fTime.value  = 'Auf Anfrage';
-      fSeats.value = `${free} von ${MAX_PER_DAY} frei`;
-      persIn.max   = free;
-      if (Number(persIn.value) > free) persIn.value = free;
+      fSeats.value = 'Auf Anfrage';
+      persIn.max   = MAX_PER_DAY;
       anfNote.classList.add('visible');
       wunschzeitZeigen(true);
     }

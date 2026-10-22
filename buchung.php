@@ -72,7 +72,7 @@ if ($datum === '' || !datum_gueltig($datum)) {
     antwort(['ok' => false, 'fehler' => 'Bitte wähle einen gültigen Termin im Kalender.'], 422);
 }
 if (!buchbarer_tag($datum)) {
-    antwort(['ok' => false, 'fehler' => 'An diesem Tag haben wir geschlossen. Bitte wähle einen anderen Tag.'], 422);
+    antwort(['ok' => false, 'fehler' => 'An diesem Tag habe ich geschlossen. Bitte wähle einen anderen Tag.'], 422);
 }
 
 $wt        = (int)date('w', strtotime($datum));
@@ -101,11 +101,17 @@ $anfrage_id = bin2hex(random_bytes(8));
 try {
 $ergebnis = mit_sperre(function (array &$d) use (
     $datum, $personen, $name, $email, $telefon, $nachricht, $oeffnung, $angebot, $anfrage_id,
-    $wunschzeit, $anlass, $anlass_text
+    $wunschzeit, $anlass, $anlass_text, $auf_anfr
 ) {
     $noch_frei = frei($d, $datum);
 
-    if ($personen > $noch_frei) {
+    /* Am Wochenende gibt es keine feste Platzzahl: Samstag und
+       Sonntag laufen auf Anfrage, jeder Termin wird einzeln
+       abgesprochen. Hier wird deshalb nichts gegen ein Tageslimit
+       gerechnet — sonst wiese der Server eine Anfrage ab, von der
+       der Besucher im Kalender gar nicht erfahren hat, dass sie zu
+       gross ist. An den festen Tagen bleibt die Pruefung.      */
+    if (!$auf_anfr && $personen > $noch_frei) {
         return [
             'ok'    => false,
             'frei'  => $noch_frei,
@@ -133,7 +139,11 @@ $ergebnis = mit_sperre(function (array &$d) use (
         'ip'        => substr((string)($_SERVER['REMOTE_ADDR'] ?? ''), 0, 45),
     ];
 
-    return ['ok' => true, 'frei' => $noch_frei - $personen];
+    /* Am Wochenende gibt es kein Tageslimit — dann auch keine
+       Restzahl. Ohne das kaeme hier eine negative Zahl heraus,
+       sobald mehr Personen angefragt sind als frueher Plaetze da
+       waren. */
+    return ['ok' => true, 'frei' => $auf_anfr ? null : $noch_frei - $personen];
 });
 } catch (Throwable $ex) {
     // Bestand nicht lesbar oder nicht schreibbar: lieber ehrlich abbrechen,
@@ -170,7 +180,9 @@ $text = "Neue Terminanfrage über tonfluestern.de\n"
       . ($wunschzeit !== '' ? "Wunschzeit:  $wunschzeit\n" : '')
       . "Anlass:      $anlass" . ($anlass_text !== '' ? " — $anlass_text" : '') . "\n"
       . "Personen:    $personen\n"
-      . "Noch frei:   " . $ergebnis['frei'] . " von " . MAX_PER_DAY . "\n\n"
+      . ($auf_anfr
+          ? "Platzzahl:   entfällt — Wochenende läuft auf Anfrage\n\n"
+          : "Noch frei:   " . $ergebnis['frei'] . " von " . MAX_PER_DAY . "\n\n")
       . "Name:        $name\n"
       . "E-Mail:      $email\n"
       . "Telefon:     " . ($telefon !== '' ? $telefon : '—') . "\n\n"
@@ -254,7 +266,7 @@ Datum: $datum_kurz
 Personen: $personen
 Wunschzeit: $wunschzeit
 
-Samstag und Sonntag sind bei uns nur auf Anfrage möglich. Ich schaue, ob ich den Termin einrichten kann, und melde mich innerhalb von " . ANTWORTFRIST . " bei {$w['dativ']} — dann auch mit einer festen Uhrzeit." . $wochenend_hinweis . "
+Samstag und Sonntag sind bei mir nur auf Anfrage möglich. Ich schaue, ob ich den Termin einrichten kann, und melde mich innerhalb von " . ANTWORTFRIST . " bei {$w['dativ']} — dann auch mit einer festen Uhrzeit." . $wochenend_hinweis . "
 
 
 Die Bezahlung ist vor Ort bar oder mit Karte möglich. Falls sich noch etwas ändern sollte oder {$w['fragen']} gerne bei mir.

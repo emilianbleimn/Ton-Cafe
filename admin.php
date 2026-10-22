@@ -117,7 +117,11 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
                 }
                 $frei_neu = MAX_PER_DAY - $belegt_neu;
                 $pers     = (int)($a['personen'] ?? 0);
-                if ($pers > $frei_neu) {
+                /* Samstag und Sonntag laufen auf Anfrage — dort gibt
+                   es keine feste Platzzahl, gegen die gerechnet
+                   werden koennte. */
+                $anfrage_ziel = in_array((int)date('w', strtotime($neu)), REQUEST_DAYS, true);
+                if (!$anfrage_ziel && $pers > $frei_neu) {
                     return ['ok' => false, 'grund' => 'voll', 'frei' => max(0, $frei_neu)];
                 }
 
@@ -300,7 +304,8 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
                    nicht mit, sonst blockierte sie sich selbst.
                    Bei stornierten Anfragen ist das egal — die
                    belegen ohnehin keinen Platz. */
-                if (($a['status'] ?? 'offen') !== 'storniert') {
+                $anfrage_tag = in_array((int)date('w', strtotime($datum)), REQUEST_DAYS, true);
+                if (!$anfrage_tag && ($a['status'] ?? 'offen') !== 'storniert') {
                     $sonst = (int)($d['manuell'][$datum] ?? 0);
                     foreach ($d['anfragen'] as $i => $b) {
                         if ($i === $treffer) { continue; }
@@ -413,7 +418,10 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
                     $belegt_tag += (int)($b['personen'] ?? 0);
                 }
                 $frei_tag = MAX_PER_DAY - $belegt_tag;
-                if ($h['personen'] > $frei_tag) {
+                /* Am Wochenende gibt es kein Tageslimit — dort wird
+                   jeder Termin einzeln abgesprochen. */
+                $anfrage_tag = in_array((int)date('w', strtotime($h['datum'])), REQUEST_DAYS, true);
+                if (!$anfrage_tag && $h['personen'] > $frei_tag) {
                     return ['ok' => false, 'frei' => max(0, $frei_tag)];
                 }
 
@@ -441,11 +449,14 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
 
             if (!empty($ergebnis['ok'])) {
                 unset($_SESSION['hand_werte']);
+                $wochenende_tag = in_array((int)date('w', strtotime($h['datum'])), REQUEST_DAYS, true);
                 $hinweis = 'Buchung eingetragen: ' . $h['name'] . ', '
                          . $h['personen'] . ' '
                          . ($h['personen'] === 1 ? 'Person' : 'Personen') . ' am '
                          . date('d.m.Y', strtotime($h['datum']))
-                         . '. An dem Tag sind noch ' . $ergebnis['frei'] . ' Plätze frei.';
+                         . ($wochenende_tag
+                             ? ' (auf Anfrage).'
+                             : '. An dem Tag sind noch ' . $ergebnis['frei'] . ' Plätze frei.');
             } else {
                 $hinweis = 'Das passt nicht mehr — am '
                          . date('d.m.Y', strtotime($h['datum'])) . ' sind nur noch '
@@ -566,6 +577,77 @@ $kal_url = $schema . '://' . $host . $basis . '/kalender.php?key=' . KALENDER_KE
 $e = fn($s) => htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8');
 
 /**
+ * Baut die Adresse, mit der sich eine Anfrage sofort in den Google
+ * Kalender eintragen laesst.
+ *
+ * Das Abo (siehe unten) holt Google nur alle paar Stunden ab. Wer
+ * einen Termin sofort im Kalender haben will, oeffnet damit die
+ * fertig ausgefuellte Eingabemaske und muss nur noch speichern.
+ *
+ * An festen Tagen wird die Oeffnungszeit als Zeitfenster gesetzt,
+ * am Wochenende ein ganztaegiger Eintrag — dort gibt es keine
+ * feste Zeit.
+ */
+function google_termin_url(array $a): string {
+    $datum = (string)($a['datum'] ?? '');
+    if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $datum)) {
+        return '';
+    }
+    $zone = new DateTimeZone('Europe/Berlin');
+    $wt   = (int)date('w', strtotime($datum));
+    $fest = OPEN_HOURS[$wt] ?? null;
+
+    if ($fest !== null && preg_match('/(\d{2}:\d{2}).*?(\d{2}:\d{2})/', $fest, $m)) {
+        $von = new DateTime($datum . ' ' . $m[1], $zone);
+        $bis = new DateTime($datum . ' ' . $m[2], $zone);
+        $von->setTimezone(new DateTimeZone('UTC'));
+        $bis->setTimezone(new DateTimeZone('UTC'));
+        $spanne = $von->format('Ymd\THis\Z') . '/' . $bis->format('Ymd\THis\Z');
+    } else {
+        // Ganztaegig: Google erwartet als Ende den Folgetag
+        $spanne = date('Ymd', strtotime($datum)) . '/'
+                . date('Ymd', strtotime($datum . ' +1 day'));
+    }
+
+    $personen = (int)($a['personen'] ?? 0);
+    $titel = sprintf('%s – %d %s (%s)',
+        (string)($a['angebot'] ?? 'Anfrage'), $personen,
+        $personen === 1 ? 'Person' : 'Personen', (string)($a['name'] ?? ''));
+
+    $zeilen = [
+        'Angebot:   ' . (string)($a['angebot'] ?? '—'),
+        'Personen:  ' . $personen,
+        'Name:      ' . (string)($a['name'] ?? '—'),
+        'E-Mail:    ' . (($a['email'] ?? '') !== '' ? $a['email'] : '—'),
+        'Telefon:   ' . (($a['telefon'] ?? '') !== '' ? $a['telefon'] : '—'),
+        'Zeit:      ' . (string)($a['zeit'] ?? '—'),
+    ];
+    if (($a['wunschzeit'] ?? '') !== '') {
+        $zeilen[] = 'Wunschzeit: ' . $a['wunschzeit'];
+    }
+    if (($a['anlass'] ?? '') !== '') {
+        $zeilen[] = 'Anlass:    ' . $a['anlass']
+                  . (($a['anlass_text'] ?? '') !== '' ? ' — ' . $a['anlass_text'] : '');
+    }
+    if (($a['quelle'] ?? '') === 'hand') {
+        $zeilen[] = 'Eingetragen von Hand (nicht über die Website)';
+    }
+    if (($a['nachricht'] ?? '') !== '') {
+        $zeilen[] = '';
+        $zeilen[] = 'Nachricht:';
+        $zeilen[] = (string)$a['nachricht'];
+    }
+
+    return 'https://calendar.google.com/calendar/render?' . http_build_query([
+        'action'   => 'TEMPLATE',
+        'text'     => $titel,
+        'dates'    => $spanne,
+        'details'  => implode("\n", $zeilen),
+        'location' => 'Tonflüstern, Hauptstraße 43, 64711 Erbach',
+    ], '', '&', PHP_QUERY_RFC3986);
+}
+
+/**
  * Baut Betreff und Text für die Antwort an die Kundin oder den Kunden.
  * $art: 'bestaetigt' oder 'storniert'
  */
@@ -681,7 +763,7 @@ uns bald!
 
     /* ── Zusage ── */
     $hinweis = $wochenende
-        ? "Da Samstage und Sonntage bei uns auf Anfrage laufen, trage ich\n{$w['dativ']} die oben genannte Uhrzeit ein."
+        ? "Da Samstage und Sonntage bei mir auf Anfrage laufen, trage ich\n{$w['dativ']} die oben genannte Uhrzeit ein."
         : "Bitte {$w['kommt']} zur angegebenen Anfangszeit, damit {$w['dativ']} genügend Zeit\nzum kreativen Gestalten bleibt.";
 
     return [
@@ -855,6 +937,14 @@ Ich freue mich auf eine schöne kreative Zeit mit {$w['dativ']}!
      umbrechen lassen. Sie rollt deshalb in sich, statt die ganze
      Seite breiter zu machen. */
   .rolltabelle{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  /* Sieht aus wie die Knoepfe daneben, ist aber ein Verweis */
+  a.gknopf{display:block;box-sizing:border-box;text-align:center;text-decoration:none;
+           color:#291b0f;line-height:1.6}
+  .kal-schritte{margin:0 0 1rem;padding-left:1.2rem;font-size:.85rem;color:#5e4535;line-height:1.8}
+  .kal-schritte li{margin-bottom:.2rem}
+  .kal-url{background:#f4ece0;border:1px solid rgba(122,82,48,.25);padding:.7rem 1rem;
+           font-family:ui-monospace,monospace;font-size:.78rem;word-break:break-all;margin:0}
+  .kal-warn{font-size:.8rem;color:#a84c2a;margin:.9rem 0 0;line-height:1.6}
 
   .manuell{background:#ebe2d2;padding:1.2rem;margin-top:2.5rem;border-left:3px solid #7a5230}
   .manuell h2{font-size:1rem;margin:0 0 .5rem;font-weight:600}
@@ -1044,10 +1134,22 @@ Ich freue mich auf eine schöne kreative Zeit mit {$w['dativ']}!
     <div class="tag <?= $voll ? 'voll' : '' ?>" data-tag="<?= $e($datum) ?>">
       <div class="tag-kopf">
         <strong><?= $e($wt_namen[$wt]) ?>, <?= date('d.m.Y', $ts) ?></strong>
-        <span class="zaehler <?= $voll ? 'voll' : '' ?>">
-          <?= $bel ?> / <?= MAX_PER_DAY ?> belegt
-          <?= $voll ? ' — AUSGEBUCHT' : ' — noch ' . $frei . ' frei' ?>
-          <?= $manu > 0 ? ' (davon ' . $manu . ' von Hand)' : '' ?>
+        <?php /* Samstag und Sonntag laufen auf Anfrage — dort gibt es
+                 keine feste Platzzahl, also auch keine Angabe wie
+                 "noch 6 frei" oder "ausgebucht". Die Zahl der
+                 angefragten Personen bleibt, die brauchst du zum
+                 Planen. */
+        $anfrage_tag = in_array($wt, REQUEST_DAYS, true); ?>
+        <span class="zaehler <?= !$anfrage_tag && $voll ? 'voll' : '' ?>">
+          <?php if ($anfrage_tag): ?>
+            Auf Anfrage
+            <?= $bel > 0 ? ' — ' . $bel . ' ' . ($bel === 1 ? 'Person' : 'Personen') . ' angefragt' : '' ?>
+            <?= $manu > 0 ? ' (davon ' . $manu . ' von Hand)' : '' ?>
+          <?php else: ?>
+            <?= $bel ?> / <?= MAX_PER_DAY ?> belegt
+            <?= $voll ? ' — AUSGEBUCHT' : ' — noch ' . $frei . ' frei' ?>
+            <?= $manu > 0 ? ' (davon ' . $manu . ' von Hand)' : '' ?>
+          <?php endif; ?>
         </span>
       </div>
 
@@ -1170,6 +1272,13 @@ Ich freue mich auf eine schöne kreative Zeit mit {$w['dativ']}!
                 <?= $stor ? 'Absage schreiben' : 'Bestätigung schreiben' ?>
               </button>
               <button type="button" class="mailknopf" onclick="bearbAuf('<?= $rid ?>')">Bearbeiten</button>
+              <?php /* Sofort in den Google Kalender — das Abo holt Google
+                       nur alle paar Stunden ab. */
+              $gurl = google_termin_url($a);
+              if ($gurl !== '' && !$stor): ?>
+                <a class="mailknopf gknopf" href="<?= $e($gurl) ?>"
+                   target="_blank" rel="noopener noreferrer">In Google Kalender</a>
+              <?php endif; ?>
 
               <?php /* Umbuchen: Der Server prueft, ob der Zieltag buchbar
                        ist und genug Platz hat. */ ?>
@@ -1252,7 +1361,11 @@ Ich freue mich auf eine schöne kreative Zeit mit {$w['dativ']}!
                     <label for="<?= $rid ?>-b-pers">Personen</label>
                     <input type="number" inputmode="numeric" id="<?= $rid ?>-b-pers"
                            name="b_personen" value="<?= $e((string)(int)$bv('personen', 0)) ?>">
-                    <span class="bf-klein">an diesem Tag wären <?= (int)$frei_ohne ?> möglich</span>
+                    <?php /* Am Wochenende gibt es kein Tageslimit — dann hier
+                             auch keine Zahl, die eines vortaeuscht. */
+                    if (!in_array($wt, REQUEST_DAYS, true)): ?>
+                      <span class="bf-klein">an diesem Tag wären <?= (int)$frei_ohne ?> möglich</span>
+                    <?php endif; ?>
                   </div>
 
                   <div class="bf">
@@ -1551,15 +1664,45 @@ Ich freue mich auf eine schöne kreative Zeit mit {$w['dativ']}!
   </div>
 
   <div class="manuell" style="margin-top:1.5rem">
-    <h2>Kalender abonnieren</h2>
+    <h2>Google Kalender verbinden</h2>
     <p>
-      Trage diese Adresse einmal in deinem Kalender ein (Hetzner Webmail, Handy, Outlook &hellip;)
-      &mdash; danach erscheinen alle Anfragen dort automatisch. Die Adresse enth&auml;lt
-      Kundendaten, gib sie also nicht weiter.
+      Einmal einrichten &mdash; danach tr&auml;gt sich jede Anfrage von selbst in deinen
+      Google Kalender ein, mit Name, Personenzahl, Angebot, Anlass, E-Mail, Telefon
+      und Nachricht. Stornierte Anfragen verschwinden wieder, verschobene wandern
+      auf das neue Datum.
     </p>
-    <p style="background:#f4ece0;border:1px solid rgba(122,82,48,.25);padding:.7rem 1rem;
-              font-family:ui-monospace,monospace;font-size:.78rem;word-break:break-all;margin:0">
-      <?= $e($kal_url) ?>
+
+    <ol class="kal-schritte">
+      <li>Kopiere die Adresse unten mit dem Knopf.</li>
+      <li>Öffne <strong>calendar.google.com</strong> am Rechner.
+          (Am Handy geht das Einrichten nicht &mdash; danach ist der Kalender
+          aber auch dort zu sehen.)</li>
+      <li>Links unten bei <strong>„Weitere Kalender“</strong> auf das
+          <strong>+</strong> klicken.</li>
+      <li><strong>„Per URL“</strong> wählen, die Adresse einfügen und auf
+          <strong>„Kalender hinzufügen“</strong> klicken.</li>
+    </ol>
+
+    <p class="kal-url" id="kal-url"><?= $e($kal_url) ?></p>
+    <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.6rem">
+      <button type="button" class="gruen" onclick="kalKopieren(this)">Adresse kopieren</button>
+      <a href="https://calendar.google.com/calendar/u/0/r/settings/addbyurl"
+         target="_blank" rel="noopener noreferrer"
+         style="display:inline-block;padding:.55rem 1.2rem;background:#e1d5c2;
+                border:1px solid rgba(122,82,48,.3);color:#291b0f;font-size:.78rem;
+                text-decoration:none;line-height:1.6">Google Kalender öffnen</a>
+    </div>
+
+    <p class="kal-warn">
+      <strong>Wichtig:</strong> Die Adresse enthält Namen und Kontaktdaten deiner
+      Gäste. Gib sie nicht weiter und stelle den Kalender in Google nicht
+      öffentlich.
+    </p>
+    <p class="kal-warn" style="color:#5e4535">
+      Google holt sich abonnierte Kalender in eigenem Takt &mdash; meist alle paar
+      Stunden, manchmal erst am nächsten Tag. Eine frische Anfrage steht also
+      nicht sofort drin. Wenn du eine <em>sofort</em> im Kalender brauchst, nimm
+      bei der Anfrage den Knopf <strong>„In Google Kalender“</strong>.
     </p>
   </div>
 
@@ -1591,6 +1734,29 @@ function bearbAuf(id) {
   if (f) { f.focus(); }
 }
 function bearbZu(id) { document.getElementById(id + '-b').hidden = true; }
+
+/* Kalenderadresse in die Zwischenablage */
+async function kalKopieren(knopf) {
+  const text = document.getElementById('kal-url').textContent.trim();
+  const fertig = () => {
+    const alt = knopf.textContent;
+    knopf.textContent = 'Kopiert';
+    setTimeout(() => { knopf.textContent = alt; }, 1800);
+  };
+  try {
+    await navigator.clipboard.writeText(text);
+    fertig();
+  } catch {
+    /* Ohne Zwischenablage bleibt das Markieren von Hand — dafuer
+       wird der Text wenigstens ausgewaehlt. */
+    const bereich = document.createRange();
+    bereich.selectNodeContents(document.getElementById('kal-url'));
+    const aus = window.getSelection();
+    aus.removeAllRanges(); aus.addRange(bereich);
+    try { document.execCommand('copy'); fertig(); }
+    catch { alert('Kopieren hat nicht geklappt — bitte die Adresse von Hand markieren.'); }
+  }
+}
 
 /* ── Suche ueber die ganze Seite ──
    Durchsucht die kommenden Tage oben und die vergangenen Anfragen
