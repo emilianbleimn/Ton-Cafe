@@ -828,7 +828,42 @@ Ich freue mich auf eine schöne kreative Zeit mit {$w['dativ']}!
   th{text-align:left;font-weight:600;font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;
      color:#7a5230;padding:.6rem 1.2rem;border-bottom:1px solid rgba(122,82,48,.15)}
   td{padding:.7rem 1.2rem;border-bottom:1px solid rgba(122,82,48,.09);vertical-align:top}
-  tr.storniert td{opacity:.45;text-decoration:line-through}
+  /* ── Namenszeile ──
+     In der Uebersicht steht nur der Name. Der ganze Streifen ist der
+     Schalter, nicht nur das Wort — das trifft man auch auf dem Handy
+     sicher. */
+  .nz{padding:0}
+  .namenknopf{display:flex;align-items:center;gap:.55rem;flex-wrap:wrap;
+              width:100%;box-sizing:border-box;padding:.8rem 1.2rem;
+              text-align:left;background:none;border:0;font:inherit;cursor:pointer}
+  .namenknopf:hover{background:rgba(122,82,48,.07)}
+  .namenknopf:focus-visible{outline:2px solid #7a5230;outline-offset:-2px}
+  .nk-pfeil::before{content:'▸';color:#7a5230;font-size:.9rem}
+  .namenknopf.offen .nk-pfeil::before{content:'▾'}
+  .nk-name{font-size:1rem;font-weight:600;color:#291b0f}
+  tr.arow.storniert .nk-name{text-decoration:line-through;opacity:.5}
+
+  /* ── Aufgeklappte Angaben ── */
+  .detailzeile td{background:rgba(122,82,48,.05);padding:.2rem 1.2rem 1.1rem}
+  .dt{display:grid;gap:.85rem 1.6rem;
+      grid-template-columns:repeat(auto-fit,minmax(190px,1fr))}
+  .dz{font-size:.88rem;color:#291b0f;line-height:1.6}
+  .dz.weit{grid-column:1/-1}
+  .dl{display:block;font-size:.66rem;letter-spacing:.09em;text-transform:uppercase;
+      color:#a8917a;margin-bottom:.15rem}
+  .wzeit{display:inline-block;margin-top:.3rem;font-size:.76rem;color:#7a5230;
+         background:#f0e7d8;padding:.15rem .45rem;white-space:nowrap}
+  .danlass{display:inline-block;margin-top:.3rem;font-size:.78rem;color:#5e4535}
+  .dt-aktionen{display:flex;gap:.5rem;flex-wrap:wrap;align-items:flex-start;
+               margin-top:1.1rem;padding-top:.9rem;
+               border-top:1px solid rgba(122,82,48,.15)}
+  .dt-knoepfe{display:flex;gap:.3rem;flex-wrap:wrap}
+  /* In der Knopfreihe sollen sie nebeneinander passen, nicht jeder
+     ueber die ganze Breite wie frueher in der schmalen Spalte. */
+  .dt-aktionen .mailknopf{width:auto;margin-top:0}
+  .dt-aktionen .umbuchen{flex-basis:100%;margin-top:.2rem}
+
+  tr.arow.storniert td{opacity:.6}
   .msg{color:#5e4535;font-size:.82rem;max-width:320px;white-space:pre-wrap;word-break:break-word}
   .ang{display:inline-block;font-size:.75rem;padding:.15rem .5rem;background:rgba(122,82,48,.1);
        border:1px solid rgba(122,82,48,.2);white-space:nowrap}
@@ -937,9 +972,14 @@ Ich freue mich auf eine schöne kreative Zeit mit {$w['dativ']}!
      umbrechen lassen. Sie rollt deshalb in sich, statt die ganze
      Seite breiter zu machen. */
   .rolltabelle{overflow-x:auto;-webkit-overflow-scrolling:touch}
-  /* Sieht aus wie die Knoepfe daneben, ist aber ein Verweis */
-  a.gknopf{display:block;box-sizing:border-box;text-align:center;text-decoration:none;
-           color:#291b0f;line-height:1.6}
+  /* Sieht aus wie die Knoepfe daneben, ist aber ein Verweis — die
+     Regeln fuer button greifen bei einem a nicht, also hier noch
+     einmal dieselbe Umrandung und Groesse. */
+  a.gknopf{display:inline-block;box-sizing:border-box;text-align:center;
+           text-decoration:none;font-size:.72rem;padding:.3rem .7rem;
+           border:1px solid rgba(122,82,48,.35);background:#e1d5c2;color:#5e4535;
+           white-space:nowrap;line-height:1.6}
+  a.gknopf:hover{background:#d4c5af}
   .kal-schritte{margin:0 0 1rem;padding-left:1.2rem;font-size:.85rem;color:#5e4535;line-height:1.8}
   .kal-schritte li{margin-bottom:.2rem}
   .kal-url{background:#f4ece0;border:1px solid rgba(122,82,48,.25);padding:.7rem 1rem;
@@ -955,32 +995,20 @@ Ich freue mich auf eine schöne kreative Zeit mit {$w['dativ']}!
   .leer{color:#a8917a;font-size:.9rem;padding:2rem 0;text-align:center}
   .fuss{margin-top:2.5rem;font-size:.78rem;color:#a8917a}
   a{color:#7a5230}
-  /* ── Handy ──
-     Nebeneinander passen sechs Spalten nicht auf ein Handy. Die
-     Tabelle wurde dadurch breiter als der Bildschirm, und was rechts
-     stand — also genau die Knoepfe — war nicht mehr erreichbar. Auf
-     schmalen Geraeten steht deshalb jede Anfrage als Block
-     untereinander. Jede Zeile bekommt ihre Beschriftung aus data-l,
-     damit man weiterhin erkennt, was was ist.                     */
+  /* ── Handy ── */
   @media(max-width:640px){
     body{padding:1rem}
     .tabelle{overflow-x:visible}
-    .tabelle table,.tabelle tr,.tabelle td{display:block;width:auto}
-    .tabelle tr.kopf{display:none}
-    /* Muss nach der Regel darueber stehen: "display:block" von dort
-       wuerde sonst das eingebaute Verstecken des Browsers aushebeln,
-       und die aufklappbaren Zeilen staenden dauerhaft offen. */
-    .tabelle tr[hidden],.tabelle td[hidden]{display:none}
-    .tabelle tr.mailzeile,.tabelle tr.bearbzeile{padding:0}
-    .tabelle tr.mailzeile td,.tabelle tr.bearbzeile td{padding:0}
+    /* Angaben untereinander, Knoepfe ueber die ganze Breite —
+       so bleibt alles mit dem Daumen erreichbar. */
+    .dt{grid-template-columns:1fr}
+    .detailzeile td{padding:.2rem 1rem 1rem}
+    .namenknopf{padding:.85rem 1rem}
+    .dt-knoepfe{width:100%}
+    .dt-knoepfe button{flex:1 1 7rem}
+    .dt-aktionen .mailknopf{width:100%}
     .mailbox,.bearb{padding:1.1rem}
     .bearb-aktionen button{width:100%}
-    .tabelle tr{padding:.9rem 1.1rem;border-bottom:1px solid rgba(122,82,48,.15)}
-    .tabelle tr:last-child{border-bottom:0}
-    .tabelle td{border:0;padding:.3rem 0}
-    .tabelle td[data-l]::before{content:attr(data-l);display:block;
-                font-size:.66rem;letter-spacing:.09em;text-transform:uppercase;
-                color:#a8917a;margin-bottom:.15rem}
     .msg{max-width:none}
 
     /* Datumsfeld und Knopf untereinander und auf ganzer Breite.
@@ -1156,9 +1184,13 @@ Ich freue mich auf eine schöne kreative Zeit mit {$w['dativ']}!
       <?php if ($liste): ?>
       <div class="tabelle">
       <table>
-        <tr class="kopf">
-          <th>Pers.</th><th>Angebot</th><th>Name</th><th>Kontakt</th><th>Nachricht</th><th></th>
-        </tr>
+        <?php /* Nur der Name steht offen da. Alles Weitere — Personen,
+                 Angebot, Kontakt, Nachricht und die Knoepfe — steckt in
+                 einer Zeile darunter, die erst auf Klick aufgeht. Bei
+                 einem vollen Tag standen sonst zwanzig Spalten
+                 nebeneinander, und man sah vor lauter Angaben die
+                 Anfragen nicht mehr. Eine Kopfzeile braucht die
+                 Tabelle dadurch nicht mehr.                        */ ?>
         <?php foreach ($liste as $a):
             $status = $a['status'] ?? 'offen';
             $stor   = $status === 'storniert';
@@ -1168,7 +1200,8 @@ Ich freue mich auf eine schöne kreative Zeit mit {$w['dativ']}!
 
             /* Stand in dieser Anfrage gerade ein Tippfehler? Dann
                werden die zurueckgehaltenen Eingaben angezeigt statt
-               der gespeicherten Werte, und das Formular steht offen. */
+               der gespeicherten Werte, und das Formular steht offen —
+               dann muss auch die Zeile darueber offen sein. */
             $b_auf = $bearb_id !== '' && $bearb_id === (string)($a['id'] ?? '');
             $bv    = function (string $k, $std = '') use ($a, $b_auf, $bearb_werte) {
                 $quelle = $b_auf ? $bearb_werte : $a;
@@ -1189,140 +1222,172 @@ Ich freue mich auf eine schöne kreative Zeit mit {$w['dativ']}!
                 ($a['quelle'] ?? '') === 'hand' ? 'von hand' : '',
                 $stor ? 'storniert' : ($best ? 'bestätigt' : 'offen'),
             ])); ?>
+
           <tr class="arow <?= $stor ? 'storniert' : '' ?>"
               data-such="<?= $e($such) ?>" data-rid="<?= $rid ?>">
-            <td data-l="Personen"><strong><?= (int)$a['personen'] ?></strong></td>
-            <td data-l="Angebot"><span class="ang"><?= $e($a['angebot'] ?? '—') ?></span>
-              <?php /* Am Wochenende gibt es keine feste Zeit — dann steht
-                       hier, ab wann die Gaeste kommen moechten. */
-              if (($a['wunschzeit'] ?? '') !== ''): ?>
-                <br><span style="display:inline-block;margin-top:.3rem;font-size:.76rem;
-                                 color:#7a5230;background:#f0e7d8;padding:.15rem .45rem;
-                                 border-radius:2px;white-space:nowrap;">Wunschzeit:
-                  <strong><?= $e($a['wunschzeit']) ?></strong></span>
-              <?php endif; ?>
-              <?php /* Anlass — bei "Sonstiges" mit der kurzen Erklaerung */
-              if (($a['anlass'] ?? '') !== ''): ?>
-                <br><span style="display:inline-block;margin-top:.3rem;font-size:.76rem;color:#5e4535;">
-                  <?= $e($a['anlass']) ?><?= ($a['anlass_text'] ?? '') !== ''
-                      ? ' — ' . $e($a['anlass_text']) : '' ?></span>
-              <?php endif; ?>
-            </td>
-            <td data-l="Name">
-              <?= $e($a['name'] ?? '') ?><br>
-              <span class="st <?= $stor ? 'st-stor' : ($best ? 'st-best' : 'st-offen') ?>">
-                <?= $stor ? 'storniert' : ($best ? 'bestätigt' : 'offen') ?>
-              </span>
-              <?php /* Woher die Buchung kam — von Hand eingetragene
-                       haben keine Mails und keine IP. */
-              if (($a['quelle'] ?? '') === 'hand'): ?>
-                <span class="st st-hand" title="nicht über die Website gebucht">von Hand</span>
-              <?php endif; ?>
-              <span style="font-size:.72rem;color:#a8917a">
-                <?= $e(date('d.m. H:i', strtotime($a['erstellt'] ?? 'now'))) ?>
-              </span>
-              <?php
-                /* Wurde die automatische Antwort verschickt?
-                   Fehlt der Eintrag ganz, stammt die Anfrage aus der Zeit
-                   vor dieser Aufzeichnung — dann wird nichts angezeigt. */
-                if (array_key_exists('mail_kunde', $a)):
-                    $mk = $a['mail_kunde'];
-                    if ($mk === null): ?>
-                      <span class="mailstatus ms-aus">automatische Antwort ist abgeschaltet</span>
-                <?php elseif ($mk): ?>
-                      <span class="mailstatus ms-ok">✓ Bestätigung verschickt<?=
-                        isset($a['mail_zeit']) ? ' · ' . $e(date('d.m. H:i', strtotime($a['mail_zeit']))) : '' ?></span>
-                <?php else: ?>
-                      <span class="mailstatus ms-fehl">✕ Bestätigung konnte nicht verschickt werden</span>
-                <?php endif;
-                endif;
-                // Kam die Benachrichtigung an den Betrieb selbst durch?
-                if (array_key_exists('mail_betreiber', $a) && !$a['mail_betreiber']): ?>
-                      <span class="mailstatus ms-fehl">✕ Benachrichtigung an dich fehlgeschlagen</span>
+            <td class="nz">
+              <button type="button" class="namenknopf<?= $b_auf ? ' offen' : '' ?>"
+                      id="<?= $rid ?>-k" onclick="zeileAuf('<?= $rid ?>')"
+                      aria-expanded="<?= $b_auf ? 'true' : 'false' ?>"
+                      aria-controls="<?= $rid ?>-d">
+                <span class="nk-pfeil" aria-hidden="true"></span>
+                <span class="nk-name"><?= $e($a['name'] ?? '') ?: '(ohne Namen)' ?></span>
+                <span class="st <?= $stor ? 'st-stor' : ($best ? 'st-best' : 'st-offen') ?>">
+                  <?= $stor ? 'storniert' : ($best ? 'bestätigt' : 'offen') ?>
+                </span>
+                <?php /* Woher die Buchung kam — von Hand eingetragene
+                         haben keine Mails und keine IP. */
+                if (($a['quelle'] ?? '') === 'hand'): ?>
+                  <span class="st st-hand" title="nicht über die Website gebucht">von Hand</span>
                 <?php endif; ?>
-            </td>
-            <td data-l="Kontakt">
-              <?php /* Von Hand eingetragene Buchungen haben nicht immer
-                       eine Adresse — dann hier auch keinen leeren Link. */
-              if (($a['email'] ?? '') !== ''): ?>
-                <a href="mailto:<?= $e($a['email']) ?>"><?= $e($a['email']) ?></a>
-              <?php endif; ?>
-              <?php if (($a['telefon'] ?? '') !== ''): ?>
-                <?= ($a['email'] ?? '') !== '' ? '<br>' : '' ?><a href="tel:<?= $e($a['telefon']) ?>"><?= $e($a['telefon']) ?></a>
-              <?php endif; ?>
-              <?php if (($a['email'] ?? '') === '' && ($a['telefon'] ?? '') === ''): ?>
-                <span style="color:#a8917a">keine Kontaktangabe</span>
-              <?php endif; ?>
-            </td>
-            <td class="msg" data-l="Nachricht"><?= $e($a['nachricht'] ?? '') ?: '—' ?></td>
-            <td>
-              <form method="post" style="display:flex;gap:.3rem;flex-wrap:wrap">
-                <?php if ($stor): ?>
-                  <button name="aktivieren" value="<?= $e($a['id'] ?? '') ?>">Aktivieren</button>
-                <?php else: ?>
-                  <?php if (!$best): ?>
-                    <button class="gruen" name="bestaetigen" value="<?= $e($a['id'] ?? '') ?>">Bestätigen</button>
-                  <?php endif; ?>
-                  <button name="stornieren" value="<?= $e($a['id'] ?? '') ?>">Stornieren</button>
-                <?php endif; ?>
-                <button class="rot" name="loeschen" value="<?= $e($a['id'] ?? '') ?>"
-                        onclick="return confirm('Diese Anfrage endgültig löschen?')">Löschen</button>
-              </form>
-              <button type="button" class="mailknopf" onclick="mailAuf('<?= $rid ?>')">
-                <?= $stor ? 'Absage schreiben' : 'Bestätigung schreiben' ?>
               </button>
-              <button type="button" class="mailknopf" onclick="bearbAuf('<?= $rid ?>')">Bearbeiten</button>
-              <?php /* Sofort in den Google Kalender — das Abo holt Google
-                       nur alle paar Stunden ab. */
-              $gurl = google_termin_url($a);
-              if ($gurl !== '' && !$stor): ?>
-                <a class="mailknopf gknopf" href="<?= $e($gurl) ?>"
-                   target="_blank" rel="noopener noreferrer">In Google Kalender</a>
-              <?php endif; ?>
+            </td>
+          </tr>
 
-              <?php /* Umbuchen: Der Server prueft, ob der Zieltag buchbar
-                       ist und genug Platz hat. */ ?>
-              <form method="post" class="umbuchen">
-                <label for="<?= $rid ?>-neu">Verschieben auf</label>
-                <?php /* Bewusst ohne required, min und max: Passt der Wert
-                         nicht dazu, verweigert der Browser das Absenden
-                         wortlos — der Knopf tut dann scheinbar nichts.
-                         Die Pruefung macht ohnehin der Server, und der
-                         sagt auch, was nicht stimmt. */ ?>
-                <input type="date" id="<?= $rid ?>-neu" name="neues_datum"
-                       autocomplete="off"
-                       value="<?= $e($a['datum'] ?? '') ?>">
-                <button type="submit" name="verschieben" value="<?= $e($a['id'] ?? '') ?>">Verschieben</button>
-              </form>
-              <?php
-              /* Aeltere Eintraege haben noch das einzelne Feld — beide
-                 Schreibweisen anzeigen, damit nichts verloren geht. */
-              $weg = $a['verschoben'] ?? (($a['verschoben_von'] ?? '') !== '' ? [$a['verschoben_von']] : []);
-              if (is_array($weg) && $weg):
-                /* Bei vielen Verschiebungen wuerde die Kette sonst ueber
-                   mehrere Zeilen laufen. Interessant sind die letzten
-                   Stationen — die vollstaendige Kette steht im Tooltip. */
-                $alle = array_map(fn($t) => date('d.m.', strtotime($t)), $weg);
-                $alle[] = date('d.m.Y', strtotime($a['datum'] ?? 'now'));
-                $kurz  = count($alle) > 4 ? array_slice($alle, -4) : $alle;
-                $text  = (count($alle) > 4 ? '… → ' : '') . implode(' → ', $kurz); ?>
-                <span class="umgebucht" title="<?= count($weg) ?>× verschoben: <?= $e(implode(' → ', $alle)) ?>">
-                  verschoben: <?= $e($text) ?></span>
-              <?php endif; ?>
-              <?php
-              /* Wann wurde zuletzt von Hand etwas geaendert? */
-              $bhist = $a['bearbeitet'] ?? [];
-              if (is_array($bhist) && $bhist):
-                $letzte = end($bhist);
-                $felder = is_array($letzte['felder'] ?? null) ? $letzte['felder'] : []; ?>
-                <span class="umgebucht" title="<?= count($bhist) ?>× bearbeitet, zuletzt: <?= $e(implode(', ', $felder)) ?>">
-                  bearbeitet: <?= $e(date('d.m. H:i', strtotime((string)($letzte['zeit'] ?? 'now')))) ?></span>
-              <?php endif; ?>
+          <tr class="detailzeile" id="<?= $rid ?>-d"<?= $b_auf ? '' : ' hidden' ?>>
+            <td>
+              <div class="dt">
+
+                <div class="dz">
+                  <span class="dl">Personen</span>
+                  <strong><?= (int)$a['personen'] ?></strong>
+                </div>
+
+                <div class="dz">
+                  <span class="dl">Angebot</span>
+                  <span class="ang"><?= $e($a['angebot'] ?? '—') ?></span>
+                  <?php /* Am Wochenende gibt es keine feste Zeit — dann steht
+                           hier, ab wann die Gaeste kommen moechten. */
+                  if (($a['wunschzeit'] ?? '') !== ''): ?>
+                    <br><span class="wzeit">Wunschzeit: <strong><?= $e($a['wunschzeit']) ?></strong></span>
+                  <?php endif; ?>
+                  <?php /* Anlass — bei "Sonstiges" mit der kurzen Erklaerung */
+                  if (($a['anlass'] ?? '') !== ''): ?>
+                    <br><span class="danlass"><?= $e($a['anlass']) ?><?= ($a['anlass_text'] ?? '') !== ''
+                        ? ' — ' . $e($a['anlass_text']) : '' ?></span>
+                  <?php endif; ?>
+                </div>
+
+                <div class="dz">
+                  <span class="dl">Kontakt</span>
+                  <?php /* Von Hand eingetragene Buchungen haben nicht immer
+                           eine Adresse — dann hier auch keinen leeren Link. */
+                  if (($a['email'] ?? '') !== ''): ?>
+                    <a href="mailto:<?= $e($a['email']) ?>"><?= $e($a['email']) ?></a>
+                  <?php endif; ?>
+                  <?php if (($a['telefon'] ?? '') !== ''): ?>
+                    <?= ($a['email'] ?? '') !== '' ? '<br>' : '' ?><a href="tel:<?= $e($a['telefon']) ?>"><?= $e($a['telefon']) ?></a>
+                  <?php endif; ?>
+                  <?php if (($a['email'] ?? '') === '' && ($a['telefon'] ?? '') === ''): ?>
+                    <span style="color:#a8917a">keine Kontaktangabe</span>
+                  <?php endif; ?>
+                </div>
+
+                <div class="dz">
+                  <span class="dl">Eingegangen</span>
+                  <?= $e(date('d.m.Y, H:i', strtotime($a['erstellt'] ?? 'now'))) ?>
+                  <?php
+                    /* Wurde die automatische Antwort verschickt?
+                       Fehlt der Eintrag ganz, stammt die Anfrage aus der Zeit
+                       vor dieser Aufzeichnung — dann wird nichts angezeigt. */
+                    if (array_key_exists('mail_kunde', $a)):
+                        $mk = $a['mail_kunde'];
+                        if ($mk === null): ?>
+                          <span class="mailstatus ms-aus">automatische Antwort ist abgeschaltet</span>
+                    <?php elseif ($mk): ?>
+                          <span class="mailstatus ms-ok">✓ Bestätigung verschickt<?=
+                            isset($a['mail_zeit']) ? ' · ' . $e(date('d.m. H:i', strtotime($a['mail_zeit']))) : '' ?></span>
+                    <?php else: ?>
+                          <span class="mailstatus ms-fehl">✕ Bestätigung konnte nicht verschickt werden</span>
+                    <?php endif;
+                    endif;
+                    // Kam die Benachrichtigung an den Betrieb selbst durch?
+                    if (array_key_exists('mail_betreiber', $a) && !$a['mail_betreiber']): ?>
+                          <span class="mailstatus ms-fehl">✕ Benachrichtigung an dich fehlgeschlagen</span>
+                    <?php endif; ?>
+                </div>
+
+                <div class="dz weit">
+                  <span class="dl">Nachricht</span>
+                  <span class="msg"><?= $e($a['nachricht'] ?? '') ?: '—' ?></span>
+                </div>
+
+                <?php
+                /* Aeltere Eintraege haben noch das einzelne Feld — beide
+                   Schreibweisen anzeigen, damit nichts verloren geht. */
+                $weg = $a['verschoben'] ?? (($a['verschoben_von'] ?? '') !== '' ? [$a['verschoben_von']] : []);
+                $bhist = $a['bearbeitet'] ?? [];
+                if ((is_array($weg) && $weg) || (is_array($bhist) && $bhist)): ?>
+                  <div class="dz weit">
+                    <span class="dl">Verlauf</span>
+                    <?php if (is_array($weg) && $weg):
+                      /* Bei vielen Verschiebungen wuerde die Kette sonst ueber
+                         mehrere Zeilen laufen. Interessant sind die letzten
+                         Stationen — die vollstaendige Kette steht im Tooltip. */
+                      $alle = array_map(fn($t) => date('d.m.', strtotime($t)), $weg);
+                      $alle[] = date('d.m.Y', strtotime($a['datum'] ?? 'now'));
+                      $kurz  = count($alle) > 4 ? array_slice($alle, -4) : $alle;
+                      $text  = (count($alle) > 4 ? '… → ' : '') . implode(' → ', $kurz); ?>
+                      <span class="umgebucht" title="<?= count($weg) ?>× verschoben: <?= $e(implode(' → ', $alle)) ?>">
+                        verschoben: <?= $e($text) ?></span>
+                    <?php endif; ?>
+                    <?php if (is_array($bhist) && $bhist):
+                      $letzte = end($bhist);
+                      $felder = is_array($letzte['felder'] ?? null) ? $letzte['felder'] : []; ?>
+                      <span class="umgebucht" title="<?= count($bhist) ?>× bearbeitet, zuletzt: <?= $e(implode(', ', $felder)) ?>">
+                        bearbeitet: <?= $e(date('d.m. H:i', strtotime((string)($letzte['zeit'] ?? 'now')))) ?></span>
+                    <?php endif; ?>
+                  </div>
+                <?php endif; ?>
+
+              </div>
+
+              <div class="dt-aktionen">
+                <form method="post" class="dt-knoepfe">
+                  <?php if ($stor): ?>
+                    <button name="aktivieren" value="<?= $e($a['id'] ?? '') ?>">Aktivieren</button>
+                  <?php else: ?>
+                    <?php if (!$best): ?>
+                      <button class="gruen" name="bestaetigen" value="<?= $e($a['id'] ?? '') ?>">Bestätigen</button>
+                    <?php endif; ?>
+                    <button name="stornieren" value="<?= $e($a['id'] ?? '') ?>">Stornieren</button>
+                  <?php endif; ?>
+                  <button class="rot" name="loeschen" value="<?= $e($a['id'] ?? '') ?>"
+                          onclick="return confirm('Diese Anfrage endgültig löschen?')">Löschen</button>
+                </form>
+
+                <button type="button" class="mailknopf" onclick="mailAuf('<?= $rid ?>')">
+                  <?= $stor ? 'Absage schreiben' : 'Bestätigung schreiben' ?>
+                </button>
+                <button type="button" class="mailknopf" onclick="bearbAuf('<?= $rid ?>')">Bearbeiten</button>
+                <?php /* Sofort in den Google Kalender — das Abo holt Google
+                         nur alle paar Stunden ab. */
+                $gurl = google_termin_url($a);
+                if ($gurl !== '' && !$stor): ?>
+                  <a class="mailknopf gknopf" href="<?= $e($gurl) ?>"
+                     target="_blank" rel="noopener noreferrer">In Google Kalender</a>
+                <?php endif; ?>
+
+                <?php /* Umbuchen: Der Server prueft, ob der Zieltag buchbar
+                         ist und genug Platz hat. */ ?>
+                <form method="post" class="umbuchen">
+                  <label for="<?= $rid ?>-neu">Verschieben auf</label>
+                  <?php /* Bewusst ohne required, min und max: Passt der Wert
+                           nicht dazu, verweigert der Browser das Absenden
+                           wortlos — der Knopf tut dann scheinbar nichts.
+                           Die Pruefung macht ohnehin der Server, und der
+                           sagt auch, was nicht stimmt. */ ?>
+                  <input type="date" id="<?= $rid ?>-neu" name="neues_datum"
+                         autocomplete="off"
+                         value="<?= $e($a['datum'] ?? '') ?>">
+                  <button type="submit" name="verschieben" value="<?= $e($a['id'] ?? '') ?>">Verschieben</button>
+                </form>
+              </div>
             </td>
           </tr>
 
           <tr class="mailzeile" id="<?= $rid ?>" hidden>
-            <td colspan="6">
+            <td>
               <div class="mailbox">
                 <label>Empfänger</label>
                 <input type="text" id="<?= $rid ?>-to" value="<?= $e($a['email'] ?? '') ?>">
@@ -1353,7 +1418,7 @@ Ich freue mich auf eine schöne kreative Zeit mit {$w['dativ']}!
                    blockieren, und der Knopf saehe aus, als taete er
                    nichts.                                          */ ?>
           <tr class="bearbzeile" id="<?= $rid ?>-b"<?= $b_auf ? '' : ' hidden' ?>>
-            <td colspan="6">
+            <td>
               <form method="post" class="bearb" novalidate>
                 <div class="bearb-gitter">
 
@@ -1716,9 +1781,34 @@ Ich freue mich auf eine schöne kreative Zeit mit {$w['dativ']}!
 
 </div>
 <script>
+/* ── Namenszeile auf- und zuklappen ──
+   In der Uebersicht steht nur der Name. Erst ein Klick zeigt die
+   Angaben und die Knoepfe. Beim Zuklappen gehen auch die
+   Mail-Vorlage und das Bearbeiten-Formular dieser Anfrage mit zu —
+   sonst blieben sie unsichtbar offen und spraengen beim naechsten
+   Aufklappen wieder auf. */
+function zeileAuf(rid, erzwingen) {
+  const z = document.getElementById(rid + '-d');
+  const k = document.getElementById(rid + '-k');
+  if (!z) { return; }
+  const auf = erzwingen === undefined ? z.hidden : erzwingen;
+  z.hidden = !auf;
+  if (k) {
+    k.classList.toggle('offen', auf);
+    k.setAttribute('aria-expanded', auf ? 'true' : 'false');
+  }
+  if (!auf) {
+    ['', '-b'].forEach(function (zusatz) {
+      const x = document.getElementById(rid + zusatz);
+      if (x) { x.hidden = true; }
+    });
+  }
+}
+
 /* Aufklappen der Mail-Vorlage */
 function mailAuf(id) {
   const z = document.getElementById(id);
+  zeileAuf(id, true);          // die Angaben darueber mit aufklappen
   z.hidden = false;
   z.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   document.getElementById(id + '-body').focus();
@@ -1728,6 +1818,7 @@ function mailZu(id) { document.getElementById(id).hidden = true; }
 /* Aufklappen des Bearbeiten-Formulars */
 function bearbAuf(id) {
   const z = document.getElementById(id + '-b');
+  zeileAuf(id, true);          // die Angaben darueber mit aufklappen
   z.hidden = false;
   z.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   const f = document.getElementById(id + '-b-name');
@@ -1768,6 +1859,8 @@ async function kalKopieren(knopf) {
 
 // Hat die Suche das Archiv aufgeklappt? Dann wird es danach wieder zugemacht.
 let archivVonSuche = false;
+// Dasselbe fuer die Zeilen, die die Suche aufgeklappt hat.
+const vonSuche = new Set();
 
 function allesFiltern() {
   const feld    = document.getElementById('top-suche');
@@ -1790,12 +1883,21 @@ function allesFiltern() {
       /* Die aufklappbaren Zeilen gehoeren zur selben Anfrage. Beim
          Ausblenden muessen sie mit weg — beim Einblenden bleiben sie
          aber zu, sonst springen sie ungefragt auf. */
+      const rid = zeile.dataset.rid;
       if (!ja) {
-        const rid = zeile.dataset.rid;
-        ['', '-b'].forEach(function (zusatz) {
+        ['-d', '', '-b'].forEach(function (zusatz) {
           const z = document.getElementById(rid + zusatz);
           if (z) { z.hidden = true; }
         });
+        const k = document.getElementById(rid + '-k');
+        if (k) { k.classList.remove('offen'); k.setAttribute('aria-expanded', 'false'); }
+      } else if (worte.length > 0) {
+        /* Beim Suchen die Treffer aufklappen. Sonst sieht man bei
+           einer Suche nach Telefonnummer oder Nachricht nur den
+           Namen und nicht, warum die Zeile passt. Beim Leeren der
+           Suche gehen sie wieder zu. */
+        zeileAuf(rid, true);
+        vonSuche.add(rid);
       }
     });
     // Ein Tag ohne Treffer verschwindet ganz, sonst bleibt eine leere Hülle stehen
@@ -1831,6 +1933,8 @@ function allesFiltern() {
   const kein = document.getElementById('keintreffer');
   weg.hidden = eingabe === '';
   if (eingabe === '') {
+    vonSuche.forEach(function (rid) { zeileAuf(rid, false); });
+    vonSuche.clear();
     zahl.textContent = '';
     if (kein) { kein.hidden = true; }
   } else {
