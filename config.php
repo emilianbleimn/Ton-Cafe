@@ -75,6 +75,12 @@ const BEWERTUNG_SPERRE_MIN  = 10;       // Minuten, bevor dieselbe Person erneut
    Aenderst du ihn, musst du das Abo im Kalender neu einrichten. */
 const KALENDER_KEY = 'omlry06src94to43dz477kss4cb5';
 
+/* Sollen die Ruhetage (siehe CLOSED_DAYS) als wiederkehrende
+   Eintraege im Kalender-Abo stehen? Dann steht an jedem Montag und
+   Dienstag "Geschlossen – Ruhetag" im Google Kalender. Auf false
+   setzen, wenn das dort zu unruhig wird. */
+const KALENDER_RUHETAGE = true;
+
 /* Adresse, unter der sich im Webmail direkt eine neue E-Mail
    verfassen laesst. {to}, {subject} und {body} werden eingesetzt.
 

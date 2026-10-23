@@ -319,6 +319,10 @@
     }
     .bk-avail-item strong { display: block; font-family: var(--fd); font-size: 1rem; font-weight: 400; margin-bottom: .15rem; }
     .bk-avail-item span { color: var(--cream-mid); font-size: .8rem; }
+    /* Ruhetage sollen sich auf den ersten Blick von den offenen
+       Tagen unterscheiden — gedeckt statt in der Akzentfarbe. */
+    .bk-avail-item.bk-avail-zu { border-left-color: rgba(122,82,48,.35); opacity: .75; }
+    .bk-avail-item.bk-avail-zu span { font-weight: 600; }
 
     .info-box {
       display: flex; gap: .9rem; align-items: flex-start;
@@ -734,6 +738,10 @@
     }
     .ft-kontakt a { border-bottom: 1px solid rgba(122,82,48,.28); transition: border-color .3s; }
     .ft-kontakt a:hover { border-color: var(--bronze); color: var(--cream); }
+    .ft-zeiten {
+      margin-top: .9rem; font-size: .78rem; color: var(--cream-mid); line-height: 1.8;
+    }
+    .ft-zeiten strong { color: var(--cream); }
 
     /* ── LEGAL MODALS ── */
     .lm {
@@ -1828,6 +1836,10 @@
           <strong>Samstag &amp; Sonntag</strong>
           <span>Auf Anfrage · am besten ab 11 Uhr im Studio</span>
         </div>
+        <div class="bk-avail-item bk-avail-zu">
+          <strong>Montag &amp; Dienstag</strong>
+          <span>Geschlossen</span>
+        </div>
       </div>
 
       <div class="info-box">
@@ -1980,6 +1992,10 @@
     <a href="mailto:keramikcafe@tonfluestern.de">keramikcafe@tonfluestern.de</a>
     <span>Hauptstraße 43, 64711 Erbach</span>
   </div>
+  <p class="ft-zeiten">
+    Mittwoch &amp; Donnerstag 15:00 – 18:00 Uhr · Freitag 15:00 – 20:00 Uhr ·
+    Samstag &amp; Sonntag auf Anfrage · <strong>Montag &amp; Dienstag geschlossen</strong>
+  </p>
   <ul class="ft-links">
     <li><a href="#impressum">Impressum</a></li>
     <li><a href="#datenschutz">Datenschutz</a></li>
@@ -2401,7 +2417,12 @@ kalenderInstanz = flatpickr('#cal-container', {
     // Ausgebucht zuerst pruefen, sonst wuerden Sa/So immer als
     // "Auf Anfrage" durchgehen, auch wenn sie voll belegt sind
     if (CLOSED_DAYS.includes(d)) {
-      dayElem.title = 'Geschlossen';
+      /* Montag und Dienstag sind Ruhetage. Sie waren zwar schon
+         gesperrt, sahen aber aus wie ein vergangener Tag. Dieselbe
+         Zeichnung wie bei einem von Hand zugemachten Tag macht es
+         eindeutig: durchgestrichen heisst "hier geht nichts". */
+      dayElem.title = 'Geschlossen — Ruhetag';
+      dayElem.classList.add('day-zu');
     } else if (isFull(date)) {
       const zu = zugemacht(date);
       dayElem.title = zu ? 'Geschlossen' : 'Ausgebucht';

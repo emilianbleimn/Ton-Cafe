@@ -135,6 +135,51 @@ foreach ($d['anfragen'] as $a) {
     z('END:VEVENT');
 }
 
+/* ── Ruhetage ──
+   Montag und Dienstag ist geschlossen. Statt fuer jede Woche einen
+   eigenen Eintrag zu erzeugen — das waeren ueber Jahre Hunderte —
+   steht hier je Wochentag ein einziger Termin mit einer
+   Wiederholungsregel. Der Kalender rechnet die Wochen selbst aus.
+
+   TRANSP:TRANSPARENT: Der Eintrag ist ein Hinweis, kein Termin. So
+   gilt der Tag nicht als belegt und verdeckt nichts anderes.    */
+if (KALENDER_RUHETAGE && CLOSED_DAYS) {
+    // 0=So .. 6=Sa in die Kuerzel des Kalenderformats uebersetzen
+    $kuerzel = ['SU', 'MO', 'TU', 'WE', 'TH', 'FR', 'SA'];
+    $namen   = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch',
+                'Donnerstag', 'Freitag', 'Samstag'];
+    $heute   = new DateTime('today', new DateTimeZone('Europe/Berlin'));
+
+    foreach (CLOSED_DAYS as $wt) {
+        $wt = (int)$wt;
+        if (!isset($kuerzel[$wt])) {
+            continue;
+        }
+        /* Beim zuletzt vergangenen solchen Wochentag anfangen (oder
+           heute, wenn heute einer ist). Dann steht der Hinweis auch
+           in der laufenden Woche schon da. */
+        $zurueck = ((int)$heute->format('w') - $wt + 7) % 7;
+        $start   = (clone $heute)->modify('-' . $zurueck . ' days');
+        $ende    = (clone $start)->modify('+1 day');
+
+        z('BEGIN:VEVENT');
+        z('UID:ruhetag-' . strtolower($kuerzel[$wt]) . '@tonfluestern.de');
+        z('DTSTAMP:' . $jetzt);
+        z('DTSTART;VALUE=DATE:' . $start->format('Ymd'));
+        z('DTEND;VALUE=DATE:' . $ende->format('Ymd'));
+        z('RRULE:FREQ=WEEKLY;BYDAY=' . $kuerzel[$wt]);
+        z('SUMMARY:' . ics_text('Geschlossen – Ruhetag'));
+        z('DESCRIPTION:' . ics_text(
+            $namen[$wt] . ' ist bei Tonflüstern geschlossen.' . "\n\n"
+          . 'Geöffnet: Mittwoch und Donnerstag 15:00 – 18:00 Uhr, '
+          . 'Freitag 15:00 – 20:00 Uhr, Samstag und Sonntag auf Anfrage.'));
+        z('LOCATION:' . ics_text('Tonflüstern, Hauptstraße 43, 64711 Erbach'));
+        z('STATUS:CONFIRMED');
+        z('TRANSP:TRANSPARENT');
+        z('END:VEVENT');
+    }
+}
+
 /* Von Hand blockierte Plaetze */
 foreach ($d['manuell'] as $datum => $anzahl) {
     $anzahl = (int)$anzahl;
