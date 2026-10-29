@@ -266,7 +266,7 @@ Datum: $datum_kurz
 Personen: $personen
 Wunschzeit: $wunschzeit
 
-Samstag und Sonntag sind bei mir nur auf Anfrage möglich. Ich schaue, ob ich den Termin einrichten kann, und melde mich innerhalb von " . ANTWORTFRIST . " bei {$w['dativ']} — dann auch mit einer festen Uhrzeit." . $wochenend_hinweis . "
+Samstag und Sonntag sind bei mir nur auf Anfrage möglich. Ich schaue, ob ich den Termin einrichten kann, und melde mich " . ANTWORTFRIST . " bei {$w['dativ']} — dann auch mit einer festen Uhrzeit." . $wochenend_hinweis . "
 
 
 Die Bezahlung ist vor Ort bar oder mit Karte möglich. Falls sich noch etwas ändern sollte oder {$w['fragen']} gerne bei mir.

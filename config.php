@@ -94,8 +94,11 @@ const WEBMAIL_COMPOSE = 'https://webmail.your-server.de/imp/dynamic.php?page=com
    Auf false setzen, wenn keine automatische Antwort verschickt werden soll. */
 const AUTO_ANTWORT = true;
 
-/* Innerhalb welcher Frist wird geantwortet? Steht so in der Mail. */
-const ANTWORTFRIST = '24 Stunden';
+/* Wie schnell wird geantwortet? Steht so in der Mail und auf der
+   Website. Bewusst keine feste Stundenzahl: Eine Zusage wie
+   "innerhalb von 24 Stunden" ist ein Versprechen, das an einem
+   vollen Tag im Laden nicht immer zu halten ist. */
+const ANTWORTFRIST = 'so schnell wie möglich';
 
 /* Samstag und Sonntag laufen auf Anfrage. Ab welcher Uhrzeit
    passt ein Termin am besten? Der Hinweis steht dann in der
