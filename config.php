@@ -49,7 +49,6 @@ const ANLAESSE        = [
     'Team-Event',
     'Schulklasse oder Kindergruppe',
     'Familienfeier',
-    'Geschlossene Gesellschaft',
     'Geschenk selbst gestalten',
     'Sonstiges',
 ];

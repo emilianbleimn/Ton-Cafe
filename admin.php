@@ -278,11 +278,14 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
                      . ' Du kannst das Feld auch leer lassen.';
         } elseif (!in_array($neu['angebot'], ANGEBOTE, true)) {
             $problem = 'Bitte ein Angebot auswählen.';
-        } elseif ($neu['anlass'] !== '' && !in_array($neu['anlass'], ANLAESSE, true)) {
-            $problem = 'Diesen Anlass gibt es nicht.';
         } elseif ($neu['personen'] < 1 || $neu['personen'] > MAX_PER_DAY) {
             $problem = 'Die Personenzahl muss zwischen 1 und ' . MAX_PER_DAY . ' liegen.';
         }
+        /* Der Anlass wird erst weiter unten geprueft, in der Sperre:
+           Dort ist bekannt, was bei dieser Anfrage gespeichert ist.
+           Wird ein Anlass spaeter aus der Liste genommen, sollen
+           aeltere Anfragen damit trotzdem bearbeitbar bleiben — sonst
+           liesse sich bei ihnen gar nichts mehr aendern. */
 
         if ($problem !== '') {
             $hinweis = $problem . ' Es wurde nichts geändert — deine Eingaben stehen weiter im Formular.';
@@ -298,6 +301,15 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
 
                 $a     = $d['anfragen'][$treffer];
                 $datum = (string)($a['datum'] ?? '');
+
+                /* Anlass: aus der Liste — oder der, der ohnehin schon
+                   dort steht. So bleibt eine Anfrage bearbeitbar, deren
+                   Anlass es inzwischen nicht mehr gibt. */
+                if ($neu['anlass'] !== ''
+                    && !in_array($neu['anlass'], ANLAESSE, true)
+                    && $neu['anlass'] !== (string)($a['anlass'] ?? '')) {
+                    return ['ok' => false, 'grund' => 'anlass'];
+                }
 
                 /* Mehr Personen als frei sind? Dann waere der Tag
                    ueberbucht. Die Anfrage selbst zaehlt beim Rechnen
@@ -343,6 +355,10 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
                     ? 'Es gab nichts zu ändern — es steht schon alles so da.'
                     : 'Änderungen gespeichert. Denk daran, den Gästen Bescheid zu geben,'
                       . ' wenn es sie betrifft.';
+            } elseif (($ergebnis['grund'] ?? '') === 'anlass') {
+                $hinweis = 'Diesen Anlass gibt es nicht. Es wurde nichts geändert.';
+                $_SESSION['bearb_id']    = $id;
+                $_SESSION['bearb_werte'] = $neu;
             } elseif (($ergebnis['grund'] ?? '') === 'voll') {
                 $hinweis = 'So viele Personen passen an diesem Tag nicht mehr —'
                          . ' frei sind noch ' . $ergebnis['frei']
