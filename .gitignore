@@ -1,2 +1,5 @@
 daten/
 *.tmp
+
+# Verkleinerte Fassungen der Galeriebilder — erzeugt der Server selbst
+galerie/.cache/
