@@ -39,17 +39,24 @@ const ANGEBOTE = ['Keramik bemalen', 'Töpfern'];
    eine Antwort, mit der sich nichts anfangen laesst.
    Aenderst du die Liste, zieht die Pruefung automatisch nach;
    die Auswahl in der index.html musst du dann mitaendern. */
+/* ACHTUNG: Diese Liste steht ein zweites Mal in index.html im
+   Auswahlfeld "Anlass" — die Seite ist reines HTML und kann die
+   Werte von hier nicht lesen. Wird hier etwas geaendert, muss es
+   dort mitgeaendert werden, sonst weist der Server ab, was im
+   Formular waehlbar war. */
 const ANLAESSE        = [
     'Einfach so',
+    'Töpferwerke bemalen',
     'Geburtstag',
     'Kindergeburtstag',
     'Junggesellenabschied',
     'Babyparty',
+    'Babybauchschale',
     'Frauenabend',
+    'Männerrunde',
     'Team-Event',
     'Schulklasse oder Kindergruppe',
     'Familienfeier',
-    'Geschenk selbst gestalten',
     'Sonstiges',
 ];
 const ANLASS_FREITEXT = 'Sonstiges';
