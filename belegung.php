@@ -54,6 +54,9 @@ ksort($anzeigeart);
 
 echo json_encode([
     'max'     => MAX_PER_DAY,
+    /* Sind Wochenend-Anfragen gerade gestoppt? Der Kalender zeigt
+       Samstag und Sonntag dann als geschlossen. */
+    'wochenende_zu' => (bool)($d['wochenende_zu'] ?? false),
     'belegt'  => (object)$summe,
     'manuell' => (object)$handeintrag,
     'art'     => (object)$anzeigeart,

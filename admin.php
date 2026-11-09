@@ -371,6 +371,23 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
         }
     }
 
+    /* ── Wochenend-Anfragen anhalten oder wieder freigeben ──
+       Samstag und Sonntag laufen auf Anfrage. Sind genug Anfragen
+       da, laesst sich hier alles Weitere abstellen, ohne jeden
+       einzelnen Tag von Hand blocken zu muessen. Bereits
+       eingegangene Anfragen bleiben davon unberuehrt.           */
+    if (isset($_POST['wochenende'])) {
+        $zu = $_POST['wochenende'] === 'zu';
+        mit_sperre(function (array &$d) use ($zu) {
+            $d['wochenende_zu'] = $zu;
+        });
+        $hinweis = $zu
+            ? 'Wochenend-Anfragen sind gestoppt. Samstag und Sonntag lassen sich'
+              . ' auf der Website nicht mehr anfragen. Schon eingegangene Anfragen'
+              . ' bleiben, wie sie sind.'
+            : 'Wochenend-Anfragen sind wieder möglich.';
+    }
+
     /* ── Buchung von Hand eintragen ──
        Fuer alles, was nicht ueber die Website kam: am Telefon, per
        E-Mail oder direkt im Laden. Der Eintrag landet in derselben
@@ -973,6 +990,18 @@ Ich freue mich auf eine schöne kreative Zeit mit {$w['dativ']}!
   #top-zahl{display:block;margin-top:.4rem;font-size:.78rem;color:#7a5230}
   .keintreffer{color:#a8917a;font-size:.95rem;padding:2rem 0;text-align:center}
 
+  /* ── Wochenend-Schalter ──
+     Steht oben, damit der Zustand ins Auge faellt: Es ist leicht zu
+     vergessen, dass die Website gerade keine Wochenendanfragen
+     annimmt. */
+  .woschalter{display:flex;gap:1rem;align-items:center;justify-content:space-between;
+              flex-wrap:wrap;padding:.9rem 1.2rem;margin-bottom:1.2rem;
+              border-left:3px solid #4a6b3a;background:#ebe2d2}
+  .woschalter.aus{border-left-color:#a84c2a;background:#f0dfd6}
+  .woschalter strong{display:block;font-size:.95rem}
+  .woschalter span{font-size:.82rem;color:#5e4535}
+  .woschalter button{padding:.55rem 1.2rem;font-size:.78rem}
+
   /* ── Buchung von Hand ── */
   .handform{background:#ebe2d2;border-left:3px solid #7a5230;margin-bottom:1.8rem}
   .handform>summary{padding:.9rem 1.2rem;font-size:.95rem;font-weight:600;
@@ -1063,6 +1092,25 @@ Ich freue mich auf eine schöne kreative Zeit mit {$w['dativ']}!
            placeholder="Name, E-Mail, Telefon, Datum &hellip;" oninput="allesFiltern()">
     <button type="button" id="such-weg" onclick="sucheLeeren()" hidden>Zurücksetzen</button>
     <span id="top-zahl"></span>
+  </div>
+
+  <?php /* ── Wochenende an oder aus ──
+           Ein Knopf, kein Formular zum Ausfuellen: Der aktuelle
+           Zustand steht daneben, und der Knopf sagt, was er tut. */
+  $wo_zu = (bool)($d['wochenende_zu'] ?? false); ?>
+  <div class="woschalter <?= $wo_zu ? 'aus' : 'an' ?>">
+    <div>
+      <strong><?= $wo_zu ? 'Wochenende: Anfragen gestoppt' : 'Wochenende: Anfragen offen' ?></strong>
+      <span><?= $wo_zu
+        ? 'Samstag und Sonntag lassen sich auf der Website gerade nicht anfragen.'
+        : 'Samstag und Sonntag können auf der Website angefragt werden.' ?></span>
+    </div>
+    <form method="post">
+      <button type="submit" name="wochenende" value="<?= $wo_zu ? 'auf' : 'zu' ?>"
+              class="<?= $wo_zu ? 'gruen' : '' ?>">
+        <?= $wo_zu ? 'Wieder freigeben' : 'Anfragen stoppen' ?>
+      </button>
+    </form>
   </div>
 
   <?php /* ── Buchung von Hand ──

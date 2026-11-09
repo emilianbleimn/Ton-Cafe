@@ -168,7 +168,8 @@ function daten_verzeichnis(): void {
  * die leere Struktur.
  */
 function daten_laden(): ?array {
-    $leer = ['anfragen' => [], 'manuell' => [], 'manuell_art' => [], 'bewertungen' => []];
+    $leer = ['anfragen' => [], 'manuell' => [], 'manuell_art' => [],
+             'bewertungen' => [], 'wochenende_zu' => false];
 
     if (!is_file(DATA_FILE)) {
         return $leer;                       // gibt es noch nicht — in Ordnung
@@ -208,12 +209,18 @@ function daten_laden(): ?array {
         // Kam spaeter dazu: aeltere Datendateien haben den Schluessel
         // nicht. Fehlt er, ist das kein Fehler, sondern nur leer.
         'bewertungen' => is_array($d['bewertungen'] ?? null) ? $d['bewertungen'] : [],
+        /* Wochenend-Anfragen voruebergehend gestoppt? Samstag und
+           Sonntag laufen auf Anfrage; sind genug Anfragen da, laesst
+           sich das in der Uebersicht abschalten, ohne einzelne Tage
+           blocken zu muessen. Fehlt der Schluessel, ist offen. */
+        'wochenende_zu' => (bool)($d['wochenende_zu'] ?? false),
     ];
 }
 
 /** Wie daten_laden(), aber nie null — fuer reine Leseansichten. */
 function daten_laden_sicher(): array {
-    return daten_laden() ?? ['anfragen' => [], 'manuell' => [], 'manuell_art' => [], 'bewertungen' => []];
+    return daten_laden() ?? ['anfragen' => [], 'manuell' => [], 'manuell_art' => [],
+                             'bewertungen' => [], 'wochenende_zu' => false];
 }
 
 /** Daten atomar speichern (erst in temporäre Datei, dann umbenennen). */

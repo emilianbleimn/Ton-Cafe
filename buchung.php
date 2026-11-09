@@ -75,6 +75,16 @@ if (!buchbarer_tag($datum)) {
     antwort(['ok' => false, 'fehler' => 'An diesem Tag habe ich geschlossen. Bitte wähle einen anderen Tag.'], 422);
 }
 
+/* Wochenend-Anfragen voruebergehend gestoppt? Der Kalender sperrt
+   Samstag und Sonntag dann schon im Browser; hier wird es noch
+   einmal geprueft, weil sich das umgehen laesst.              */
+if (in_array((int)date('w', strtotime($datum)), REQUEST_DAYS, true)
+    && !empty(daten_laden_sicher()['wochenende_zu'])) {
+    antwort(['ok' => false,
+             'fehler' => 'Für das Wochenende kann ich gerade keine Anfragen mehr annehmen.'
+                       . ' Bitte wähle einen Tag von Mittwoch bis Freitag.'], 422);
+}
+
 $wt        = (int)date('w', strtotime($datum));
 $oeffnung  = OPEN_HOURS[$wt] ?? 'Auf Anfrage';
 $auf_anfr  = !isset(OPEN_HOURS[$wt]);

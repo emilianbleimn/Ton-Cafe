@@ -2257,6 +2257,10 @@ document.querySelectorAll('.rv').forEach(el => obs.observe(el));
 let BOOKED = {};
 let HANDEINTRAG = {};      // Tage, die der Betrieb selbst zugemacht hat
 let ANZEIGEART  = {};      // und wie sie dort heissen sollen
+/* Wochenend-Anfragen voruebergehend gestoppt? Wird aus der Uebersicht
+   gesetzt, wenn genug Anfragen da sind. Samstag und Sonntag sind dann
+   nicht waehlbar. */
+let WOCHENENDE_ZU = false;
 const MAX_PER_DAY = 18;
 
 // Wochentage: 0=So, 1=Mo, 2=Di, 3=Mi, 4=Do, 5=Fr, 6=Sa
@@ -2354,7 +2358,20 @@ function vollHinweis(datum) {
   if (!titel || !text || !kasten) return;
 
   const ruhetag = CLOSED_DAYS.includes(datum.getDay());
-  const zu      = !ruhetag && zugemacht(datum);
+  const gestoppt = !ruhetag && woGestoppt(datum);
+  const zu      = !ruhetag && !gestoppt && zugemacht(datum);
+
+  if (gestoppt) {
+    titel.textContent = 'Für das Wochenende nehme ich gerade keine Anfragen an';
+    text.textContent  = 'Es sind schon genug Anfragen da. Mittwoch bis Freitag '
+                      + 'kannst du weiterhin ganz normal anfragen.';
+    kasten.classList.add('zu', 'visible');
+    anfNote.classList.remove('visible');
+    dayInfo.classList.add('hidden');
+    wunschzeitZeigen(false);
+    fDate.value = ''; fTime.value = ''; fSeats.value = '';
+    return;
+  }
 
   if (ruhetag) {
     titel.textContent = 'An diesem Wochentag ist geschlossen';
@@ -2388,8 +2405,12 @@ const buchbar = d => Boolean(OPEN_HOURS[d.getDay()]) || REQUEST_DAYS.includes(d.
    rechnerisch achtzehn Plaetze zusammengekommen sind.
    Mittwoch bis Freitag gilt die Platzzahl wie bisher.          */
 const handVoll = d => (HANDEINTRAG[dkey(d)] || 0) >= MAX_PER_DAY;
+/* Am Wochenende faellt ein Tag aus zwei Gruenden aus: Er wurde von
+   Hand ganz zugemacht, oder die Wochenend-Anfragen sind gerade
+   gestoppt. */
+const woGestoppt = d => WOCHENENDE_ZU && REQUEST_DAYS.includes(d.getDay());
 const isFull = d => buchbar(d) && (
-  REQUEST_DAYS.includes(d.getDay()) ? handVoll(d) : freeSeats(d) <= 0
+  REQUEST_DAYS.includes(d.getDay()) ? (handVoll(d) || woGestoppt(d)) : freeSeats(d) <= 0
 );
 
 // Deutsche Beschriftung setzen; schlaegt das fehl, bleibt der Kalender
@@ -2425,8 +2446,10 @@ kalenderInstanz = flatpickr('#cal-container', {
       dayElem.title = 'Geschlossen — Ruhetag';
       dayElem.classList.add('day-zu');
     } else if (isFull(date)) {
-      const zu = zugemacht(date);
-      dayElem.title = zu ? 'Geschlossen' : 'Ausgebucht';
+      const zu = woGestoppt(date) || zugemacht(date);
+      dayElem.title = woGestoppt(date)
+        ? 'Zurzeit keine Anfragen möglich'
+        : (zu ? 'Geschlossen' : 'Ausgebucht');
       dayElem.classList.add(zu ? 'day-zu' : 'day-full');
     } else if (REQUEST_DAYS.includes(d)) {
       // Keine Platzzahl — am Wochenende wird jeder Termin einzeln abgesprochen
@@ -2529,6 +2552,7 @@ function belegungLaden() {
       if (j && j.belegt) BOOKED = j.belegt;
       if (j && j.manuell) HANDEINTRAG = j.manuell;
       if (j && j.art) ANZEIGEART = j.art;
+      WOCHENENDE_ZU = Boolean(j && j.wochenende_zu);
     })
     .catch(() => { /* offline oder Server-Problem */ });
 }
