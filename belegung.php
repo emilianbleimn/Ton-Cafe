@@ -57,6 +57,10 @@ echo json_encode([
     /* Sind Wochenend-Anfragen gerade gestoppt? Der Kalender zeigt
        Samstag und Sonntag dann als geschlossen. */
     'wochenende_zu' => (bool)($d['wochenende_zu'] ?? false),
+    /* Einzelne gestoppte Wochenendtage. Nur kommende — vergangene
+       haetten keine Wirkung und blaehen die Antwort nur auf. */
+    'wochenende_tage' => array_values(array_filter(
+        $d['wochenende_tage'] ?? [], fn($t) => $t >= $heute)),
     'belegt'  => (object)$summe,
     'manuell' => (object)$handeintrag,
     'art'     => (object)$anzeigeart,

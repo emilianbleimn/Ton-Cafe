@@ -169,7 +169,7 @@ function daten_verzeichnis(): void {
  */
 function daten_laden(): ?array {
     $leer = ['anfragen' => [], 'manuell' => [], 'manuell_art' => [],
-             'bewertungen' => [], 'wochenende_zu' => false];
+             'bewertungen' => [], 'wochenende_zu' => false, 'wochenende_tage' => []];
 
     if (!is_file(DATA_FILE)) {
         return $leer;                       // gibt es noch nicht — in Ordnung
@@ -214,13 +214,21 @@ function daten_laden(): ?array {
            sich das in der Uebersicht abschalten, ohne einzelne Tage
            blocken zu muessen. Fehlt der Schluessel, ist offen. */
         'wochenende_zu' => (bool)($d['wochenende_zu'] ?? false),
+        /* Einzelne Wochenendtage, fuer die keine Anfragen mehr
+           angenommen werden — etwa weil der Tag schon voll ist.
+           Wirkt unabhaengig vom Schalter fuer alle Wochenenden. */
+        'wochenende_tage' => array_values(array_filter(
+            is_array($d['wochenende_tage'] ?? null) ? $d['wochenende_tage'] : [],
+            fn($t) => is_string($t) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $t)
+        )),
     ];
 }
 
 /** Wie daten_laden(), aber nie null — fuer reine Leseansichten. */
 function daten_laden_sicher(): array {
     return daten_laden() ?? ['anfragen' => [], 'manuell' => [], 'manuell_art' => [],
-                             'bewertungen' => [], 'wochenende_zu' => false];
+                             'bewertungen' => [], 'wochenende_zu' => false,
+                             'wochenende_tage' => []];
 }
 
 /** Daten atomar speichern (erst in temporäre Datei, dann umbenennen). */

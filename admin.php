@@ -388,6 +388,52 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
             : 'Wochenend-Anfragen sind wieder möglich.';
     }
 
+    /* ── Einen einzelnen Wochenendtag stoppen ──
+       Fuer den haeufigen Fall: Ein Samstag ist voll, der naechste
+       aber noch frei. Der Schalter oben wuerde alle Wochenenden
+       zumachen; hier geht es nur um diesen einen Tag.
+       Vergangene Eintraege werden beim Speichern mit aufgeraeumt —
+       sie haetten ohnehin keine Wirkung mehr.                    */
+    if (isset($_POST['wo_tag_stopp'])) {
+        $tag = (string)($_POST['wo_tag'] ?? '');
+        $wt  = $tag !== '' ? (int)date('w', strtotime($tag)) : -1;
+
+        if ($tag === '' || !preg_match('/^\d{4}-\d{2}-\d{2}$/', $tag)) {
+            $hinweis = 'Bitte zuerst ein Datum auswählen, dann auf Stoppen klicken.';
+        } elseif ($tag < date('Y-m-d')) {
+            $hinweis = 'Dieser Tag liegt in der Vergangenheit — da kommt ohnehin nichts mehr.';
+        } elseif (!in_array($wt, REQUEST_DAYS, true)) {
+            $hinweis = 'Das ist kein Samstag oder Sonntag. Mittwoch bis Freitag machst du'
+                     . ' mit „Plätze von Hand blocken“ weiter unten zu.';
+        } else {
+            mit_sperre(function (array &$d) use ($tag) {
+                $liste = $d['wochenende_tage'] ?? [];
+                $liste[] = $tag;
+                // doppelte und vergangene Eintraege aussortieren
+                $liste = array_values(array_unique(array_filter(
+                    $liste, fn($t) => $t >= date('Y-m-d')
+                )));
+                sort($liste);
+                $d['wochenende_tage'] = $liste;
+            });
+            $hinweis = 'Für ' . date('d.m.Y', strtotime($tag))
+                     . ' werden keine Anfragen mehr angenommen.'
+                     . ' Die übrigen Wochenendtage bleiben offen.';
+        }
+    }
+
+    if (isset($_POST['wo_tag_frei'])) {
+        $tag = (string)$_POST['wo_tag_frei'];
+        mit_sperre(function (array &$d) use ($tag) {
+            $liste = $d['wochenende_tage'] ?? [];
+            $liste = array_values(array_filter(
+                $liste, fn($t) => $t !== $tag && $t >= date('Y-m-d')
+            ));
+            $d['wochenende_tage'] = $liste;
+        });
+        $hinweis = date('d.m.Y', strtotime($tag)) . ' ist wieder anfragbar.';
+    }
+
     /* ── Buchung von Hand eintragen ──
        Fuer alles, was nicht ueber die Website kam: am Telefon, per
        E-Mail oder direkt im Laden. Der Eintrag landet in derselben
@@ -1000,7 +1046,23 @@ Ich freue mich auf eine schöne kreative Zeit mit {$w['dativ']}!
   .woschalter.aus{border-left-color:#a84c2a;background:#f0dfd6}
   .woschalter strong{display:block;font-size:.95rem}
   .woschalter span{font-size:.82rem;color:#5e4535}
+  .woschalter{display:block}
+  .wo-oben{display:flex;gap:1rem;align-items:center;justify-content:space-between;
+           flex-wrap:wrap}
   .woschalter button{padding:.55rem 1.2rem;font-size:.78rem}
+  .wo-tag{margin-top:.9rem;padding-top:.8rem;border-top:1px solid rgba(122,82,48,.2)}
+  .wo-tag form{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
+  .wo-tag label{font-size:.8rem;color:#7a5230}
+  .wo-tag input[type=date]{font:inherit;font-size:.85rem;padding:.35rem .45rem;
+       border:1px solid rgba(122,82,48,.3);background:#fff;color:#291b0f}
+  .wo-klein{display:block;margin-top:.4rem;font-size:.74rem;color:#a8917a}
+  .wo-liste{margin-top:.9rem;padding-top:.8rem;border-top:1px solid rgba(122,82,48,.2)}
+  .wo-liste-titel{display:block;font-size:.68rem;letter-spacing:.1em;
+       text-transform:uppercase;color:#7a5230;margin-bottom:.4rem}
+  .wo-eintrag{display:inline-flex;gap:.45rem;align-items:center;
+       background:#fff;border:1px solid rgba(122,82,48,.25);
+       padding:.25rem .3rem .25rem .6rem;margin:0 .4rem .4rem 0;font-size:.82rem}
+  .wo-eintrag button{padding:.2rem .55rem;font-size:.72rem}
 
   /* ── Buchung von Hand ── */
   .handform{background:#ebe2d2;border-left:3px solid #7a5230;margin-bottom:1.8rem}
@@ -1066,6 +1128,9 @@ Ich freue mich auf eine schöne kreative Zeit mit {$w['dativ']}!
     button{min-height:2.4rem}
     .suchleiste{padding:.7rem 0 .8rem}
     .suchleiste button{margin:.4rem 0 0;width:100%}
+    .wo-oben form,.wo-oben button{width:100%}
+    .wo-tag input[type=date]{flex:1 1 9rem;min-width:0}
+    .wo-tag button{width:100%}
     .hf-text{margin:0 1rem .4rem}
   }
 </style>
@@ -1097,20 +1162,59 @@ Ich freue mich auf eine schöne kreative Zeit mit {$w['dativ']}!
   <?php /* ── Wochenende an oder aus ──
            Ein Knopf, kein Formular zum Ausfuellen: Der aktuelle
            Zustand steht daneben, und der Knopf sagt, was er tut. */
-  $wo_zu = (bool)($d['wochenende_zu'] ?? false); ?>
+  $wo_zu = (bool)($d['wochenende_zu'] ?? false);
+  /* Nur kommende Tage anzeigen — vergangene haetten keine Wirkung. */
+  $wo_tage = array_values(array_filter(
+      $d['wochenende_tage'] ?? [], fn($t) => $t >= $heute));
+  sort($wo_tage); ?>
   <div class="woschalter <?= $wo_zu ? 'aus' : 'an' ?>">
-    <div>
-      <strong><?= $wo_zu ? 'Wochenende: Anfragen gestoppt' : 'Wochenende: Anfragen offen' ?></strong>
-      <span><?= $wo_zu
-        ? 'Samstag und Sonntag lassen sich auf der Website gerade nicht anfragen.'
-        : 'Samstag und Sonntag können auf der Website angefragt werden.' ?></span>
+
+    <div class="wo-oben">
+      <div>
+        <strong><?= $wo_zu ? 'Wochenende: Anfragen gestoppt' : 'Wochenende: Anfragen offen' ?></strong>
+        <span><?= $wo_zu
+          ? 'Samstag und Sonntag lassen sich auf der Website gerade nicht anfragen.'
+          : 'Samstag und Sonntag können auf der Website angefragt werden.' ?></span>
+      </div>
+      <form method="post">
+        <button type="submit" name="wochenende" value="<?= $wo_zu ? 'auf' : 'zu' ?>"
+                class="<?= $wo_zu ? 'gruen' : '' ?>">
+          <?= $wo_zu ? 'Alle wieder freigeben' : 'Alle Wochenenden stoppen' ?>
+        </button>
+      </form>
     </div>
-    <form method="post">
-      <button type="submit" name="wochenende" value="<?= $wo_zu ? 'auf' : 'zu' ?>"
-              class="<?= $wo_zu ? 'gruen' : '' ?>">
-        <?= $wo_zu ? 'Wieder freigeben' : 'Anfragen stoppen' ?>
-      </button>
-    </form>
+
+    <?php /* Einzelner Tag — der haeufigere Fall: Ein Samstag ist
+             voll, der naechste aber noch frei. */ ?>
+    <div class="wo-tag">
+      <form method="post">
+        <label for="wo-tag">Nur einen einzelnen Tag stoppen</label>
+        <?php /* Ohne required und ohne min: Passt der Wert nicht,
+                 verweigert der Browser das Absenden wortlos. Die
+                 Pruefung macht der Server, und der sagt auch, was
+                 nicht stimmt. */ ?>
+        <input type="date" id="wo-tag" name="wo_tag" autocomplete="off">
+        <button type="submit" name="wo_tag_stopp" value="1">Diesen Tag stoppen</button>
+      </form>
+      <span class="wo-klein">nur Samstag und Sonntag — Mittwoch bis Freitag
+        machst du mit „Plätze von Hand blocken“ weiter unten zu</span>
+    </div>
+
+    <?php if ($wo_tage): ?>
+      <div class="wo-liste">
+        <span class="wo-liste-titel">Gestoppte Tage</span>
+        <?php foreach ($wo_tage as $t):
+          $tts = strtotime($t); ?>
+          <form method="post" class="wo-eintrag">
+            <span><?= $e($wt_namen[(int)date('w', $tts)]) ?>, <?= date('d.m.Y', $tts) ?></span>
+            <button type="submit" name="wo_tag_frei" value="<?= $e($t) ?>">freigeben</button>
+          </form>
+        <?php endforeach; ?>
+        <?php if ($wo_zu): ?>
+          <span class="wo-klein">Zurzeit sind ohnehin alle Wochenenden gestoppt.</span>
+        <?php endif; ?>
+      </div>
+    <?php endif; ?>
   </div>
 
   <?php /* ── Buchung von Hand ──

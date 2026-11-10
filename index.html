@@ -2261,6 +2261,9 @@ let ANZEIGEART  = {};      // und wie sie dort heissen sollen
    gesetzt, wenn genug Anfragen da sind. Samstag und Sonntag sind dann
    nicht waehlbar. */
 let WOCHENENDE_ZU = false;
+/* Einzelne Wochenendtage, die gestoppt wurden — etwa weil dieser
+   eine Samstag voll ist, der naechste aber noch frei. */
+let WOCHENENDE_TAGE = [];
 const MAX_PER_DAY = 18;
 
 // Wochentage: 0=So, 1=Mo, 2=Di, 3=Mi, 4=Do, 5=Fr, 6=Sa
@@ -2362,9 +2365,19 @@ function vollHinweis(datum) {
   const zu      = !ruhetag && !gestoppt && zugemacht(datum);
 
   if (gestoppt) {
-    titel.textContent = 'Für das Wochenende nehme ich gerade keine Anfragen an';
-    text.textContent  = 'Es sind schon genug Anfragen da. Mittwoch bis Freitag '
-                      + 'kannst du weiterhin ganz normal anfragen.';
+    /* Zwei Faelle: Entweder sind alle Wochenenden gestoppt, oder nur
+       dieser eine Tag. Beides anders zu benennen hilft dem Besucher —
+       beim einzelnen Tag lohnt der Blick auf das naechste Wochenende. */
+    if (WOCHENENDE_ZU) {
+      titel.textContent = 'Für das Wochenende nehme ich gerade keine Anfragen an';
+      text.textContent  = 'Es sind schon genug Anfragen da. Mittwoch bis Freitag '
+                        + 'kannst du weiterhin ganz normal anfragen.';
+    } else {
+      titel.textContent = 'Dieser Tag ist schon ausgelastet';
+      text.textContent  = 'Für diesen Tag nehme ich keine Anfragen mehr an. '
+                        + 'Schau gerne beim nächsten Wochenende oder von '
+                        + 'Mittwoch bis Freitag.';
+    }
     kasten.classList.add('zu', 'visible');
     anfNote.classList.remove('visible');
     dayInfo.classList.add('hidden');
@@ -2408,7 +2421,8 @@ const handVoll = d => (HANDEINTRAG[dkey(d)] || 0) >= MAX_PER_DAY;
 /* Am Wochenende faellt ein Tag aus zwei Gruenden aus: Er wurde von
    Hand ganz zugemacht, oder die Wochenend-Anfragen sind gerade
    gestoppt. */
-const woGestoppt = d => WOCHENENDE_ZU && REQUEST_DAYS.includes(d.getDay());
+const woGestoppt = d => REQUEST_DAYS.includes(d.getDay())
+  && (WOCHENENDE_ZU || WOCHENENDE_TAGE.includes(dkey(d)));
 const isFull = d => buchbar(d) && (
   REQUEST_DAYS.includes(d.getDay()) ? (handVoll(d) || woGestoppt(d)) : freeSeats(d) <= 0
 );
@@ -2553,6 +2567,7 @@ function belegungLaden() {
       if (j && j.manuell) HANDEINTRAG = j.manuell;
       if (j && j.art) ANZEIGEART = j.art;
       WOCHENENDE_ZU = Boolean(j && j.wochenende_zu);
+      WOCHENENDE_TAGE = (j && Array.isArray(j.wochenende_tage)) ? j.wochenende_tage : [];
     })
     .catch(() => { /* offline oder Server-Problem */ });
 }
