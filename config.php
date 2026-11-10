@@ -114,6 +114,20 @@ const ANTWORTFRIST = 'so schnell wie möglich';
    Kasten "anfrage-note" — dort bei einer Aenderung mitziehen. */
 const WOCHENEND_AB = '11 Uhr';
 
+/* ── Wochenend-Bloecke ──
+   Samstag und Sonntag laufen in zwei festen Zeitfenstern. Jeder
+   Block hat seine eigenen MAX_PER_DAY Plaetze — wer vormittags
+   bucht, nimmt niemandem am Nachmittag etwas weg.
+
+   Der Text ist zugleich der gespeicherte Wert: Er steht so in der
+   Anfrage, in den Mails, in der Uebersicht und im Kalender. Wird
+   hier etwas geaendert, behalten bereits gespeicherte Anfragen
+   ihren alten Text — der zaehlt dann als eigener Block. */
+const WOCHENEND_BLOECKE = [
+    '11:00 – 14:00 Uhr',
+    '15:00 – 18:00 Uhr',
+];
+
 /* Gruss am Ende aller Nachrichten an Kundinnen und Kunden —
    in den automatischen Mails wie in den Vorlagen der Uebersicht. */
 const GRUSS = "Liebe Grüße\nTatjana\nTonflüstern\nwww.tonfluestern.de";
@@ -301,6 +315,29 @@ function belegt(array $d, string $datum): int {
 /** Freie Plätze an diesem Tag. */
 function frei(array $d, string $datum): int {
     return max(0, MAX_PER_DAY - belegt($d, $datum));
+}
+
+/** Belegte Plätze in einem Wochenend-Block.
+ *
+ * Von Hand geblockte Plätze gelten für den ganzen Tag und zählen
+ * deshalb in beiden Blöcken mit: Wer den Raum vormittags für sich
+ * hat, hat ihn nachmittags nicht automatisch frei.
+ */
+function block_belegt(array $d, string $datum, string $block): int {
+    $n = 0;
+    foreach ($d['anfragen'] as $a) {
+        if (($a['datum'] ?? '') !== $datum) { continue; }
+        if (($a['status'] ?? 'offen') === 'storniert') { continue; }
+        if ((string)($a['wunschzeit'] ?? '') !== $block) { continue; }
+        $n += (int)($a['personen'] ?? 0);
+    }
+    $n += (int)($d['manuell'][$datum] ?? 0);
+    return max(0, $n);
+}
+
+/** Freie Plätze in einem Wochenend-Block. */
+function block_frei(array $d, string $datum, string $block): int {
+    return max(0, MAX_PER_DAY - block_belegt($d, $datum, $block));
 }
 
 /** Ist das ein Tag, an dem überhaupt gebucht werden kann? */

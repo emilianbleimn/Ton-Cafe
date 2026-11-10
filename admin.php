@@ -317,16 +317,24 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
                    Bei stornierten Anfragen ist das egal — die
                    belegen ohnehin keinen Platz. */
                 $anfrage_tag = in_array((int)date('w', strtotime($datum)), REQUEST_DAYS, true);
-                if (!$anfrage_tag && ($a['status'] ?? 'offen') !== 'storniert') {
+                if (($a['status'] ?? 'offen') !== 'storniert') {
                     $sonst = (int)($d['manuell'][$datum] ?? 0);
                     foreach ($d['anfragen'] as $i => $b) {
                         if ($i === $treffer) { continue; }
                         if (($b['datum'] ?? '') !== $datum) { continue; }
                         if (($b['status'] ?? 'offen') === 'storniert') { continue; }
+                        /* Am Wochenende zaehlt nur, wer im selben
+                           Zeitfenster liegt — beide Bloecke haben
+                           ihre eigenen Plaetze. */
+                        if ($anfrage_tag
+                            && (string)($b['wunschzeit'] ?? '') !== $neu['wunschzeit']) {
+                            continue;
+                        }
                         $sonst += (int)($b['personen'] ?? 0);
                     }
                     if ($neu['personen'] > MAX_PER_DAY - $sonst) {
                         return ['ok' => false, 'grund' => 'voll',
+                                'block' => $anfrage_tag,
                                 'frei' => max(0, MAX_PER_DAY - $sonst)];
                     }
                 }
@@ -360,9 +368,13 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
                 $_SESSION['bearb_id']    = $id;
                 $_SESSION['bearb_werte'] = $neu;
             } elseif (($ergebnis['grund'] ?? '') === 'voll') {
-                $hinweis = 'So viele Personen passen an diesem Tag nicht mehr —'
-                         . ' frei sind noch ' . $ergebnis['frei']
-                         . '. Es wurde nichts geändert.';
+                $hinweis = !empty($ergebnis['block'])
+                    ? 'So viele Personen passen in dieses Zeitfenster nicht mehr —'
+                      . ' frei sind dort noch ' . $ergebnis['frei']
+                      . '. Es wurde nichts geändert.'
+                    : 'So viele Personen passen an diesem Tag nicht mehr —'
+                      . ' frei sind noch ' . $ergebnis['frei']
+                      . '. Es wurde nichts geändert.';
                 $_SESSION['bearb_id']    = $id;
                 $_SESSION['bearb_werte'] = $neu;
             } else {
@@ -481,6 +493,12 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
             $problem = 'Diesen Anlass gibt es nicht.';
         } elseif ($h['personen'] < 1 || $h['personen'] > MAX_PER_DAY) {
             $problem = 'Die Personenzahl muss zwischen 1 und ' . MAX_PER_DAY . ' liegen.';
+        } elseif ($h['datum'] !== ''
+                  && in_array((int)date('w', strtotime($h['datum'])), REQUEST_DAYS, true)
+                  && !in_array($h['wunschzeit'], WOCHENEND_BLOECKE, true)) {
+            /* Am Wochenende haengen die Plaetze am Zeitfenster —
+               ohne eines liesse sich nicht rechnen, wie voll es ist. */
+            $problem = 'Am Wochenende gehört ein Zeitfenster dazu. Bitte wähle eines aus.';
         }
 
         if ($problem !== '') {
@@ -496,12 +514,22 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
                     if (($b['status'] ?? 'offen') === 'storniert') { continue; }
                     $belegt_tag += (int)($b['personen'] ?? 0);
                 }
-                $frei_tag = MAX_PER_DAY - $belegt_tag;
-                /* Am Wochenende gibt es kein Tageslimit — dort wird
-                   jeder Termin einzeln abgesprochen. */
+                /* Am Wochenende zaehlt das gewaehlte Zeitfenster,
+                   sonst der ganze Tag. */
                 $anfrage_tag = in_array((int)date('w', strtotime($h['datum'])), REQUEST_DAYS, true);
-                if (!$anfrage_tag && $h['personen'] > $frei_tag) {
-                    return ['ok' => false, 'frei' => max(0, $frei_tag)];
+                if ($anfrage_tag) {
+                    $belegt_tag = (int)($d['manuell'][$h['datum']] ?? 0);
+                    foreach ($d['anfragen'] as $b) {
+                        if (($b['datum'] ?? '') !== $h['datum']) { continue; }
+                        if (($b['status'] ?? 'offen') === 'storniert') { continue; }
+                        if ((string)($b['wunschzeit'] ?? '') !== $h['wunschzeit']) { continue; }
+                        $belegt_tag += (int)($b['personen'] ?? 0);
+                    }
+                }
+                $frei_tag = MAX_PER_DAY - $belegt_tag;
+                if ($h['personen'] > $frei_tag) {
+                    return ['ok' => false, 'frei' => max(0, $frei_tag),
+                            'block' => $anfrage_tag];
                 }
 
                 $wt = (int)date('w', strtotime($h['datum']));
@@ -534,12 +562,20 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
                          . ($h['personen'] === 1 ? 'Person' : 'Personen') . ' am '
                          . date('d.m.Y', strtotime($h['datum']))
                          . ($wochenende_tag
-                             ? ' (auf Anfrage).'
+                             ? ($h['wunschzeit'] !== ''
+                                 ? ', ' . $h['wunschzeit'] . '. In diesem Zeitfenster sind noch '
+                                   . $ergebnis['frei'] . ' Plätze frei.'
+                                 : ' (ohne Zeitfenster).')
                              : '. An dem Tag sind noch ' . $ergebnis['frei'] . ' Plätze frei.');
             } else {
-                $hinweis = 'Das passt nicht mehr — am '
-                         . date('d.m.Y', strtotime($h['datum'])) . ' sind nur noch '
-                         . $ergebnis['frei'] . ' Plätze frei. Es wurde nichts eingetragen.';
+                $hinweis = !empty($ergebnis['block'])
+                    ? 'Das passt nicht mehr — am '
+                      . date('d.m.Y', strtotime($h['datum']))
+                      . ' sind im Zeitfenster „' . $h['wunschzeit'] . '“ nur noch '
+                      . $ergebnis['frei'] . ' Plätze frei. Es wurde nichts eingetragen.'
+                    : 'Das passt nicht mehr — am '
+                      . date('d.m.Y', strtotime($h['datum'])) . ' sind nur noch '
+                      . $ergebnis['frei'] . ' Plätze frei. Es wurde nichts eingetragen.';
                 $_SESSION['hand_werte'] = $h;
             }
         }
@@ -675,6 +711,11 @@ function google_termin_url(array $a): string {
     $zone = new DateTimeZone('Europe/Berlin');
     $wt   = (int)date('w', strtotime($datum));
     $fest = OPEN_HOURS[$wt] ?? null;
+    /* Am Wochenende steht die Zeit im gewaehlten Zeitfenster. */
+    if ($fest === null
+        && in_array((string)($a['wunschzeit'] ?? ''), WOCHENEND_BLOECKE, true)) {
+        $fest = (string)$a['wunschzeit'];
+    }
 
     if ($fest !== null && preg_match('/(\d{2}:\d{2}).*?(\d{2}:\d{2})/', $fest, $m)) {
         $von = new DateTime($datum . ' ' . $m[1], $zone);
@@ -1288,9 +1329,13 @@ Ich freue mich auf eine schöne kreative Zeit mit {$w['dativ']}!
 
         <div class="bf">
           <label for="h-zeit">Wunschzeit</label>
-          <input type="text" id="h-zeit" name="h_wunschzeit"
-                 value="<?= $e((string)$hw('wunschzeit', '')) ?>">
-          <span class="bf-klein">nur am Wochenende nötig</span>
+          <select id="h-zeit" name="h_wunschzeit">
+            <option value=""<?= (string)$hw('wunschzeit', '') === '' ? ' selected' : '' ?>>— keines —</option>
+            <?php foreach (WOCHENEND_BLOECKE as $opt): ?>
+              <option value="<?= $e($opt) ?>"<?= $opt === (string)$hw('wunschzeit', '') ? ' selected' : '' ?>><?= $e($opt) ?></option>
+            <?php endforeach; ?>
+          </select>
+          <span class="bf-klein">nur am Wochenende — Samstag und Sonntag laufen in zwei Zeitfenstern</span>
         </div>
 
         <div class="bf">
@@ -1660,9 +1705,20 @@ Ich freue mich auf eine schöne kreative Zeit mit {$w['dativ']}!
 
                   <div class="bf">
                     <label for="<?= $rid ?>-b-zeit">Wunschzeit</label>
-                    <input type="text" id="<?= $rid ?>-b-zeit" name="b_wunschzeit"
-                           value="<?= $e((string)$bv('wunschzeit', '')) ?>">
-                    <span class="bf-klein">nur am Wochenende, sonst gelten die Öffnungszeiten</span>
+                    <?php
+                    $wz_jetzt = (string)$bv('wunschzeit', '');
+                    $wz_liste = WOCHENEND_BLOECKE;
+                    // Steht dort etwas anderes, geht es nicht verloren
+                    if ($wz_jetzt !== '' && !in_array($wz_jetzt, $wz_liste, true)) {
+                        $wz_liste[] = $wz_jetzt;
+                    } ?>
+                    <select id="<?= $rid ?>-b-zeit" name="b_wunschzeit">
+                      <option value=""<?= $wz_jetzt === '' ? ' selected' : '' ?>>— keines —</option>
+                      <?php foreach ($wz_liste as $opt): ?>
+                        <option value="<?= $e($opt) ?>"<?= $opt === $wz_jetzt ? ' selected' : '' ?>><?= $e($opt) ?></option>
+                      <?php endforeach; ?>
+                    </select>
+                    <span class="bf-klein">nur am Wochenende — sonst gelten die Öffnungszeiten</span>
                   </div>
 
                   <div class="bf weit">

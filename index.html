@@ -399,6 +399,32 @@
       text-decoration: line-through;
       text-decoration-thickness: 1px;
     }
+    /* ── Wochenend-Zeitfenster ──
+       Zwei grosse Flaechen statt eines Textfelds: Am Handy trifft
+       man sie sicher, und es ist sofort zu sehen, was zur Wahl
+       steht. Ein belegtes Fenster bleibt sichtbar, ist aber nicht
+       waehlbar — sonst waere unklar, warum es nur noch eines gibt. */
+    #wz-bloecke { display: grid; gap: .6rem; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
+    #wz-bloecke .wz-block {
+      display: flex; align-items: center; gap: .6rem;
+      padding: .8rem 1rem; cursor: pointer;
+      border: 1px solid rgba(122,82,48,.3); background: var(--bg-1);
+      transition: border-color .2s, background .2s;
+      /* Die Flaechen sind <label> und erben sonst die Grossschreibung
+         der Formularbeschriftungen — aus "11:00 – 14:00 Uhr" wuerde
+         "11:00 – 14:00 UHR". */
+      text-transform: none; letter-spacing: normal;
+    }
+    #wz-bloecke .wz-block:hover { border-color: var(--bronze); }
+    #wz-bloecke .wz-block input { accent-color: var(--bronze); width: 1.1rem; height: 1.1rem; flex: none; }
+    #wz-bloecke .wz-zeit { font-size: .95rem; color: var(--cream); }
+    #wz-bloecke .wz-wann { display: block; font-size: .72rem; color: var(--cream-faint);
+                         text-transform: uppercase; letter-spacing: .1em; margin-bottom: .1rem; }
+    #wz-bloecke .wz-block.gewaehlt { border-color: var(--bronze); background: rgba(122,82,48,.08); }
+    #wz-bloecke .wz-block.belegt { opacity: .5; cursor: not-allowed; }
+    #wz-bloecke .wz-block.belegt .wz-zeit { text-decoration: line-through; }
+    #wz-bloecke .wz-voll { font-size: .72rem; color: var(--terra); display: block; }
+
     .flatpickr-day.day-limited { position: relative; font-weight: 700; }
     .flatpickr-day.day-limited::after {
       content: ''; position: absolute; bottom: 4px; left: 50%; transform: translateX(-50%);
@@ -1954,11 +1980,13 @@
               </div>
             </div>
             <div class="fg" id="wz-feld">
-              <label for="bk-wunschzeit">Wunschzeit *
-                <span class="wz-hint">Am Wochenende gibt es keine festen Zeiten. Ab wann möchtest du kommen? Am besten passt es ab 11 Uhr.</span>
+              <label id="wz-label">Zeitfenster *
+                <span class="wz-hint">Am Wochenende gibt es zwei Zeitfenster. Wähle aus, wann ihr kommen möchtet.</span>
               </label>
-              <input type="text" id="bk-wunschzeit" name="wunschzeit"
-                     placeholder="z. B. ab 11 Uhr" maxlength="60" autocomplete="off">
+              <!-- Die Zeitfenster kommen aus belegung.php, damit sie nur an
+                   einer Stelle stehen. Hier steht nur das Gerüst. -->
+              <div class="wz-bloecke" id="wz-bloecke" role="radiogroup" aria-labelledby="wz-label"></div>
+              <input type="hidden" id="bk-wunschzeit" name="wunschzeit" value="">
             </div>
 
             <div class="fg">
@@ -2264,6 +2292,11 @@ let WOCHENENDE_ZU = false;
 /* Einzelne Wochenendtage, die gestoppt wurden — etwa weil dieser
    eine Samstag voll ist, der naechste aber noch frei. */
 let WOCHENENDE_TAGE = [];
+/* Die beiden Wochenend-Zeitfenster und wie voll sie sind.
+   BLOECKE: die Texte in fester Reihenfolge.
+   BLOCKBELEGT: je Datum eine Liste mit der Belegung je Block. */
+let BLOECKE = [];
+let BLOCKBELEGT = {};
 const MAX_PER_DAY = 18;
 
 // Wochentage: 0=So, 1=Mo, 2=Di, 3=Mi, 4=Do, 5=Fr, 6=Sa
@@ -2309,19 +2342,85 @@ anlassFreitext();
 const wzFeld   = document.getElementById('wz-feld');
 const wzIn     = document.getElementById('bk-wunschzeit');
 
-/* Wunschzeit ein- und ausblenden. Das "required" wandert mit:
+const wzKasten = document.getElementById('wz-bloecke');
+
+/* Freie Plaetze in einem Zeitfenster an einem Tag. */
+function blockFrei(datum, i) {
+  const b = BLOCKBELEGT[datum];
+  const belegt = (b && typeof b[i] === 'number') ? b[i] : 0;
+  return MAX_PER_DAY - belegt;
+}
+
+/* Die beiden Zeitfenster fuer diesen Tag aufbauen.
+   Ein volles Fenster bleibt stehen, ist aber nicht waehlbar — sonst
+   waere unklar, warum nur noch eines zur Wahl steht. Eine Platzzahl
+   steht bewusst nicht dabei: Am Wochenende wird keine genannt. */
+function bloeckeAufbauen(datum) {
+  if (!wzKasten) return;
+  wzKasten.innerHTML = '';
+  if (wzIn) wzIn.value = '';
+
+  const namen = ['Vormittags', 'Nachmittags'];
+  BLOECKE.forEach((zeit, i) => {
+    const frei = blockFrei(datum, i);
+    const voll = frei <= 0;
+
+    const label = document.createElement('label');
+    label.className = 'wz-block' + (voll ? ' belegt' : '');
+
+    const knopf = document.createElement('input');
+    knopf.type = 'radio';
+    knopf.name = 'wunschzeit_wahl';
+    knopf.value = zeit;
+    knopf.disabled = voll;
+
+    const text = document.createElement('span');
+    const wann = document.createElement('span');
+    wann.className = 'wz-wann';
+    wann.textContent = namen[i] || ('Block ' + (i + 1));
+    const uhr = document.createElement('span');
+    uhr.className = 'wz-zeit';
+    uhr.textContent = zeit;
+    text.appendChild(wann);
+    text.appendChild(uhr);
+    if (voll) {
+      const hin = document.createElement('span');
+      hin.className = 'wz-voll';
+      hin.textContent = 'schon belegt';
+      text.appendChild(hin);
+    }
+
+    knopf.addEventListener('change', () => {
+      if (!knopf.checked) return;
+      if (wzIn) wzIn.value = zeit;
+      [...wzKasten.querySelectorAll('.wz-block')]
+        .forEach(x => x.classList.remove('gewaehlt'));
+      label.classList.add('gewaehlt');
+      /* Mehr Personen als in dieses Fenster passen, nimmt der Server
+         ohnehin nicht an — also gleich hier begrenzen. */
+      persIn.max = Math.max(1, frei);
+      if (Number(persIn.value) > frei) persIn.value = Math.max(1, frei);
+    });
+
+    label.appendChild(knopf);
+    label.appendChild(text);
+    wzKasten.appendChild(label);
+  });
+}
+
+/* Zeitfenster ein- und ausblenden. Das "required" wandert mit:
    ein verborgenes Pflichtfeld laesst sich nicht ausfuellen, der
    Browser wuerde das Absenden aber trotzdem verweigern — und die
    Fehlermeldung zeigt er an einer unsichtbaren Stelle an. */
-function wunschzeitZeigen(an) {
+function wunschzeitZeigen(an, datum) {
   if (!wzFeld || !wzIn) return;
   wzFeld.classList.toggle('visible', an);
   if (an) {
-    wzIn.setAttribute('required', '');
+    bloeckeAufbauen(datum);
   } else {
-    wzIn.removeAttribute('required');
     wzIn.value = '';
     wzIn.setCustomValidity('');
+    if (wzKasten) wzKasten.innerHTML = '';
   }
 }
 
@@ -2543,11 +2642,18 @@ kalenderInstanz = flatpickr('#cal-container', {
         return;
       }
 
+      /* Beide Zeitfenster voll? Dann geht an diesem Tag nichts mehr. */
+      if (BLOECKE.length && BLOECKE.every((_, i) => blockFrei(dkey(date), i) <= 0)) {
+        vollHinweis(date);
+        fTime.value = ''; fSeats.value = '';
+        return;
+      }
+
       fTime.value  = 'Auf Anfrage';
       fSeats.value = 'Auf Anfrage';
       persIn.max   = MAX_PER_DAY;
       anfNote.classList.add('visible');
-      wunschzeitZeigen(true);
+      wunschzeitZeigen(true, dkey(date));
     }
   }
 });
@@ -2568,6 +2674,8 @@ function belegungLaden() {
       if (j && j.art) ANZEIGEART = j.art;
       WOCHENENDE_ZU = Boolean(j && j.wochenende_zu);
       WOCHENENDE_TAGE = (j && Array.isArray(j.wochenende_tage)) ? j.wochenende_tage : [];
+      if (j && Array.isArray(j.bloecke)) BLOECKE = j.bloecke;
+      if (j && j.blockbelegt) BLOCKBELEGT = j.blockbelegt;
     })
     .catch(() => { /* offline oder Server-Problem */ });
 }
@@ -2602,6 +2710,16 @@ bkForm.addEventListener('submit', async e => {
   if (!fDate.value) {
     alert('Bitte wähle zuerst einen Termin im Kalender.');
     document.getElementById('cal-container').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    return;
+  }
+
+  /* Am Wochenende gehoert ein Zeitfenster dazu. Das Feld selbst ist
+     verborgen — ein "required" darauf wuerde der Browser an einer
+     unsichtbaren Stelle anmahnen, und der Knopf taete scheinbar
+     nichts. Deshalb hier von Hand. */
+  if (wzFeld && wzFeld.classList.contains('visible') && !wzIn.value) {
+    alert('Bitte wähle aus, in welchem Zeitfenster ihr kommen möchtet.');
+    wzFeld.scrollIntoView({ behavior: 'smooth', block: 'center' });
     return;
   }
 

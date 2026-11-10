@@ -93,8 +93,14 @@ foreach ($d['anfragen'] as $a) {
     $angebot  = (string)($a['angebot'] ?? 'Anfrage');
     $name     = (string)($a['name'] ?? '');
 
-    // Zeitfenster: an festen Tagen die Oeffnungszeit, sonst ganztaegig
+    /* Zeitfenster: an festen Tagen die Oeffnungszeit, am Wochenende
+       das gewaehlte Zeitfenster — erst ohne eines wird der Termin
+       ganztaegig. */
     $fest = OPEN_HOURS[$wt] ?? null;
+    if ($fest === null
+        && in_array((string)($a['wunschzeit'] ?? ''), WOCHENEND_BLOECKE, true)) {
+        $fest = (string)$a['wunschzeit'];
+    }
     if ($fest !== null && preg_match('/(\d{2}:\d{2}).*?(\d{2}:\d{2})/', $fest, $m)) {
         $start = 'DTSTART:' . ics_zeit($datum, $m[1]);
         $ende  = 'DTEND:'   . ics_zeit($datum, $m[2]);

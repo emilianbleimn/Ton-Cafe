@@ -105,7 +105,11 @@ $auf_anfr  = !isset(OPEN_HOURS[$wt]);
 if ($auf_anfr) {
     if ($wunschzeit === '') {
         antwort(['ok' => false,
-                 'fehler' => 'Bitte gib an, ab wann du am Wochenende kommen möchtest.'], 422);
+                 'fehler' => 'Bitte wähle aus, in welchem Zeitfenster du kommen möchtest.'], 422);
+    }
+    if (!in_array($wunschzeit, WOCHENEND_BLOECKE, true)) {
+        antwort(['ok' => false,
+                 'fehler' => 'Dieses Zeitfenster gibt es nicht. Bitte wähle eines aus der Liste.'], 422);
     }
 } else {
     $wunschzeit = '';
@@ -121,18 +125,18 @@ $ergebnis = mit_sperre(function (array &$d) use (
     $datum, $personen, $name, $email, $telefon, $nachricht, $oeffnung, $angebot, $anfrage_id,
     $wunschzeit, $anlass, $anlass_text, $auf_anfr
 ) {
-    $noch_frei = frei($d, $datum);
+    /* Am Wochenende zaehlt der gewaehlte Block, sonst der ganze
+       Tag. Beide Bloecke haben ihre eigenen Plaetze: Wer vormittags
+       bucht, nimmt niemandem am Nachmittag etwas weg. */
+    $noch_frei = $auf_anfr
+        ? block_frei($d, $datum, $wunschzeit)
+        : frei($d, $datum);
 
-    /* Am Wochenende gibt es keine feste Platzzahl: Samstag und
-       Sonntag laufen auf Anfrage, jeder Termin wird einzeln
-       abgesprochen. Hier wird deshalb nichts gegen ein Tageslimit
-       gerechnet — sonst wiese der Server eine Anfrage ab, von der
-       der Besucher im Kalender gar nicht erfahren hat, dass sie zu
-       gross ist. An den festen Tagen bleibt die Pruefung.      */
-    if (!$auf_anfr && $personen > $noch_frei) {
+    if ($personen > $noch_frei) {
         return [
             'ok'    => false,
             'frei'  => $noch_frei,
+            'block' => $auf_anfr,
             'grund' => $noch_frei === 0
                 ? 'ausgebucht'
                 : 'zu_viele',
@@ -157,11 +161,7 @@ $ergebnis = mit_sperre(function (array &$d) use (
         'ip'        => substr((string)($_SERVER['REMOTE_ADDR'] ?? ''), 0, 45),
     ];
 
-    /* Am Wochenende gibt es kein Tageslimit — dann auch keine
-       Restzahl. Ohne das kaeme hier eine negative Zahl heraus,
-       sobald mehr Personen angefragt sind als frueher Plaetze da
-       waren. */
-    return ['ok' => true, 'frei' => $auf_anfr ? null : $noch_frei - $personen];
+    return ['ok' => true, 'frei' => $noch_frei - $personen];
 });
 } catch (Throwable $ex) {
     // Bestand nicht lesbar oder nicht schreibbar: lieber ehrlich abbrechen,
@@ -176,10 +176,23 @@ $ergebnis = mit_sperre(function (array &$d) use (
 }
 
 if (!$ergebnis['ok']) {
-    $fehler = $ergebnis['grund'] === 'ausgebucht'
-        ? 'Dieser Tag ist inzwischen leider ausgebucht. Bitte wähle einen anderen Termin.'
-        : 'An diesem Tag sind nur noch ' . $ergebnis['frei'] . ' '
-          . ($ergebnis['frei'] === 1 ? 'Platz' : 'Plätze') . ' frei.';
+    /* Am Wochenende ist nicht der Tag voll, sondern das gewaehlte
+       Zeitfenster — das andere kann durchaus noch frei sein. Die
+       Meldung sagt das, damit niemand aufgibt, dem der andere
+       Block auch gepasst haette. Eine Platzzahl steht dort
+       bewusst nicht: Am Wochenende wird keine genannt.         */
+    if (!empty($ergebnis['block'])) {
+        $fehler = $ergebnis['grund'] === 'ausgebucht'
+            ? 'Dieses Zeitfenster ist inzwischen leider belegt.'
+              . ' Bitte wähle das andere Zeitfenster oder einen anderen Tag.'
+            : 'In diesem Zeitfenster ist nicht mehr genug Platz für so viele Personen.'
+              . ' Bitte wähle das andere Zeitfenster oder einen anderen Tag.';
+    } else {
+        $fehler = $ergebnis['grund'] === 'ausgebucht'
+            ? 'Dieser Tag ist inzwischen leider ausgebucht. Bitte wähle einen anderen Termin.'
+            : 'An diesem Tag sind nur noch ' . $ergebnis['frei'] . ' '
+              . ($ergebnis['frei'] === 1 ? 'Platz' : 'Plätze') . ' frei.';
+    }
     antwort(['ok' => false, 'fehler' => $fehler, 'frei' => $ergebnis['frei']], 409);
 }
 
@@ -199,7 +212,8 @@ $text = "Neue Terminanfrage über tonfluestern.de\n"
       . "Anlass:      $anlass" . ($anlass_text !== '' ? " — $anlass_text" : '') . "\n"
       . "Personen:    $personen\n"
       . ($auf_anfr
-          ? "Platzzahl:   entfällt — Wochenende läuft auf Anfrage\n\n"
+          ? "Noch frei:   " . $ergebnis['frei'] . " von " . MAX_PER_DAY
+            . " in diesem Zeitfenster\n\n"
           : "Noch frei:   " . $ergebnis['frei'] . " von " . MAX_PER_DAY . "\n\n")
       . "Name:        $name\n"
       . "E-Mail:      $email\n"
