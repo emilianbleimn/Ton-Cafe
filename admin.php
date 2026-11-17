@@ -89,8 +89,6 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
             // Die Meldung wird beim Ausgeben maskiert ($e), hier also roh
             $hinweis = 'Das Datum ' . $neu . ' geht nicht — es muss zwischen heute und '
                      . date('d.m.Y', strtotime('+' . VORLAUF_TAGE . ' days')) . ' liegen.';
-        } elseif (!buchbarer_tag($neu)) {
-            $hinweis = 'An diesem Wochentag ist geschlossen — bitte ein anderes Datum wählen.';
         } else {
             $ergebnis = mit_sperre(function (array &$d) use ($id, $neu) {
                 $treffer = null;
@@ -134,6 +132,9 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
                 $alt  = (string)($a['datum'] ?? '');
                 $d['anfragen'][$treffer]['datum'] = $neu;
                 $d['anfragen'][$treffer]['zeit']  = OPEN_HOURS[$wt] ?? 'Auf Anfrage';
+                /* Ruhetag? Dann ist das eine Ausnahme und wird so
+                   gekennzeichnet. Ueber die Website bleibt der Tag zu. */
+                $d['anfragen'][$treffer]['ausnahme'] = !buchbarer_tag($neu);
 
                 if (isset(OPEN_HOURS[$wt]) && ($a['wunschzeit'] ?? '') !== '') {
                     $notiz = 'Wunschzeit vom ursprünglichen Termin: ' . $a['wunschzeit'];
@@ -158,7 +159,10 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
                 $hinweis = 'Anfrage verschoben: '
                     . date('d.m.Y', strtotime($ergebnis['von'])) . ' → '
                     . date('d.m.Y', strtotime($neu))
-                    . '. Bitte gib den Gästen Bescheid.';
+                    . (!buchbarer_tag($neu)
+                        ? ' — das ist ein Ruhetag, der Eintrag ist als Ausnahme vermerkt.'
+                        : '.')
+                    . ' Bitte gib den Gästen Bescheid.';
             } elseif ($ergebnis['grund'] === 'voll') {
                 $hinweis = 'Verschieben nicht möglich — am '
                     . date('d.m.Y', strtotime($neu)) . ' sind nur noch '
@@ -474,14 +478,19 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
             'wunschzeit'  => $f('h_wunschzeit', 60),
             'nachricht'   => $f('h_nachricht', 2000),
             'status'      => $f('h_status', 20) === 'offen' ? 'offen' : 'bestaetigt',
+            /* Ausnahme an einem Ruhetag — etwa ein Event, eine
+               Schulklasse oder Babyschalen an einem Dienstag. Nur von
+               Hand moeglich; ueber die Website bleibt der Tag zu. */
+            'ausnahme'    => isset($_POST['h_ausnahme']),
         ];
 
         $problem = '';
         if ($h['datum'] === '' || !datum_gueltig($h['datum'])) {
             $problem = 'Bitte ein Datum zwischen heute und '
                      . date('d.m.Y', strtotime('+' . VORLAUF_TAGE . ' days')) . ' wählen.';
-        } elseif (!buchbarer_tag($h['datum'])) {
-            $problem = 'An diesem Wochentag ist geschlossen — bitte ein anderes Datum wählen.';
+        } elseif (!buchbarer_tag($h['datum']) && !$h['ausnahme']) {
+            $problem = 'An diesem Wochentag ist geschlossen. Setze den Haken bei'
+                     . ' „Ausnahme“, wenn du trotzdem eintragen willst.';
         } elseif (mb_strlen($h['name']) < 2) {
             $problem = 'Bitte einen Namen eintragen.';
         } elseif ($h['email'] !== '' && !filter_var($h['email'], FILTER_VALIDATE_EMAIL)) {
@@ -493,7 +502,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
             $problem = 'Diesen Anlass gibt es nicht.';
         } elseif ($h['personen'] < 1 || $h['personen'] > MAX_PER_DAY) {
             $problem = 'Die Personenzahl muss zwischen 1 und ' . MAX_PER_DAY . ' liegen.';
-        } elseif ($h['datum'] !== ''
+        } elseif ($h['datum'] !== '' && empty($h['ausnahme'])
                   && in_array((int)date('w', strtotime($h['datum'])), REQUEST_DAYS, true)
                   && !in_array($h['wunschzeit'], WOCHENEND_BLOECKE, true)) {
             /* Am Wochenende haengen die Plaetze am Zeitfenster —
@@ -550,6 +559,8 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
                     'erstellt'    => date('Y-m-d H:i:s'),
                     // Woher der Eintrag stammt — in der Liste als Merkmal sichtbar
                     'quelle'      => 'hand',
+                    // Ausnahme an einem Ruhetag? Steht in der Zeile dabei.
+                    'ausnahme'    => !buchbarer_tag($h['datum']),
                 ];
                 return ['ok' => true, 'frei' => $frei_tag - $h['personen']];
             });
@@ -939,6 +950,10 @@ Ich freue mich auf eine schöne kreative Zeit mit {$w['dativ']}!
             align-items:baseline;flex-wrap:wrap;gap:.5rem;background:rgba(122,82,48,.07)}
   .tag-kopf strong{font-size:1.05rem;font-weight:600}
   .zaehler{font-size:.85rem;font-weight:600;color:#7a5230}
+  .tag-ausnahme{display:inline-block;margin-left:.5rem;font-size:.66rem;
+       letter-spacing:.08em;text-transform:uppercase;font-weight:600;
+       color:#a84c2a;border:1px solid rgba(168,76,42,.4);background:#f7e9e2;
+       padding:.08rem .45rem;vertical-align:middle}
   .zaehler.voll{color:#a84c2a}
   /* Die Tabelle rollt in sich, nicht die ganze Seite. Sonst wanderten
      auf dem Handy die Knoepfe der letzten Spalte aus dem Bild heraus
@@ -1114,7 +1129,17 @@ Ich freue mich auf eine schöne kreative Zeit mit {$w['dativ']}!
   .handform[open]>summary::before{content:'－ '}
   .hf-text{font-size:.83rem;color:#5e4535;margin:0 1.2rem .4rem;line-height:1.6}
   .bf-opt{text-transform:none;letter-spacing:0;color:#a8917a;font-size:.72rem}
+  /* Das Kaestchen steht in einem .bf-Block, dessen Regel die
+     Beschriftung gross schreibt. Hier gehoert Fliesstext hin. */
+  .bf .hf-ausnahme{display:flex;gap:.6rem;align-items:flex-start;
+       text-transform:none;letter-spacing:normal;color:#5e4535;
+       font-size:.82rem;line-height:1.6;margin:0;cursor:pointer}
+  .bf .hf-ausnahme input{margin-top:.2rem;width:1.05rem;height:1.05rem;flex:none;
+       accent-color:#7a5230}
+  .bf .hf-ausnahme strong{display:block;color:#291b0f;font-size:.86rem;
+       text-transform:none;letter-spacing:normal}
   .st-hand{color:#7a5230;border-color:rgba(122,82,48,.35);background:#f0e7d8}
+  .st-ausnahme{color:#a84c2a;border-color:rgba(168,76,42,.4);background:#f7e9e2}
   .archiv-text{padding:0 1.2rem 1rem;font-size:.8rem;color:#a8917a;margin:0}
   /* Die Liste der geblockten Tage hat feste Spalten, die sich nicht
      umbrechen lassen. Sie rollt deshalb in sich, statt die ganze
@@ -1352,6 +1377,18 @@ Ich freue mich auf eine schöne kreative Zeit mit {$w['dativ']}!
           <textarea id="h-msg" name="h_nachricht" rows="3"><?= $e((string)$hw('nachricht', '')) ?></textarea>
         </div>
 
+        <div class="bf weit">
+          <label class="hf-ausnahme">
+            <input type="checkbox" name="h_ausnahme" value="1"<?= !empty($hw('ausnahme')) ? ' checked' : '' ?>>
+            <span>
+              <strong>Ausnahme an einem Ruhetag</strong>
+              Montag und Dienstag ist sonst geschlossen. Mit diesem Haken trägst du
+              trotzdem ein — etwa ein Event, eine Schulklasse oder Babyschalen.
+              Über die Website bleibt der Tag weiterhin zu.
+            </span>
+          </label>
+        </div>
+
       </div>
       <div class="bearb-aktionen">
         <button type="submit" class="gruen" name="hand_buchen" value="1">Buchung eintragen</button>
@@ -1374,18 +1411,36 @@ Ich freue mich auf eine schöne kreative Zeit mit {$w['dativ']}!
   ?>
     <div class="tag <?= $voll ? 'voll' : '' ?>" data-tag="<?= $e($datum) ?>">
       <div class="tag-kopf">
-        <strong><?= $e($wt_namen[$wt]) ?>, <?= date('d.m.Y', $ts) ?></strong>
+        <strong><?= $e($wt_namen[$wt]) ?>, <?= date('d.m.Y', $ts) ?>
+          <?php /* An einem Ruhetag steht hier nur etwas, weil von Hand
+                   eingetragen wurde — das gehoert benannt. */
+          if (in_array($wt, CLOSED_DAYS, true)): ?>
+            <span class="tag-ausnahme">Ruhetag — Ausnahme</span>
+          <?php endif; ?>
+        </strong>
         <?php /* Samstag und Sonntag laufen auf Anfrage — dort gibt es
                  keine feste Platzzahl, also auch keine Angabe wie
                  "noch 6 frei" oder "ausgebucht". Die Zahl der
                  angefragten Personen bleibt, die brauchst du zum
                  Planen. */
-        $anfrage_tag = in_array($wt, REQUEST_DAYS, true); ?>
-        <span class="zaehler <?= !$anfrage_tag && $voll ? 'voll' : '' ?>">
+        $anfrage_tag = in_array($wt, REQUEST_DAYS, true);
+        /* Am Wochenende haengen die Plaetze am Zeitfenster. Beide
+           einzeln nennen — eine Summe waere irrefuehrend, weil sich
+           eine Gruppe nicht auf zwei Fenster aufteilen laesst. */
+        $bl_voll = $anfrage_tag;
+        if ($anfrage_tag) {
+            foreach (WOCHENEND_BLOECKE as $blk) {
+                if (block_frei($d, $datum, $blk) > 0) { $bl_voll = false; break; }
+            }
+        } ?>
+        <span class="zaehler <?= ($anfrage_tag ? $bl_voll : $voll) ? 'voll' : '' ?>">
           <?php if ($anfrage_tag): ?>
-            Auf Anfrage
-            <?= $bel > 0 ? ' — ' . $bel . ' ' . ($bel === 1 ? 'Person' : 'Personen') . ' angefragt' : '' ?>
-            <?= $manu > 0 ? ' (davon ' . $manu . ' von Hand)' : '' ?>
+            <?php foreach (WOCHENEND_BLOECKE as $i => $blk):
+              $b_bel = block_belegt($d, $datum, $blk); ?>
+              <?= $i > 0 ? ' · ' : '' ?><?= $e($blk) ?>:
+              <?= $b_bel ?> / <?= MAX_PER_DAY ?><?= $b_bel >= MAX_PER_DAY ? ' VOLL' : '' ?>
+            <?php endforeach; ?>
+            <?= $manu > 0 ? ' (' . $manu . ' von Hand für den ganzen Tag)' : '' ?>
           <?php else: ?>
             <?= $bel ?> / <?= MAX_PER_DAY ?> belegt
             <?= $voll ? ' — AUSGEBUCHT' : ' — noch ' . $frei . ' frei' ?>
@@ -1452,6 +1507,10 @@ Ich freue mich auf eine schöne kreative Zeit mit {$w['dativ']}!
                          haben keine Mails und keine IP. */
                 if (($a['quelle'] ?? '') === 'hand'): ?>
                   <span class="st st-hand" title="nicht über die Website gebucht">von Hand</span>
+                <?php endif; ?>
+                <?php /* An einem Ruhetag eingetragen — faellt sonst nicht auf. */
+                if (!empty($a['ausnahme'])): ?>
+                  <span class="st st-ausnahme" title="an einem sonst geschlossenen Tag">Ausnahme</span>
                 <?php endif; ?>
               </button>
             </td>
@@ -1639,10 +1698,24 @@ Ich freue mich auf eine schöne kreative Zeit mit {$w['dativ']}!
                     <label for="<?= $rid ?>-b-pers">Personen</label>
                     <input type="number" inputmode="numeric" id="<?= $rid ?>-b-pers"
                            name="b_personen" value="<?= $e((string)(int)$bv('personen', 0)) ?>">
-                    <?php /* Am Wochenende gibt es kein Tageslimit — dann hier
-                             auch keine Zahl, die eines vortaeuscht. */
-                    if (!in_array($wt, REQUEST_DAYS, true)): ?>
-                      <span class="bf-klein">an diesem Tag wären <?= (int)$frei_ohne ?> möglich</span>
+                    <?php
+                    /* Am Wochenende zaehlt das Zeitfenster dieser Anfrage,
+                       sonst der ganze Tag. */
+                    if (in_array($wt, REQUEST_DAYS, true)) {
+                        $blk = (string)($a['wunschzeit'] ?? '');
+                        if (in_array($blk, WOCHENEND_BLOECKE, true)) {
+                            $moeglich = block_frei($d, $datum, $blk)
+                                      + ($stor ? 0 : (int)($a['personen'] ?? 0));
+                            $wo = 'in diesem Zeitfenster';
+                        } else {
+                            $moeglich = null;
+                        }
+                    } else {
+                        $moeglich = (int)$frei_ohne;
+                        $wo = 'an diesem Tag';
+                    }
+                    if ($moeglich !== null): ?>
+                      <span class="bf-klein"><?= $e($wo) ?> wären <?= (int)$moeglich ?> möglich</span>
                     <?php endif; ?>
                   </div>
 

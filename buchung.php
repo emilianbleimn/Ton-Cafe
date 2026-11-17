@@ -179,13 +179,13 @@ if (!$ergebnis['ok']) {
     /* Am Wochenende ist nicht der Tag voll, sondern das gewaehlte
        Zeitfenster — das andere kann durchaus noch frei sein. Die
        Meldung sagt das, damit niemand aufgibt, dem der andere
-       Block auch gepasst haette. Eine Platzzahl steht dort
-       bewusst nicht: Am Wochenende wird keine genannt.         */
+       Block auch gepasst haette.                               */
     if (!empty($ergebnis['block'])) {
         $fehler = $ergebnis['grund'] === 'ausgebucht'
             ? 'Dieses Zeitfenster ist inzwischen leider belegt.'
               . ' Bitte wähle das andere Zeitfenster oder einen anderen Tag.'
-            : 'In diesem Zeitfenster ist nicht mehr genug Platz für so viele Personen.'
+            : 'In diesem Zeitfenster sind nur noch ' . $ergebnis['frei'] . ' '
+              . ($ergebnis['frei'] === 1 ? 'Platz' : 'Plätze') . ' frei.'
               . ' Bitte wähle das andere Zeitfenster oder einen anderen Tag.';
     } else {
         $fehler = $ergebnis['grund'] === 'ausgebucht'

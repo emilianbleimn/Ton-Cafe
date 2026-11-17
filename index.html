@@ -424,6 +424,8 @@
     #wz-bloecke .wz-block.belegt { opacity: .5; cursor: not-allowed; }
     #wz-bloecke .wz-block.belegt .wz-zeit { text-decoration: line-through; }
     #wz-bloecke .wz-voll { font-size: .72rem; color: var(--terra); display: block; }
+    #wz-bloecke .wz-frei { font-size: .72rem; color: var(--cream-mid); display: block; }
+    #wz-bloecke .wz-frei.wz-knapp { color: var(--terra); }
 
     .flatpickr-day.day-limited { position: relative; font-weight: 700; }
     .flatpickr-day.day-limited::after {
@@ -2383,12 +2385,18 @@ function bloeckeAufbauen(datum) {
     uhr.textContent = zeit;
     text.appendChild(wann);
     text.appendChild(uhr);
-    if (voll) {
-      const hin = document.createElement('span');
-      hin.className = 'wz-voll';
-      hin.textContent = 'schon belegt';
-      text.appendChild(hin);
-    }
+
+    /* Die freien Plaetze gehoeren zum Zeitfenster, nicht zum Tag —
+       deshalb stehen sie hier und nicht oben beim Datum. */
+    const plaetze = document.createElement('span');
+    plaetze.className = voll ? 'wz-voll' : 'wz-frei';
+    plaetze.textContent = voll
+      ? 'schon belegt'
+      : (frei === MAX_PER_DAY
+          ? MAX_PER_DAY + ' Plätze frei'
+          : 'noch ' + frei + ' von ' + MAX_PER_DAY + (frei === 1 ? ' Platz' : ' Plätzen') + ' frei');
+    if (!voll && frei <= 5) { plaetze.classList.add('wz-knapp'); }
+    text.appendChild(plaetze);
 
     knopf.addEventListener('change', () => {
       if (!knopf.checked) return;
@@ -2400,6 +2408,7 @@ function bloeckeAufbauen(datum) {
          ohnehin nicht an — also gleich hier begrenzen. */
       persIn.max = Math.max(1, frei);
       if (Number(persIn.value) > frei) persIn.value = Math.max(1, frei);
+      fSeats.value = zeit + ': ' + frei + ' von ' + MAX_PER_DAY + ' frei';
     });
 
     label.appendChild(knopf);
@@ -2565,8 +2574,22 @@ kalenderInstanz = flatpickr('#cal-container', {
         : (zu ? 'Geschlossen' : 'Ausgebucht');
       dayElem.classList.add(zu ? 'day-zu' : 'day-full');
     } else if (REQUEST_DAYS.includes(d)) {
-      // Keine Platzzahl — am Wochenende wird jeder Termin einzeln abgesprochen
-      dayElem.title = 'Auf Anfrage';
+      /* Am Wochenende haengen die Plaetze am Zeitfenster, nicht am
+         Tag. Beide einzeln nennen — eine Summe waere irrefuehrend:
+         Eine Gruppe von zehn passt nicht in "sechs plus vier". */
+      const k = dkey(date);
+      if (BLOECKE.length) {
+        dayElem.title = 'Auf Anfrage · ' + BLOECKE.map((zeit, i) => {
+          const f = blockFrei(k, i);
+          return zeit + ': ' + (f <= 0 ? 'belegt'
+            : 'noch ' + f + (f === 1 ? ' Platz' : ' Plätze') + ' frei');
+        }).join(' · ');
+        if (BLOECKE.some((_, i) => blockFrei(k, i) < MAX_PER_DAY)) {
+          dayElem.classList.add('day-limited');
+        }
+      } else {
+        dayElem.title = 'Auf Anfrage';
+      }
     } else {
       const free = freeSeats(date);
       dayElem.title = `${OPEN_HOURS[d]} · noch ${free} ${free === 1 ? 'Platz' : 'Plätze'} frei`;
