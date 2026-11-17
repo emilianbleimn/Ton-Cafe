@@ -207,8 +207,10 @@ $text = "Neue Terminanfrage über tonfluestern.de\n"
       . str_repeat('=', 45) . "\n\n"
       . "Angebot:     $angebot\n"
       . "Termin:      $datum_lang\n"
-      . "Zeit:        $oeffnung" . ($auf_anfr ? "  (auf Anfrage)" : "") . "\n"
-      . ($wunschzeit !== '' ? "Wunschzeit:  $wunschzeit\n" : '')
+      /* Am Wochenende sagt das Zeitfenster alles; die Zeile
+         "Zeit: Auf Anfrage" daneben waere nur Doppelung. */
+      . ($auf_anfr ? '' : "Zeit:        $oeffnung\n")
+      . ($wunschzeit !== '' ? "Zeitfenster: $wunschzeit\n" : '')
       . "Anlass:      $anlass" . ($anlass_text !== '' ? " — $anlass_text" : '') . "\n"
       . "Personen:    $personen\n"
       . ($auf_anfr
@@ -263,7 +265,6 @@ if (AUTO_ANTWORT) {
             'aufWen'   => 'euch',
             'anfrage'  => 'Eure Anfrage',
             'possessiv'=> 'Eure',
-            'abZeit'   => 'wenn ihr ab ' . WOCHENEND_AB . ' ins Studio kommen könntet',
           ]
         : [
             'moechte'  => 'Sie zu Tonflüstern kommen möchten',
@@ -273,16 +274,9 @@ if (AUTO_ANTWORT) {
             'aufWen'   => 'Sie',
             'anfrage'  => 'Ihre Anfrage',
             'possessiv'=> 'Ihre',
-            'abZeit'   => 'wenn Sie ab ' . WOCHENEND_AB . ' ins Studio kommen könnten',
           ];
 
     $gruss = GRUSS . "\n";
-
-    /* Hinweis auf die guenstigste Uhrzeit am Wochenende. Ist in
-       der config.php keine Zeit hinterlegt, entfaellt der Satz. */
-    $wochenend_hinweis = (WOCHENEND_AB !== '')
-        ? ' Am besten würde es passen, ' . $w['abZeit'] . '.'
-        : '';
 
     if ($auf_anfr) {
         /* ── Samstag / Sonntag: Anfrage eingegangen ── */
@@ -296,9 +290,9 @@ wie schön, dass {$w['moechte']}! {$w['anfrage']} ist bei mir angekommen.
 Angebot: $angebot
 Datum: $datum_kurz
 Personen: $personen
-Wunschzeit: $wunschzeit
+Zeitfenster: $wunschzeit
 
-Samstag und Sonntag sind bei mir nur auf Anfrage möglich. Ich schaue, ob ich den Termin einrichten kann, und melde mich " . ANTWORTFRIST . " bei {$w['dativ']} — dann auch mit einer festen Uhrzeit." . $wochenend_hinweis . "
+Samstag und Sonntag laufen bei mir auf Anfrage. Ich schaue, ob ich den Termin in diesem Zeitfenster einrichten kann, und melde mich " . ANTWORTFRIST . " bei {$w['dativ']}.
 
 
 Die Bezahlung ist vor Ort bar oder mit Karte möglich. Falls sich noch etwas ändern sollte oder {$w['fragen']} gerne bei mir.

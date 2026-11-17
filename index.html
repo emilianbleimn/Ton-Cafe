@@ -1862,7 +1862,7 @@
         </div>
         <div class="bk-avail-item">
           <strong>Samstag &amp; Sonntag</strong>
-          <span>Auf Anfrage · am besten ab 11 Uhr im Studio</span>
+          <span>Auf Anfrage · 11:00 – 14:00 Uhr oder 15:00 – 18:00 Uhr</span>
         </div>
         <div class="bk-avail-item bk-avail-zu">
           <strong>Montag &amp; Dienstag</strong>
@@ -1894,9 +1894,9 @@
         </div>
 
         <div id="anfrage-note">
-          Samstag und Sonntag sind <strong>auf Anfrage</strong> — schreib mir einfach deinen Wunsch in die Nachricht,
-          ich versuche alles möglich zu machen. Am besten passt es, wenn du
-          <strong>ab 11 Uhr ins Studio kommst</strong> — anfragen kannst du natürlich jederzeit.
+          Samstag und Sonntag sind <strong>auf Anfrage</strong> — wähle im Formular eines der
+          beiden <strong>Zeitfenster</strong>. Ich melde mich so schnell wie möglich und
+          bestätige dir den Termin.
         </div>
 
         <div id="full-note">
@@ -1976,7 +1976,7 @@
                 <input type="tel" id="bk-phone" name="telefon" placeholder="+49 …" autocomplete="tel">
               </div>
               <div class="fg">
-                <label for="bk-pers">Personenanzahl * <span style="text-transform:none;letter-spacing:0;color:var(--cream-faint);">(max. 18)</span></label>
+                <label for="bk-pers">Personenanzahl * <span style="text-transform:none;letter-spacing:0;color:var(--cream-faint);">(höchstens 18)</span></label>
                 <input type="number" id="bk-pers" name="personen" required
                        min="1" max="18" step="1" value="1" placeholder="1">
               </div>
@@ -2324,7 +2324,7 @@ const anlassFrei = document.getElementById('anlass-frei');
 const anlassText = document.getElementById('bk-anlass-text');
 
 /* "Sonstiges" allein sagt nichts — dann wird kurz nachgefragt.
-   Das "required" wandert mit, wie bei der Wunschzeit: ein
+   Das "required" wandert mit, wie beim Zeitfenster: ein
    verborgenes Pflichtfeld wuerde das Absenden blockieren, ohne
    dass jemand sieht, woran es liegt. */
 function anlassFreitext() {
@@ -2531,8 +2531,15 @@ const handVoll = d => (HANDEINTRAG[dkey(d)] || 0) >= MAX_PER_DAY;
    gestoppt. */
 const woGestoppt = d => REQUEST_DAYS.includes(d.getDay())
   && (WOCHENENDE_ZU || WOCHENENDE_TAGE.includes(dkey(d)));
+/* Am Wochenende ist der Tag voll, wenn in keinem Zeitfenster mehr
+   Platz ist — sonst saehe ein durchgebuchter Samstag im Kalender
+   frei aus und man erfuehre es erst beim Anklicken. */
+const alleBloeckeVoll = d => BLOECKE.length > 0
+  && BLOECKE.every((_, i) => blockFrei(dkey(d), i) <= 0);
 const isFull = d => buchbar(d) && (
-  REQUEST_DAYS.includes(d.getDay()) ? (handVoll(d) || woGestoppt(d)) : freeSeats(d) <= 0
+  REQUEST_DAYS.includes(d.getDay())
+    ? (handVoll(d) || woGestoppt(d) || alleBloeckeVoll(d))
+    : freeSeats(d) <= 0
 );
 
 // Deutsche Beschriftung setzen; schlaegt das fehl, bleibt der Kalender

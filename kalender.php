@@ -119,7 +119,7 @@ foreach ($d['anfragen'] as $a) {
           . "E-Mail:    " . ($a['email'] ?? '—') . "\n"
           . "Telefon:   " . (($a['telefon'] ?? '') !== '' ? $a['telefon'] : '—') . "\n"
           . "Zeit:      " . ($a['zeit'] ?? '—') . "\n"
-          . ((($a['wunschzeit'] ?? '') !== '') ? "Wunschzeit: " . $a['wunschzeit'] . "\n" : '')
+          . ((($a['wunschzeit'] ?? '') !== '') ? "Zeitfenster: " . $a['wunschzeit'] . "\n" : '')
           . ((($a['anlass'] ?? '') !== '')
               ? "Anlass:    " . $a['anlass']
                 . ((($a['anlass_text'] ?? '') !== '') ? ' — ' . $a['anlass_text'] : '') . "\n"

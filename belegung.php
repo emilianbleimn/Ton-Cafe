@@ -45,40 +45,30 @@ foreach ($d['manuell'] as $datum => $anzahl) {
 /* Belegung je Wochenend-Block. Nur fuer kommende Wochenendtage,
    an denen ueberhaupt etwas liegt — sonst waere die Antwort voller
    Nullen. Je Tag eine Liste in der Reihenfolge der Bloecke. */
+/* Gerechnet wird mit block_belegt() aus der config.php — derselben
+   Funktion, die auch buchung.php und die Uebersicht benutzen. Zwei
+   eigene Rechnungen waeren zwei Gelegenheiten, auseinanderzulaufen. */
 $blockbelegt = [];
+$wochenendtage = [];
 foreach ($d['anfragen'] as $a) {
     $datum = (string)($a['datum'] ?? '');
-    if ($datum < $heute || ($a['status'] ?? 'offen') === 'storniert') {
-        continue;
-    }
-    if (!in_array((int)date('w', strtotime($datum)), REQUEST_DAYS, true)) {
-        continue;
-    }
-    $i = array_search((string)($a['wunschzeit'] ?? ''), WOCHENEND_BLOECKE, true);
-    if ($i === false) {
-        continue;                       // Anfrage ohne bekannten Block
-    }
-    if (!isset($blockbelegt[$datum])) {
-        $blockbelegt[$datum] = array_fill(0, count(WOCHENEND_BLOECKE), 0);
-    }
-    $blockbelegt[$datum][$i] += (int)($a['personen'] ?? 0);
+    if ($datum < $heute || ($a['status'] ?? 'offen') === 'storniert') { continue; }
+    if (!in_array((int)date('w', strtotime($datum)), REQUEST_DAYS, true)) { continue; }
+    $wochenendtage[$datum] = true;
 }
-/* Von Hand geblockte Plaetze gelten fuer den ganzen Tag und zaehlen
-   deshalb in beiden Bloecken mit. */
-foreach ($handeintrag as $datum => $anzahl) {
-    if (!in_array((int)date('w', strtotime($datum)), REQUEST_DAYS, true)) {
-        continue;
-    }
-    if (!isset($blockbelegt[$datum])) {
-        $blockbelegt[$datum] = array_fill(0, count(WOCHENEND_BLOECKE), 0);
-    }
-    foreach ($blockbelegt[$datum] as $i => $n) {
-        $blockbelegt[$datum][$i] = $n + (int)$anzahl;
+foreach (array_keys($handeintrag) as $datum) {
+    if (in_array((int)date('w', strtotime($datum)), REQUEST_DAYS, true)) {
+        $wochenendtage[$datum] = true;
     }
 }
-foreach ($blockbelegt as $datum => $werte) {
-    $blockbelegt[$datum] = array_map(
-        fn($n) => max(0, min((int)$n, MAX_PER_DAY)), $werte);
+foreach (array_keys($wochenendtage) as $datum) {
+    $werte = [];
+    foreach (WOCHENEND_BLOECKE as $blk) {
+        $werte[] = min(block_belegt($d, $datum, $blk), MAX_PER_DAY);
+    }
+    if (array_sum($werte) > 0) {
+        $blockbelegt[$datum] = $werte;
+    }
 }
 ksort($blockbelegt);
 

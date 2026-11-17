@@ -101,18 +101,10 @@ const WEBMAIL_COMPOSE = 'https://webmail.your-server.de/imp/dynamic.php?page=com
 const AUTO_ANTWORT = true;
 
 /* Wie schnell wird geantwortet? Steht so in der Mail und auf der
-   Website. Bewusst keine feste Stundenzahl: Eine Zusage wie
-   "innerhalb von 24 Stunden" ist ein Versprechen, das an einem
-   vollen Tag im Laden nicht immer zu halten ist. */
+   Website. Bewusst ohne feste Stundenzahl — eine Frist waere ein
+   Versprechen, das an einem vollen Tag im Laden nicht immer zu
+   halten ist. */
 const ANTWORTFRIST = 'so schnell wie möglich';
-
-/* Samstag und Sonntag laufen auf Anfrage. Ab welcher Uhrzeit
-   passt ein Termin am besten? Der Hinweis steht dann in der
-   Eingangsbestaetigung fuer das Wochenende.
-   Leer lassen ('') , wenn kein Hinweis erscheinen soll.
-   Achtung: derselbe Hinweis steht auch in der index.html im
-   Kasten "anfrage-note" — dort bei einer Aenderung mitziehen. */
-const WOCHENEND_AB = '11 Uhr';
 
 /* ── Wochenend-Bloecke ──
    Samstag und Sonntag laufen in zwei festen Zeitfenstern. Jeder
@@ -323,12 +315,27 @@ function frei(array $d, string $datum): int {
  * deshalb in beiden Blöcken mit: Wer den Raum vormittags für sich
  * hat, hat ihn nachmittags nicht automatisch frei.
  */
-function block_belegt(array $d, string $datum, string $block): int {
+function block_belegt(array $d, string $datum, string $block, string $ausser = ''): int {
     $n = 0;
     foreach ($d['anfragen'] as $a) {
         if (($a['datum'] ?? '') !== $datum) { continue; }
         if (($a['status'] ?? 'offen') === 'storniert') { continue; }
-        if ((string)($a['wunschzeit'] ?? '') !== $block) { continue; }
+        // Eine bestimmte Anfrage aussen vor lassen (sie zieht gerade um)
+        if ($ausser !== '' && (string)($a['id'] ?? '') === $ausser) { continue; }
+
+        $wz = (string)($a['wunschzeit'] ?? '');
+        /* Uebersprungen wird nur, was nachweislich in ein ANDERES
+           bekanntes Zeitfenster gehoert.
+
+           Alles Uebrige zaehlt hier mit — auch Anfragen ohne
+           Zeitfenster und solche mit einer frei getippten
+           Wunschzeit aus der Zeit vor den Bloecken. In welches
+           Fenster die gehoeren, weiss niemand; sie belegen deshalb
+           in beiden Platz. Andernfalls waeren sie fuer die
+           Rechnung unsichtbar und der Tag liesse sich doppelt
+           vergeben.                                              */
+        if ($wz !== $block && in_array($wz, WOCHENEND_BLOECKE, true)) { continue; }
+
         $n += (int)($a['personen'] ?? 0);
     }
     $n += (int)($d['manuell'][$datum] ?? 0);
@@ -336,8 +343,24 @@ function block_belegt(array $d, string $datum, string $block): int {
 }
 
 /** Freie Plätze in einem Wochenend-Block. */
-function block_frei(array $d, string $datum, string $block): int {
-    return max(0, MAX_PER_DAY - block_belegt($d, $datum, $block));
+function block_frei(array $d, string $datum, string $block, string $ausser = ''): int {
+    return max(0, MAX_PER_DAY - block_belegt($d, $datum, $block, $ausser));
+}
+
+/** Personen an einem Wochenendtag ohne bekanntes Zeitfenster.
+ *
+ * Sie belegen in beiden Fenstern Platz (siehe block_belegt). Die
+ * Übersicht weist darauf hin, damit sich das richtigstellen lässt.
+ */
+function ohne_fenster(array $d, string $datum): int {
+    $n = 0;
+    foreach ($d['anfragen'] as $a) {
+        if (($a['datum'] ?? '') !== $datum) { continue; }
+        if (($a['status'] ?? 'offen') === 'storniert') { continue; }
+        if (in_array((string)($a['wunschzeit'] ?? ''), WOCHENEND_BLOECKE, true)) { continue; }
+        $n += (int)($a['personen'] ?? 0);
+    }
+    return $n;
 }
 
 /** Ist das ein Tag, an dem überhaupt gebucht werden kann? */
