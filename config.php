@@ -175,7 +175,8 @@ function daten_verzeichnis(): void {
  */
 function daten_laden(): ?array {
     $leer = ['anfragen' => [], 'manuell' => [], 'manuell_art' => [],
-             'bewertungen' => [], 'wochenende_zu' => false, 'wochenende_tage' => []];
+             'manuell_block' => [], 'bewertungen' => [],
+             'wochenende_zu' => false, 'wochenende_tage' => []];
 
     if (!is_file(DATA_FILE)) {
         return $leer;                       // gibt es noch nicht — in Ordnung
@@ -212,6 +213,11 @@ function daten_laden(): ?array {
            Fehlt der Eintrag — etwa bei aelteren Daten —, entscheidet
            wie bisher die Anzahl.                                    */
         'manuell_art' => is_array($d['manuell_art'] ?? null) ? $d['manuell_art'] : [],
+        /* Von Hand geblockte Plaetze fuer ein einzelnes
+           Wochenend-Zeitfenster: je Datum eine Liste
+           Zeitfenster => Anzahl. Der Eintrag in 'manuell' gilt
+           weiterhin fuer den ganzen Tag. */
+        'manuell_block' => is_array($d['manuell_block'] ?? null) ? $d['manuell_block'] : [],
         // Kam spaeter dazu: aeltere Datendateien haben den Schluessel
         // nicht. Fehlt er, ist das kein Fehler, sondern nur leer.
         'bewertungen' => is_array($d['bewertungen'] ?? null) ? $d['bewertungen'] : [],
@@ -233,8 +239,8 @@ function daten_laden(): ?array {
 /** Wie daten_laden(), aber nie null — fuer reine Leseansichten. */
 function daten_laden_sicher(): array {
     return daten_laden() ?? ['anfragen' => [], 'manuell' => [], 'manuell_art' => [],
-                             'bewertungen' => [], 'wochenende_zu' => false,
-                             'wochenende_tage' => []];
+                             'manuell_block' => [], 'bewertungen' => [],
+                             'wochenende_zu' => false, 'wochenende_tage' => []];
 }
 
 /** Daten atomar speichern (erst in temporäre Datei, dann umbenennen). */
@@ -338,7 +344,10 @@ function block_belegt(array $d, string $datum, string $block, string $ausser = '
 
         $n += (int)($a['personen'] ?? 0);
     }
+    /* Von Hand geblockt: einmal fuer den ganzen Tag (gilt in
+       beiden Fenstern) und einmal nur fuer dieses Fenster. */
     $n += (int)($d['manuell'][$datum] ?? 0);
+    $n += (int)($d['manuell_block'][$datum][$block] ?? 0);
     return max(0, $n);
 }
 

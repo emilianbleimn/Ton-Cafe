@@ -2299,6 +2299,9 @@ let WOCHENENDE_TAGE = [];
    BLOCKBELEGT: je Datum eine Liste mit der Belegung je Block. */
 let BLOECKE = [];
 let BLOCKBELEGT = {};
+/* Welche Zeitfenster von Hand geblockt wurden — fuer die
+   Unterscheidung "geschlossen" (Entscheidung) von "ausgebucht". */
+let BLOCKHAND = {};
 const MAX_PER_DAY = 18;
 
 // Wochentage: 0=So, 1=Mo, 2=Di, 3=Mi, 4=Do, 5=Fr, 6=Sa
@@ -2453,7 +2456,17 @@ function zugemacht(d) {
   if (art === 'zu')   return true;
   if (art === 'voll') return false;
   // Sonst wie bisher: ganz von Hand geblockt heisst geschlossen.
-  return (HANDEINTRAG[dkey(d)] || 0) >= MAX_PER_DAY;
+  if ((HANDEINTRAG[dkey(d)] || 0) >= MAX_PER_DAY) return true;
+  /* Am Wochenende reicht es, wenn beide Zeitfenster von Hand
+     geblockt sind — das ist dieselbe Entscheidung, nur in zwei
+     Schritten getroffen. */
+  if (REQUEST_DAYS.includes(d.getDay())) {
+    const h = BLOCKHAND[dkey(d)];
+    if (h && BLOECKE.length && BLOECKE.every((_, i) => (h[i] || 0) >= MAX_PER_DAY)) {
+      return true;
+    }
+  }
+  return false;
 }
 
 /* Erklaert, warum an einem Tag nichts geht.
@@ -2706,6 +2719,7 @@ function belegungLaden() {
       WOCHENENDE_TAGE = (j && Array.isArray(j.wochenende_tage)) ? j.wochenende_tage : [];
       if (j && Array.isArray(j.bloecke)) BLOECKE = j.bloecke;
       if (j && j.blockbelegt) BLOCKBELEGT = j.blockbelegt;
+      if (j && j.blockhand) BLOCKHAND = j.blockhand;
     })
     .catch(() => { /* offline oder Server-Problem */ });
 }

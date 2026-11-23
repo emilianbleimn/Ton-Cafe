@@ -61,16 +61,22 @@ foreach (array_keys($handeintrag) as $datum) {
         $wochenendtage[$datum] = true;
     }
 }
+foreach (array_keys($d['manuell_block'] ?? []) as $datum) {
+    if ($datum >= $heute) { $wochenendtage[$datum] = true; }
+}
+$blockhand = [];
 foreach (array_keys($wochenendtage) as $datum) {
     $werte = [];
+    $hand  = [];
     foreach (WOCHENEND_BLOECKE as $blk) {
         $werte[] = min(block_belegt($d, $datum, $blk), MAX_PER_DAY);
+        $hand[]  = min((int)($d['manuell_block'][$datum][$blk] ?? 0), MAX_PER_DAY);
     }
-    if (array_sum($werte) > 0) {
-        $blockbelegt[$datum] = $werte;
-    }
+    if (array_sum($werte) > 0) { $blockbelegt[$datum] = $werte; }
+    if (array_sum($hand)  > 0) { $blockhand[$datum]   = $hand; }
 }
 ksort($blockbelegt);
+ksort($blockhand);
 
 // auf gültigen Bereich begrenzen
 foreach ($summe as $datum => $anzahl) {
@@ -97,6 +103,10 @@ echo json_encode([
        hinaus, keine Namen. */
     'bloecke'  => WOCHENEND_BLOECKE,
     'blockbelegt' => (object)$blockbelegt,
+    /* Welche Zeitfenster von Hand geblockt wurden. Der Kalender
+       braucht das, um "geschlossen" von "ausgebucht" zu
+       unterscheiden — geblockt ist eine Entscheidung. */
+    'blockhand' => (object)$blockhand,
     'belegt'  => (object)$summe,
     'manuell' => (object)$handeintrag,
     'art'     => (object)$anzeigeart,

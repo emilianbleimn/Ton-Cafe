@@ -656,9 +656,33 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
         // wie bisher die Anzahl.
         $art    = in_array($_POST['manuell_art'] ?? '', ['zu', 'voll'], true)
                   ? (string)$_POST['manuell_art'] : '';
-        if (datum_gueltig($datum)) {
-            mit_sperre(function (array &$d) use ($datum, $anzahl, $art) {
-                if ($anzahl > 0) {
+        /* Am Wochenende laesst sich ein einzelnes Zeitfenster
+           blocken, statt gleich den ganzen Tag. Leer heisst: gilt
+           fuer den ganzen Tag, wie bisher. */
+        $m_block = (string)($_POST['manuell_block'] ?? '');
+        $wt_m    = $datum !== '' ? (int)date('w', strtotime($datum)) : -1;
+
+        if (!datum_gueltig($datum)) {
+            $hinweis = 'Das Datum war ungültig.';
+        } elseif ($m_block !== '' && !in_array($m_block, WOCHENEND_BLOECKE, true)) {
+            $hinweis = 'Dieses Zeitfenster gibt es nicht.';
+        } elseif ($m_block !== '' && !in_array($wt_m, REQUEST_DAYS, true)) {
+            $hinweis = 'Zeitfenster gibt es nur am Wochenende. Für Mittwoch bis Freitag'
+                     . ' lass das Feld auf „ganzer Tag“.';
+        } else {
+            mit_sperre(function (array &$d) use ($datum, $anzahl, $art, $m_block) {
+                if ($m_block !== '') {
+                    /* Nur dieses Zeitfenster. Der Tageseintrag bleibt
+                       unberuehrt — beides laesst sich kombinieren. */
+                    if ($anzahl > 0) {
+                        $d['manuell_block'][$datum][$m_block] = min($anzahl, MAX_PER_DAY);
+                    } else {
+                        unset($d['manuell_block'][$datum][$m_block]);
+                        if (empty($d['manuell_block'][$datum])) {
+                            unset($d['manuell_block'][$datum]);
+                        }
+                    }
+                } elseif ($anzahl > 0) {
                     $d['manuell'][$datum] = min($anzahl, MAX_PER_DAY);
                     if ($art !== '') {
                         $d['manuell_art'][$datum] = $art;
@@ -669,13 +693,19 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
                     unset($d['manuell'][$datum], $d['manuell_art'][$datum]);
                 }
             });
-            $wort = $anzahl <= 0 ? 'entfernt'
-                  : ($art === 'voll' ? 'gespeichert — der Tag erscheint als ausgebucht'
-                  : ($art === 'zu'   ? 'gespeichert — der Tag erscheint als geschlossen'
-                  : 'gespeichert'));
-            $hinweis = 'Handeintrag für ' . date('d.m.Y', strtotime($datum)) . ' ' . $wort . '.';
-        } else {
-            $hinweis = 'Das Datum war ungültig.';
+
+            $wo = $m_block !== '' ? ' im Zeitfenster „' . $m_block . '“' : '';
+            if ($anzahl <= 0) {
+                $wort = 'entfernt';
+            } elseif ($m_block !== '') {
+                $wort = 'gespeichert';
+            } else {
+                $wort = $art === 'voll' ? 'gespeichert — der Tag erscheint als ausgebucht'
+                      : ($art === 'zu'   ? 'gespeichert — der Tag erscheint als geschlossen'
+                      : 'gespeichert');
+            }
+            $hinweis = 'Handeintrag für ' . date('d.m.Y', strtotime($datum))
+                     . $wo . ' ' . $wort . '.';
         }
     }
 
@@ -2016,6 +2046,27 @@ Ich freue mich auf eine schöne kreative Zeit mit {$w['dativ']}!
       <input type="number" name="manuell_anzahl" min="0" max="<?= MAX_PER_DAY ?>"
              value="<?= MAX_PER_DAY ?>" required style="width:90px">
 
+      <?php /* Am Wochenende laesst sich ein einzelnes Zeitfenster
+               blocken, statt gleich den ganzen Tag. An festen Tagen
+               gibt es keine Zeitfenster — dann bleibt es beim Tag. */ ?>
+      <div style="margin:.9rem 0 .2rem;">
+        <label for="m-block" style="display:block;margin-bottom:.4rem;font-size:.8rem;color:#7a5230;">
+          Ganzer Tag oder nur ein Zeitfenster?
+        </label>
+        <select name="manuell_block" id="m-block"
+                style="font:inherit;font-size:.85rem;padding:.4rem .5rem;
+                       border:1px solid rgba(122,82,48,.3);background:#fff;color:#291b0f">
+          <option value="">ganzer Tag</option>
+          <?php foreach (WOCHENEND_BLOECKE as $blk): ?>
+            <option value="<?= $e($blk) ?>">nur <?= $e($blk) ?></option>
+          <?php endforeach; ?>
+        </select>
+        <span style="display:block;margin-top:.35rem;font-size:.76rem;color:#a8917a;line-height:1.6;">
+          Ein Zeitfenster geht nur am Samstag und Sonntag. „Ganzer Tag“ blockt wie bisher
+          beide Zeitfenster zugleich.
+        </span>
+      </div>
+
       <div style="margin:.9rem 0 .2rem;">
         <label style="display:block;margin-bottom:.4rem;font-size:.8rem;color:#7a5230;">
           Wie soll der Tag auf der Website heißen, wenn kein Platz mehr frei ist?
@@ -2044,9 +2095,63 @@ Ich freue mich auf eine schöne kreative Zeit mit {$w['dativ']}!
         if ($datum >= $heute_str && (int)$anzahl > 0) { $offen[$datum] = (int)$anzahl; }
     }
     ksort($offen);
-    if ($offen): ?>
+
+    /* Dasselbe fuer einzeln geblockte Zeitfenster. Sie stehen in
+       einer eigenen Liste, weil sie nur einen Teil des Tages
+       betreffen und getrennt freigegeben werden. */
+    $offen_bl = [];
+    foreach (($d['manuell_block'] ?? []) as $datum => $bloecke) {
+        if ($datum < $heute_str || !is_array($bloecke)) { continue; }
+        foreach ($bloecke as $blk => $anzahl) {
+            if ((int)$anzahl > 0) { $offen_bl[] = [$datum, (string)$blk, (int)$anzahl]; }
+        }
+    }
+    usort($offen_bl, fn($x, $y) => [$x[0], $x[1]] <=> [$y[0], $y[1]]);
+
+    if ($offen_bl): ?>
       <h3 style="font-size:.8rem;letter-spacing:.14em;text-transform:uppercase;color:#7a5230;margin:1.6rem 0 .6rem;">
-        Aktuell geblockt (<?= count($offen) ?>)
+        Einzelne Zeitfenster geblockt (<?= count($offen_bl) ?>)
+      </h3>
+      <div class="rolltabelle">
+      <table style="width:100%;border-collapse:collapse;font-size:.85rem;">
+        <?php
+        $kurz_b = ['So','Mo','Di','Mi','Do','Fr','Sa'];
+        foreach ($offen_bl as [$datum, $blk, $anzahl]):
+          $bel  = block_belegt($d, $datum, $blk);
+          $rest = max(0, MAX_PER_DAY - $bel); ?>
+          <tr style="border-bottom:1px solid rgba(122,82,48,.12);">
+            <td style="padding:.45rem .6rem .45rem 0;white-space:nowrap;">
+              <strong><?= $e(date('d.m.Y', strtotime($datum))) ?></strong>
+              <span style="color:#a8917a"><?= $kurz_b[(int)date('w', strtotime($datum))] ?></span>
+            </td>
+            <td style="padding:.45rem .6rem;white-space:nowrap;"><?= $e($blk) ?></td>
+            <td style="padding:.45rem .6rem;white-space:nowrap;">
+              <?= (int)$anzahl ?> von Hand
+            </td>
+            <td style="padding:.45rem .6rem;color:#5e4535;">
+              <?php if ($rest <= 0): ?>
+                zeigt: <strong>belegt</strong>
+              <?php else: ?>
+                <span style="color:#a8917a">noch <?= $rest ?> frei</span>
+              <?php endif; ?>
+            </td>
+            <td style="padding:.45rem 0;text-align:right;">
+              <form method="post" style="display:inline">
+                <input type="hidden" name="manuell_datum" value="<?= $e($datum) ?>">
+                <input type="hidden" name="manuell_block" value="<?= $e($blk) ?>">
+                <input type="hidden" name="manuell_anzahl" value="0">
+                <button type="submit">Freigeben</button>
+              </form>
+            </td>
+          </tr>
+        <?php endforeach; ?>
+      </table>
+      </div>
+    <?php endif; ?>
+
+    <?php if ($offen): ?>
+      <h3 style="font-size:.8rem;letter-spacing:.14em;text-transform:uppercase;color:#7a5230;margin:1.6rem 0 .6rem;">
+        Ganze Tage geblockt (<?= count($offen) ?>)
       </h3>
       <div class="rolltabelle">
       <table style="width:100%;border-collapse:collapse;font-size:.85rem;">
