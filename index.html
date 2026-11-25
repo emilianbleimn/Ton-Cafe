@@ -628,6 +628,21 @@
     .kg-preis { display: inline-block; font-family: var(--fd); font-size: 1.15rem;
                 color: var(--terra); margin: .2rem 0 1rem; }
 
+    /* ── Einladungskarte ──
+       Beide Seiten nebeneinander, damit gleich zu sehen ist, dass
+       die Karte zwei Seiten hat. Auf dem Handy untereinander. */
+    .ein-vorschau { margin: 0; display: grid; gap: 10px; grid-template-columns: 1fr 1fr; }
+    .ein-vorschau img { width: 100%; height: auto; display: block;
+                        border: 1px solid rgba(122,82,48,.2); background: #fff; }
+    .ein-knopf {
+      display: inline-block; margin-top: .4rem; padding: .9rem 1.6rem;
+      background: var(--bronze); color: var(--bg-0); font-size: .9rem;
+      line-height: 1.4; transition: background .3s;
+    }
+    .ein-knopf:hover { background: var(--terra); }
+    .ein-knopf span { display: block; margin-top: .2rem; font-size: .72rem;
+                      letter-spacing: .1em; text-transform: uppercase; opacity: .8; }
+
     .kg-ruf { margin-top: clamp(2.5rem,5vw,4rem); padding-top: 1.8rem;
               border-top: 1px solid rgba(122,82,48,.15); font-size: .9rem; color: var(--cream-mid); }
     .kg-verweis { color: var(--bronze); border-bottom: 1px solid var(--bronze); padding-bottom: .1rem; }
@@ -1393,8 +1408,35 @@
       </div>
     </div>
 
+    <!-- Einladungskarte zum Selbstausdrucken -->
+    <div class="kg-block kg-block--gedreht rv" id="einladung">
+      <figure class="ein-vorschau">
+        <img src="einladung-vorn.jpg" alt="Vorderseite der Einladungskarte: Tonflüstern-Logo und „Zusammen kreativ sein an meinem Geburtstag!“"
+             loading="lazy" width="700" height="994">
+        <img src="einladung-hinten.jpg" alt="Rückseite der Einladungskarte mit Feldern für Name, Datum, Uhrzeit und Kontakt"
+             loading="lazy" width="700" height="994">
+      </figure>
+      <div class="kg-text">
+        <h3>Einladungskarte zum Ausdrucken</h3>
+        <p>
+          Passend zur Feier gibt es eine fertige Einladungskarte. Die Vorderseite lädt
+          zum gemeinsamen Gestalten ein, auf der Rückseite trägst du Name, Datum,
+          Uhrzeit und deinen Kontakt ein.
+        </p>
+        <p>
+          Die Karte ist im Format <strong>A5</strong> angelegt und hat zwei Seiten.
+          Am schönsten wird sie beidseitig auf etwas festerem Papier gedruckt —
+          sie geht aber auch auf zwei einzelnen Blättern.
+        </p>
+        <a class="ein-knopf" href="einladung-kindergeburtstag.pdf" target="_blank" rel="noopener noreferrer">
+          Einladung herunterladen
+          <span>PDF · A5 · 2 Seiten · 4 MB</span>
+        </a>
+      </div>
+    </div>
+
     <!-- Einladung -->
-    <div class="kg-block kg-block--gedreht rv">
+    <div class="kg-block rv">
       <figure>
         <img src="kbfenster.jpg" alt="Schaufenster von Tonflüstern in der Hauptstraße" loading="lazy" width="1066" height="1600">
       </figure>
