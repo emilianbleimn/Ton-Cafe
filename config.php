@@ -329,18 +329,23 @@ function block_belegt(array $d, string $datum, string $block, string $ausser = '
         // Eine bestimmte Anfrage aussen vor lassen (sie zieht gerade um)
         if ($ausser !== '' && (string)($a['id'] ?? '') === $ausser) { continue; }
 
-        $wz = (string)($a['wunschzeit'] ?? '');
-        /* Uebersprungen wird nur, was nachweislich in ein ANDERES
-           bekanntes Zeitfenster gehoert.
+        /* Gezaehlt wird nur, wer wirklich in DIESEM Zeitfenster
+           sitzt.
 
-           Alles Uebrige zaehlt hier mit — auch Anfragen ohne
-           Zeitfenster und solche mit einer frei getippten
-           Wunschzeit aus der Zeit vor den Bloecken. In welches
-           Fenster die gehoeren, weiss niemand; sie belegen deshalb
-           in beiden Platz. Andernfalls waeren sie fuer die
-           Rechnung unsichtbar und der Tag liesse sich doppelt
-           vergeben.                                              */
-        if ($wz !== $block && in_array($wz, WOCHENEND_BLOECKE, true)) { continue; }
+           Anfragen ohne bekanntes Zeitfenster — die aus der Zeit
+           vor den Bloecken, mit frei getippter Wunschzeit — zaehlen
+           hier NICHT mit. Sie wurden frueher in beiden Fenstern
+           mitgezaehlt, damit der Tag nicht doppelt vergeben wird.
+           Das war falsch gedacht: Dieselben Leute koennen nicht in
+           beiden Fenstern zugleich sitzen. Auf einem Samstag mit 23
+           solchen Personen meldeten beide Fenster "voll", obwohl in
+           jedem nur eine Handvoll sass — und die Website wies alle
+           weiteren Anfragen ab.
+
+           Sichtbar bleiben sie trotzdem: ohne_fenster() zaehlt sie,
+           und die Uebersicht weist darauf hin, damit sich das
+           Zeitfenster nachtragen laesst.                        */
+        if ((string)($a['wunschzeit'] ?? '') !== $block) { continue; }
 
         $n += (int)($a['personen'] ?? 0);
     }
@@ -358,8 +363,9 @@ function block_frei(array $d, string $datum, string $block, string $ausser = '')
 
 /** Personen an einem Wochenendtag ohne bekanntes Zeitfenster.
  *
- * Sie belegen in beiden Fenstern Platz (siehe block_belegt). Die
- * Übersicht weist darauf hin, damit sich das richtigstellen lässt.
+ * Sie zählen bei den Zeitfenstern NICHT mit, weil niemand weiß, in
+ * welches sie gehören. Die Übersicht weist darauf hin, damit sich
+ * das Zeitfenster nachtragen lässt.
  */
 function ohne_fenster(array $d, string $datum): int {
     $n = 0;

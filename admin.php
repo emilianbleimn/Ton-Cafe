@@ -1530,14 +1530,15 @@ Ich freue mich auf eine schöne kreative Zeit mit {$w['dativ']}!
               <?= $b_bel ?> / <?= MAX_PER_DAY ?><?= $b_bel >= MAX_PER_DAY ? ' VOLL' : '' ?>
             <?php endforeach; ?>
             <?= $manu > 0 ? ' (' . $manu . ' von Hand für den ganzen Tag)' : '' ?>
-            <?php /* Anfragen ohne bekanntes Zeitfenster belegen in
-                     beiden Platz — sonst liesse sich der Tag doppelt
-                     vergeben. Das gehoert benannt, damit es sich
-                     richtigstellen laesst. */
+            <?php /* Anfragen aus der Zeit vor den Zeitfenstern haben
+                     keines. Sie zaehlen bei den Fenstern oben NICHT
+                     mit — sonst saehe der Tag voll aus, obwohl in
+                     jedem Fenster noch Platz ist. Deshalb hier der
+                     Hinweis, damit sich das nachtragen laesst. */
             $offen_fenster = ohne_fenster($d, $datum);
             if ($offen_fenster > 0): ?>
-              <span class="ohne-fenster" title="Diese Anfragen belegen in beiden Zeitfenstern Platz. Trage über Bearbeiten ein Zeitfenster ein.">
-                <?= $offen_fenster ?> ohne Zeitfenster
+              <span class="ohne-fenster" title="Diese Personen sind in den Zahlen oben nicht enthalten, weil ihr Zeitfenster fehlt. Klapp die Anfrage auf, geh auf Bearbeiten und trage eines ein.">
+                + <?= $offen_fenster ?> ohne Zeitfenster
               </span>
             <?php endif; ?>
           <?php else: ?>
